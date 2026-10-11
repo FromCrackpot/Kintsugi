@@ -1,0 +1,16 @@
+version = 1
+
+[[annotations]]
+path = "**"
+SPDX-FileCopyrightText = "2026 fromcrackpot"
+SPDX-License-Identifier = "LicenseRef-Kintsugi-Engine-Community-License-1.0"
+
+[[annotations]]
+path = ["12-svg/docs/KVG_SPEC.md", "12-svg/docs/CGA-SVG-MAP.md"]
+SPDX-FileCopyrightText = "2026 fromcrackpot"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+[[annotations]]
+path = ["gradlew", "gradlew.bat", "gradle/wrapper/**"]
+SPDX-FileCopyrightText = "2015 the original author or authors"
+SPDX-License-Identifier = "Apache-2.0"

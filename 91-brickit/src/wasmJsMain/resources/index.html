@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Brick'It</title>
+    <style>
+        html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        body { background: #2E3440; display: flex; align-items: center; justify-content: center; }
+        #game {
+            aspect-ratio: 4 / 3;   /* matches ARENA_BOUNDS 800×600 */
+            width: 800px;          /* natural (max) size */
+            max-width: 100vw;      /* shrink to fit narrow windows */
+            max-height: 100vh;     /* shrink to fit short windows */
+        }
+    </style>
+</head>
+<body>
+    <div id="game"></div>
+    <script src="brickit.js"></script>
+</body>
+</html>

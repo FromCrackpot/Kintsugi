@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 540 240">
+    <use href="steel.svg" x="0" y="0"/>
+    <use href="normal.svg" x="60" y="0"/>
+    <use href="normal.svg" x="120" y="0"/>
+    <use href="steel.svg" x="180" y="0"/>
+    <use href="normal.svg" x="240" y="0"/>
+    <use href="steel.svg" x="300" y="0"/>
+    <use href="normal.svg" x="360" y="0"/>
+    <use href="normal.svg" x="420" y="0"/>
+    <use href="steel.svg" x="480" y="0"/>
+
+    <use href="normal.svg" x="0" y="30"/>
+    <use href="normal.svg" x="60" y="30"/>
+    <use href="normal.svg" x="120" y="30"/>
+    <use href="steel.svg" x="180" y="30"/>
+    <use href="normal.svg" x="240" y="30"/>
+    <use href="steel.svg" x="300" y="30"/>
+    <use href="normal.svg" x="360" y="30"/>
+    <use href="normal.svg" x="420" y="30"/>
+    <use href="normal.svg" x="480" y="30"/>
+
+    <use href="normal.svg" x="0" y="60"/>
+    <use href="normal.svg" x="60" y="60"/>
+    <use href="normal.svg" x="120" y="60"/>
+    <use href="steel.svg" x="180" y="60"/>
+    <use href="normal.svg" x="240" y="60"/>
+    <use href="steel.svg" x="300" y="60"/>
+    <use href="normal.svg" x="360" y="60"/>
+    <use href="normal.svg" x="420" y="60"/>
+    <use href="normal.svg" x="480" y="60"/>
+
+    <use href="normal.svg" x="0" y="90"/>
+    <use href="normal.svg" x="60" y="90"/>
+    <use href="normal.svg" x="120" y="90"/>
+    <use href="steel.svg" x="180" y="90"/>
+    <use href="normal.svg" x="240" y="90"/>
+    <use href="steel.svg" x="300" y="90"/>
+    <use href="normal.svg" x="360" y="90"/>
+    <use href="normal.svg" x="420" y="90"/>
+    <use href="normal.svg" x="480" y="90"/>
+
+    <use href="normal.svg" x="0" y="120"/>
+    <use href="normal.svg" x="60" y="120"/>
+    <use href="normal.svg" x="120" y="120"/>
+    <use href="steel.svg" x="180" y="120"/>
+    <use href="gold.svg" x="240" y="120"/>
+    <use href="steel.svg" x="300" y="120"/>
+    <use href="normal.svg" x="360" y="120"/>
+    <use href="normal.svg" x="420" y="120"/>
+    <use href="normal.svg" x="480" y="120"/>
+
+    <use href="normal.svg" x="0" y="150"/>
+    <use href="normal.svg" x="60" y="150"/>
+    <use href="normal.svg" x="120" y="150"/>
+    <use href="steel.svg" x="180" y="150"/>
+    <use href="steel.svg" x="240" y="150"/>
+    <use href="steel.svg" x="300" y="150"/>
+    <use href="normal.svg" x="360" y="150"/>
+    <use href="normal.svg" x="420" y="150"/>
+    <use href="normal.svg" x="480" y="150"/>
+
+    <use href="normal.svg" x="0" y="180"/>
+    <use href="normal.svg" x="60" y="180"/>
+    <use href="normal.svg" x="120" y="180"/>
+    <use href="steel.svg" x="180" y="180"/>
+    <use href="steel.svg" x="240" y="180"/>
+    <use href="steel.svg" x="300" y="180"/>
+    <use href="normal.svg" x="360" y="180"/>
+    <use href="normal.svg" x="420" y="180"/>
+    <use href="normal.svg" x="480" y="180"/>
+
+    <use href="steel.svg" x="0" y="210"/>
+    <use href="normal.svg" x="60" y="210"/>
+    <use href="normal.svg" x="120" y="210"/>
+    <use href="steel.svg" x="180" y="210"/>
+    <use href="steel.svg" x="240" y="210"/>
+    <use href="steel.svg" x="300" y="210"/>
+    <use href="normal.svg" x="360" y="210"/>
+    <use href="normal.svg" x="420" y="210"/>
+    <use href="steel.svg" x="480" y="210"/>
+</svg>
