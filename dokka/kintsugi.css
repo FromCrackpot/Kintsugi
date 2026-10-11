@@ -1,0 +1,32 @@
+:root {
+    --color-key-blue: #007A00;
+    --color-key-blue-hover: #009400;
+    --color-key-blue-50: rgba(0, 122, 0, 0.5);
+    --hover-link-color: #007A00;
+    --active-section-color: #007A00;
+    --sidemenu-section-active-color: #007A00;
+}
+
+.theme-dark {
+    --color-key-blue: #00FF00;
+    --color-key-blue-hover: #8CFF8C;
+    --color-key-blue-50: rgba(0, 255, 0, 0.5);
+    --hover-link-color: #00FF00;
+}
+
+.toc--part[data-active] > .toc--row .toc--button,
+.toc--part[data-active] > .toc--row .toc--link {
+    background: #00FF00;
+    color: #000000;
+}
+
+.toc--part[data-active] > .toc--row .toc--button:hover,
+.toc--part[data-active] > .toc--row .toc--link:hover,
+.toc--part[data-active] > .toc--row .toc--button ~ .toc--link:hover {
+    background: #8CFF8C;
+}
+
+.toc--part[data-active] > .toc--row .toc--button::after,
+.toc--part[data-active] > .toc--row .toc--link::after {
+    filter: invert(1);
+}

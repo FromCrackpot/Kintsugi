@@ -1,3 +1,5 @@
+import org.jetbrains.dokka.gradle.DokkaExtension
+import org.jetbrains.dokka.gradle.engine.plugins.DokkaHtmlPluginParameters
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 plugins {
@@ -17,6 +19,17 @@ dependencies {
 
 dokka {
     moduleName.set("Kintsugi")
+}
+
+allprojects {
+    plugins.withId("org.jetbrains.dokka") {
+        extensions.configure<DokkaExtension> {
+            pluginsConfiguration.withType<DokkaHtmlPluginParameters>().configureEach {
+                customAssets.from(rootProject.file("dokka/logo-icon.svg"))
+                customStyleSheets.from(rootProject.file("dokka/kintsugi.css"))
+            }
+        }
+    }
 }
 
 subprojects {

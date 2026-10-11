@@ -5,7 +5,7 @@
     <title>Brick'It</title>
     <style>
         html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-        body { background: #2E3440; display: flex; align-items: center; justify-content: center; }
+        body { background: #000000; display: flex; align-items: center; justify-content: center; }
         #game {
             aspect-ratio: 4 / 3;   /* matches ARENA_BOUNDS 800×600 */
             width: 800px;          /* natural (max) size */
@@ -16,6 +16,16 @@
 </head>
 <body>
     <div id="game"></div>
+    <script>
+        if (window.parent !== window) {
+            const mounted = () => [...document.querySelectorAll('#game *')].some((el) => el.shadowRoot?.querySelector('canvas'));
+            const poll = setInterval(() => {
+                if (!mounted()) return;
+                clearInterval(poll);
+                setTimeout(() => window.parent.postMessage('brickit:ready', '*'), 150);
+            }, 100);
+        }
+    </script>
     <script src="brickit.js"></script>
 </body>
 </html>
