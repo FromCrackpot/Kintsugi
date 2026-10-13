@@ -27,10 +27,21 @@ SVG  ─┘                  └─ SVG
 
 ## Getting Started
 
+The demo apps run from a clone of this repository and need JDK 25 or newer:
+
 ```bash
-./gradlew :scratchpad:run                          # Desktop (JVM)
-./gradlew :scratchpad:wasmJsBrowserDevelopmentRun  # Web (WASM)
+git clone https://github.com/FromCrackpot/Kintsugi.git
+cd Kintsugi
 ```
+
+```bash
+./gradlew :brickit:run                             # Brick'It, desktop (JVM)
+./gradlew :brickit:wasmJsBrowserDevelopmentRun     # Brick'It, web (WASM)
+./gradlew :scratchpad:run                          # Scratchpad, desktop (JVM)
+./gradlew :scratchpad:wasmJsBrowserDevelopmentRun  # Scratchpad, web (WASM)
+```
+
+To build your own game on the engine, see [Usage](#usage).
 
 ## Usage
 
@@ -46,7 +57,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.fromcrackpot:kintsugi-game-engine:0.1.1")
+    implementation("com.fromcrackpot:kintsugi-game-engine:0.1.2")
 }
 ```
 
