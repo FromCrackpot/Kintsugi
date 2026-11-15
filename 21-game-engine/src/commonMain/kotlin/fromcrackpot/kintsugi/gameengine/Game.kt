@@ -158,7 +158,7 @@ public fun <W : World> Game(
             .then(overlay),
     ) {
         Box(Modifier.matchParentSize().fitted(root.bounds, alignment)) {
-            Scene(root)
+            Scene(root, Modifier.matchParentSize())
             if (interrupted) Box(Modifier.matchParentSize(), content = paused)
         }
     }

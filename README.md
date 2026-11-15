@@ -60,7 +60,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.fromcrackpot:kintsugi-game-engine:0.2.1")
+    implementation("com.fromcrackpot:kintsugi-game-engine:0.2.2")
 }
 ```
 
@@ -76,7 +76,7 @@ The rest of his work (wikis, a C++ library, Mathematica packages) is gathered at
 
 ## Acknowledgments
 
-Kintsugi stands on the work of others. Thank you to:
+Kintsugi uses or draws inspiration from the following projects. A warm thank you to:
 
 - [**xmlutil**](https://github.com/pdvrieze/xmlutil) by Paul de Vrieze: the multiplatform XML parser behind `:svg`.
 - [**bfxr2**](https://github.com/increpare/bfxr2) by Stephen Lavelle: the `.bfxr` sound format and its 23 synths, which `:bfxr` ports to Kotlin. Try them in the [bfxr2 editor](https://www.bfxr.net/).
