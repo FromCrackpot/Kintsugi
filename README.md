@@ -60,7 +60,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.fromcrackpot:kintsugi-game-engine:0.2.0")
+    implementation("com.fromcrackpot:kintsugi-game-engine:0.2.1")
 }
 ```
 
@@ -73,4 +73,13 @@ Kintsugi's geometry follows [Eric Lengyel](https://x.com/EricLengyel)'s formulat
 The rest of his work (wikis, a C++ library, Mathematica packages) is gathered at [projectivegeometricalgebra.org](https://projectivegeometricalgebra.org/).
 
 <a href="https://projectivegeometricalgebra.org/"><img src="https://projectivegeometricalgebra.org/pgai.jpg" alt="Projective Geometric Algebra Illuminated, front cover" height="260"></a>
+
+## Acknowledgments
+
+Kintsugi stands on the work of others. Thank you to:
+
+- [**xmlutil**](https://github.com/pdvrieze/xmlutil) by Paul de Vrieze: the multiplatform XML parser behind `:svg`.
+- [**bfxr2**](https://github.com/increpare/bfxr2) by Stephen Lavelle: the `.bfxr` sound format and its 23 synths, which `:bfxr` ports to Kotlin. Try them in the [bfxr2 editor](https://www.bfxr.net/).
+- [**Pure Data**](https://puredata.info/) by Miller Puckette: bfxr2's Footsteppr synth runs Pure Data patches, and `:bfxr` ports the few objects they use.
+- [**Fix Your Timestep!**](https://gafferongames.com/post/fix_your_timestep/) by Glenn Fiedler: the article behind the engine's semi-fixed timestep loop.
 

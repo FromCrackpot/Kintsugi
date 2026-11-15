@@ -8,10 +8,10 @@ import kotlin.math.atan2
  * A direction with magnitude. It is the [RoundPoint] refinement guaranteed to lie at infinity, and
  * the round counterpart of [Direction].
  *
- * - Its round weight is exact `0.0`. Its [aw] stays live data that operations move.
+ * - Its round weight is exact `0.0`. Its [aw][RoundDirection.aw] stays live data that operations move.
  * - Equals a plain [RoundPoint] with the same components. [RoundPoint.toRoundDirection] converts one.
  *
- * @constructor Builds the direction `(dx, dy)` with conformal component [aw]. The zero direction
+ * @constructor Builds the direction `(dx, dy)` with conformal component `aw`. The zero direction
  *   is legal.
  * @param dx The `e1` component: the vector's x-extent.
  * @param dy The `e2` component: the vector's y-extent.

@@ -1,4 +1,5 @@
 import org.jetbrains.dokka.gradle.DokkaExtension
+import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
 import org.jetbrains.dokka.gradle.engine.plugins.DokkaHtmlPluginParameters
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
@@ -30,6 +31,9 @@ allprojects {
         val logo = rootProject.file("dokka/logo-icon.svg")
         val css = rootProject.file("dokka/kintsugi.css")
         extensions.configure<DokkaExtension> {
+            dokkaSourceSets.configureEach {
+                documentedVisibilities(VisibilityModifier.Public, VisibilityModifier.Protected)
+            }
             pluginsConfiguration.withType<DokkaHtmlPluginParameters>().configureEach {
                 customAssets.from(logo)
                 customStyleSheets.from(css)

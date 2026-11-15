@@ -11,7 +11,7 @@ import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
  * - A value that moves by rebinding (`ball *= motion`). Each class implements [rebuild].
  * - Identity stays structural and ignores added facts. Fold them in over `super.equals` if needed.
  *
- * @constructor Roots the entity at [node]'s geometry, style, and tags.
+ * @constructor Roots the entity at `node`'s geometry, style, and tags.
  * @param node The node value the entity starts as.
  */
 public abstract class PolygonEntity(node: PolygonNode) : PolygonNode(node), Entity {

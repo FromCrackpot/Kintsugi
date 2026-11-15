@@ -29,7 +29,7 @@ import fromcrackpot.kintsugi.bfxr.synths.Zappr
 /**
  * A sound in the `.bfxr` format: a [BfxrSynth] and its parameter values, ready to render.
  *
- * @constructor Checks [params] against [synth]'s parameters and fills in the defaults of those omitted.
+ * @constructor Checks `params` against `synth`'s parameters and fills in the defaults of those omitted.
  * @param synth The synth that renders the sound.
  * @param params Values by parameter name. An omitted name takes its default.
  * @param renderSeed The seed of the noise [BfxrSynth.BFXR] and [BfxrSynth.FOOTSTEPPR] draw while rendering, in

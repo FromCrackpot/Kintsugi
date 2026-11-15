@@ -13,7 +13,7 @@ public sealed class BfxrParam {
     public abstract val default: BfxrValue
 
     /**
-     * A slider: any number from [min] to [max], bounds included.
+     * A slider: any number from [min][BfxrParam.Range.min] to [max][BfxrParam.Range.max], bounds included.
      *
      * @param name The key under `params`.
      * @param min The smallest accepted value.
@@ -28,7 +28,7 @@ public sealed class BfxrParam {
     ) : BfxrParam()
 
     /**
-     * A selector: one number out of [options].
+     * A selector: one number out of [options][BfxrParam.Choice.options].
      *
      * @param name The key under `params`.
      * @param options The accepted numbers, in the order bfxr2's editor shows them.
@@ -41,7 +41,8 @@ public sealed class BfxrParam {
     ) : BfxrParam()
 
     /**
-     * A value travelling over the sound: both ends from [min] to [max], and a curve out of [curves].
+     * A value travelling over the sound: both ends from [min][BfxrParam.Transition.min] to
+     * [max][BfxrParam.Transition.max], and a curve out of [curves][BfxrParam.Transition.curves].
      *
      * @param name The key under `params`.
      * @param min The smallest accepted end.
@@ -58,7 +59,7 @@ public sealed class BfxrParam {
     ) : BfxrParam()
 
     /**
-     * A text of at most [maxLength] UTF-16 units.
+     * A text of at most [maxLength][BfxrParam.Text.maxLength] UTF-16 units.
      *
      * @param name The key under `params`.
      * @param maxLength The longest accepted text, in UTF-16 units.

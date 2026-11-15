@@ -14,7 +14,8 @@ public sealed interface BfxrValue {
     public data class Number(public val value: Double) : BfxrValue
 
     /**
-     * A value travelling from [start] to [end] over the sound, along [curve].
+     * A value travelling from [start][BfxrValue.Transition.start] to [end][BfxrValue.Transition.end]
+     * over the sound, along [curve][BfxrValue.Transition.curve].
      *
      * @param start The value at the sound's start.
      * @param end The value at the sound's end.

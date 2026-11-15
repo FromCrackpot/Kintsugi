@@ -21,7 +21,7 @@ public class Controls(
     public val keys: Set<Key> = emptySet(),
     /** Where the pointer is, as a [FlatPoint] in CGA model units, or `null` when there is no pointer. */
     public val pointer: FlatPoint? = null,
-    /** Whether the pointer is pressed. Meaningful only while [pointer] is non-null. */
+    /** Whether the pointer is pressed. Meaningful only while [pointer][Controls.pointer] is non-null. */
     public val pointerDown: Boolean = false,
     /** The pointer's device: `PointerType.Mouse` by default, `PointerType.Touch` for a finger. */
     public val pointerType: PointerType = PointerType.Mouse,

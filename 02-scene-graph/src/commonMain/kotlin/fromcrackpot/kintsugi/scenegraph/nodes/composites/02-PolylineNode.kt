@@ -8,9 +8,9 @@ import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
  * renders with, plus optional [tags].
  *
  * - Shape-preserving operations return the leaf, with its style and tags. Others return plain shapes.
- * - [polyline]'s vertex list is kept by reference.
+ * - `polyline`'s vertex list is kept by reference.
  *
- * @constructor Builds the leaf around [polyline]'s geometry.
+ * @constructor Builds the leaf around `polyline`'s geometry.
  * @param polyline The geometry to decorate.
  * @param style The concrete paint, the polyline default when omitted.
  * @param tags Free-form tokens riding the leaf, empty by default.
@@ -26,12 +26,12 @@ public open class PolylineNode(
     */
 
     /**
-     * Builds the leaf as a copy of [node], with the same geometry. Style and tags are [node]'s own
+     * Builds the leaf as a copy of `node`, with the same geometry. Style and tags are `node`'s own
      * unless overridden.
      *
      * @param node The leaf to copy.
-     * @param style The concrete paint, [node]'s own when omitted.
-     * @param tags Free-form tokens riding the leaf, [node]'s own when omitted.
+     * @param style The concrete paint, `node`'s own when omitted.
+     * @param tags Free-form tokens riding the leaf, `node`'s own when omitted.
      */
     public constructor(
         node: PolylineNode,

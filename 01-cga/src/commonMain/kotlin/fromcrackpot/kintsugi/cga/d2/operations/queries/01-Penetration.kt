@@ -21,7 +21,7 @@ import fromcrackpot.kintsugi.cga.round
 public class Penetration(
     /** The violated face. It is always the queried polygon's own edge, never the subject's. */
     public val edge: Segment,
-    /** The raw Euclidean depth past [edge], positive at the `SCALE` quantum. */
+    /** The raw Euclidean depth past [edge][Penetration.edge], positive at the `SCALE` quantum. */
     public val depth: Double,
     /** The correcting direction: unit length, pointing out of the region the subject may not occupy. */
     public val normal: Direction,

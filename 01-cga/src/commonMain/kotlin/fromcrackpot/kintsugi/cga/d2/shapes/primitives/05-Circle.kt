@@ -44,14 +44,14 @@ public open class Circle : Primitive {
     */
 
     /**
-     * Builds the circle `(cx, cy, cz, cw)`, unitized, with `-0.0` cleared to `0.0`. The sign of [cw]
+     * Builds the circle `(cx, cy, cz, cw)`, unitized, with `-0.0` cleared to `0.0`. The sign of `cw`
      * survives as the orientation.
      *
      * @param cx The `e423` component.
      * @param cy The `e431` component.
      * @param cz The `e412` component.
      * @param cw The `e321` round weight. Its sign picks the interior side.
-     * @throws DegenerateCircleException when [cw] rounds to zero at the `SCALE` quantum. The blade is
+     * @throws DegenerateCircleException when `cw` rounds to zero at the `SCALE` quantum. The blade is
      *   then the line `(cx, cy, cz)`.
      */
     public constructor(cx: Double, cy: Double, cz: Double, cw: Double) {
@@ -72,7 +72,7 @@ public open class Circle : Primitive {
      * @param centerX The center's Euclidean x-coordinate.
      * @param centerY The center's Euclidean y-coordinate.
      * @param radius The radius. Zero gives the single-point circle.
-     * @throws IllegalArgumentException when [radius] is negative.
+     * @throws IllegalArgumentException when `radius` is negative.
      */
     public constructor(centerX: Double, centerY: Double, radius: Double) : this(
         cx = centerX,

@@ -52,7 +52,8 @@ public open class Segment internal constructor(
     public constructor(start: FlatPoint, end: FlatPoint) : this(start.toRound, end.toRound)
 
     /**
-     * Builds the segment between two round points, keeping the instances as [start] and [end].
+     * Builds the segment between two round points, keeping the instances as [start][Segment.start] and
+     * [end][Segment.end].
      *
      * @param start The first endpoint.
      * @param end The second endpoint.
@@ -61,7 +62,7 @@ public open class Segment internal constructor(
     public constructor(start: RoundPoint, end: RoundPoint) : this(start join end, start, end)
 
     /**
-     * Builds a copy of [segment] that shares its stored geometry, the endpoints' instances included.
+     * Builds a copy of `segment` that shares its stored geometry, the endpoints' instances included.
      *
      * - Never throws. Any existing segment copies as is, even one at infinity or an imaginary one.
      *

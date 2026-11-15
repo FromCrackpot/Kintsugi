@@ -27,7 +27,7 @@ public open class GroupNode(
 ) : Node {
 
     /**
-     * Builds a group of [children] in the given order, without bounds.
+     * Builds a group of `children` in the given order, without bounds.
      *
      * @param children The child nodes in paint order.
      */

@@ -58,7 +58,7 @@ public open class Dipole : Primitive {
     /**
      * Builds the dipole `(gx, gy, gz, px, py, pz)`, unitized, with `-0.0` cleared to `0.0`.
      *
-     * - When the round weight rounds to zero but [gz] doesn't, the dipole lies at infinity and stays raw.
+     * - When the round weight rounds to zero but [gz][Dipole.gz] doesn't, the dipole lies at infinity and stays raw.
      *
      * @param gx The `e23` component: the carrier normal's x-component.
      * @param gy The `e31` component: the carrier normal's y-component.

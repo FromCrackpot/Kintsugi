@@ -8,9 +8,9 @@ import fromcrackpot.kintsugi.audio.PcmSink
  *
  * - Equal sounds share one upload to the audio output, so a sound loaded again for each new world costs nothing new.
  *
- * @constructor Copies [pcm]'s samples, so later writes to its array never reach the sound.
+ * @constructor Copies `pcm`'s samples, so later writes to its array never reach the sound.
  * @param pcm The samples to play.
- * @throws IllegalArgumentException when [pcm]'s rate isn't [PcmSink.SAMPLE_RATE].
+ * @throws IllegalArgumentException when `pcm`'s rate isn't [PcmSink.SAMPLE_RATE].
  */
 public class Sound(pcm: Pcm) {
     internal val pcm: Pcm

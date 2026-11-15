@@ -9,7 +9,7 @@ import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
  *
  * - Shape-preserving operations return the leaf, with its style and tags. Others return plain shapes.
  *
- * @constructor Builds the leaf around [point]'s geometry.
+ * @constructor Builds the leaf around `point`'s geometry.
  * @param point The geometry to decorate.
  * @param style The concrete paint, the point default when omitted.
  * @param tags Free-form tokens riding the leaf, empty by default.
@@ -25,12 +25,12 @@ public open class RoundPointNode(
     */
 
     /**
-     * Builds the leaf as a copy of [node], with the same geometry. Style and tags are [node]'s own
+     * Builds the leaf as a copy of `node`, with the same geometry. Style and tags are `node`'s own
      * unless overridden.
      *
      * @param node The leaf to copy.
-     * @param style The concrete paint, [node]'s own when omitted.
-     * @param tags Free-form tokens riding the leaf, [node]'s own when omitted.
+     * @param style The concrete paint, `node`'s own when omitted.
+     * @param tags Free-form tokens riding the leaf, `node`'s own when omitted.
      */
     public constructor(
         node: RoundPointNode,

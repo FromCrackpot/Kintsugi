@@ -38,7 +38,7 @@ public open class Line : Primitive {
     /**
      * Builds the line `gx·x + gy·y + gz = 0`, unitized, with `-0.0` cleared to `0.0`.
      *
-     * - When the normal rounds to zero at the `SCALE` quantum, the line lies at infinity and [gz] stays raw.
+     * - When the normal rounds to zero at the `SCALE` quantum, the line lies at infinity and [gz][Line.gz] stays raw.
      *
      * @param gx The `e423` component: the normal's x-component.
      * @param gy The `e431` component: the normal's y-component.
