@@ -37,7 +37,7 @@ class GroupNodeTest {
     }
 
     @Test
-    fun `vararg ctor builds the children in order, without bounds`() {
+    fun `vararg ctor builds the children in order - without bounds`() {
         val a = FlatPointNode(FlatPoint(1.0, 0.0))
         val b = FlatPointNode(FlatPoint(2.0, 0.0))
         val g = GroupNode(a, b)
@@ -108,7 +108,7 @@ class GroupNodeTest {
     }
 
     @Test
-    fun `a subclass instance and a plain group never compare equal, in either direction`() {
+    fun `a subclass instance and a plain group never compare equal - in either direction`() {
         val children = listOf<Node>(FlatPointNode(FlatPoint(1.0, 2.0)))
         val plain = GroupNode(children = children)
         val tinted = Tinted(children)
@@ -117,7 +117,7 @@ class GroupNodeTest {
     }
 
     /*
-    TRAVERSAL — flattenShapes
+    TRAVERSAL: flattenShapes
      */
 
     @Test
@@ -154,7 +154,7 @@ class GroupNodeTest {
     }
 
     @Test
-    fun `backdrop fills with the given color and no stroke, black by default`() {
+    fun `backdrop fills with the given color and no stroke - black by default`() {
         val b = SceneBounds(0.0, 0.0, 100.0, 100.0)
         val defaulted = backdrop(b).single<PolygonNode>()
         assertEquals(ShapeStyle.POLYGON.copy(fill = ShapeColor.BLACK, stroke = ShapeColor.NONE), defaulted.style)
@@ -169,7 +169,7 @@ class GroupNodeTest {
     }
 
     /*
-    LOAD BOUNDARY — single<N>
+    LOAD BOUNDARY: single<N>
      */
 
     @Test

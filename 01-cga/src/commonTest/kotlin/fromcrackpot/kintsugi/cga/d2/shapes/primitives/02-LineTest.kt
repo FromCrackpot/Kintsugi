@@ -25,7 +25,7 @@ class LineTest {
     }
 
     @Test
-    fun `line at infinity keeps gz raw (weight is data, not unitized)`() {
+    fun `line at infinity keeps gz raw - weight is data - not unitized`() {
         val l = Line(0.0, 0.0, 5.0)
         assertEquals(0.0, l.gx)
         assertEquals(0.0, l.gy)
@@ -88,7 +88,7 @@ class LineTest {
     }
 
     @Test
-    fun `attitude is the carrier tangent, 90 degrees CCW from the normal`() {
+    fun `attitude is the carrier tangent - 90 degrees CCW from the normal`() {
         // att(g) = g ∨ e412 = −gy·e41 + gx·e42: Line(1,0,0) is the vertical
         // line x=0 with normal (1,0) → tangent direction (0,1)
         assertEquals(Direction(0.0, 1.0), Line(1.0, 0.0, 0.0).attitude)
@@ -125,7 +125,7 @@ class LineTest {
 
     @Test
     fun `canonical of an at-infinity line is sign- and scale-blind`() {
-        // The at-infinity point set is unique — any non-zero gz maps to Line(0, 0, 1).
+        // The at-infinity point set is unique: any non-zero gz maps to Line(0, 0, 1).
         assertEquals(Line(0.0, 0.0, 1.0), Line(0.0, 0.0, 5.0).canonical)
         assertEquals(Line(0.0, 0.0, 1.0), Line(0.0, 0.0, -3.0).canonical)
     }

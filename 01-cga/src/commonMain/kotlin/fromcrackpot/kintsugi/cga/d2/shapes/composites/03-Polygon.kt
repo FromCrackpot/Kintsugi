@@ -1,31 +1,31 @@
 package fromcrackpot.kintsugi.cga.d2.shapes.composites
 
+import fromcrackpot.kintsugi.cga.Angle
 import fromcrackpot.kintsugi.cga.cached
 import fromcrackpot.kintsugi.cga.d2.exceptions.DegeneratePolygonException
+import fromcrackpot.kintsugi.cga.d2.exceptions.InsideOutPolygonException
+import fromcrackpot.kintsugi.cga.d2.exceptions.NonConvexPolygonException
+import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Direction
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
+import fromcrackpot.kintsugi.cga.d2.shapes.primitives.minus
 import fromcrackpot.kintsugi.cga.narrowed
 import fromcrackpot.kintsugi.cga.round
-import kotlin.math.max
-import kotlin.math.min
+import kotlin.math.*
 
 /**
- * Closed loop of straight edges through a cycle of vertices.
+ * A closed loop of straight edges through a cycle of vertices. N vertices make N [edges], the last
+ * one closing back to the first vertex.
  *
- * The closed sibling of [Polyline]: N [vertices] make N [edges], the last edge closing back to
- * the first vertex implicitly. Starting vertex and traversal direction are data — the rounded
- * identity of [equals] distinguishes both. Counter-clockwise winding is the documented
- * convention but is not enforced; to read the actual winding, test [signedArea]'s sign.
- * Convexity is not required: self-intersecting (a pentagram) and self-touching (revisiting a
- * vertex mid-loop — a figure-eight, a slit) loops are legal; only consecutive coincident
- * vertices are rejected at construction.
+ * - Winding is orientation. Counter-clockwise is classic; clockwise is [isInsideOut], solid outside.
+ * - Convexity is not required. Self-crossing and self-touching loops are legal.
+ * - The starting vertex and the traversal direction are data. [equals] distinguishes both.
  *
- * @constructor Validates the vertex list and throws on degenerate input.
- * @throws DegeneratePolygonException When fewer than 3 vertices are given, a vertex lies at
- *   infinity, or two consecutive vertices coincide at the `SCALE` quantum — including the
- *   last and first, whose implicit closing edge would collapse.
+ * @constructor Validates the vertex list.
+ * @throws DegeneratePolygonException when fewer than 3 vertices are given, a vertex lies at
+ *   infinity, or two consecutive vertices coincide at the `SCALE` quantum, last and first included.
  */
 public open class Polygon(
-    /** The points the loop passes through — finite [FlatPoint]s in traversal order, closing implicitly. */
+    /** The finite [FlatPoint]s the loop passes through, in traversal order. The loop closes implicitly. */
     public val vertices: List<FlatPoint>,
 ) : Composite {
 
@@ -53,31 +53,22 @@ public open class Polygon(
      */
 
     /**
-     * The edges, one [Segment] per consecutive vertex pair — N for N vertices, the last edge
+     * The edges, one [Segment] per consecutive vertex pair. N vertices give N edges, the last
      * wrapping back to the first vertex.
      *
-     * Adjacent edges share their endpoint instances, wrapping at the loop:
-     * `edges[i].end === edges[i + 1].start`.
+     * - Adjacent edges share their endpoint instances: `edges[i].end === edges[i + 1].start`.
      */
     public val edges: List<Segment> by cached {
         vertices.indices.map { i -> Segment(vertices[i], vertices[(i + 1) % vertices.size]) }
     }
 
-    /**
-     * The open [Polyline] over the same walk.
-     *
-     * An N + 1-vertex chain that starts and ends on the first vertex, making the implicit
-     * closing edge explicit.
-     */
+    /** The open [Polyline] over the same walk, ending back on the first vertex. */
     public val toPolyline: Polyline by cached { Polyline(vertices + vertices.first()) }
 
     /**
-     * The signed area of the loop — raw; positive when the winding is counter-clockwise,
-     * negative when clockwise.
+     * The raw signed area of the loop: positive when counter-clockwise, negative when clockwise.
      *
-     * The shoelace sum over the vertex cycle; its sign is the actual winding, whatever the
-     * construction order. For a self-intersecting loop the area is algebraic — regions cancel
-     * by winding — so it can vanish on a non-empty figure (a symmetric figure-eight).
+     * - A self-crossing loop's area is algebraic, so a symmetric figure-eight has zero area.
      */
     public val signedArea: Double by cached {
         var sum = 0.0
@@ -89,21 +80,17 @@ public open class Polygon(
     }
 
     /**
-     * Whether this polygon is inside-out — wound clockwise, its solid region the closed
-     * complement of the loop's bounded one.
+     * Whether this polygon is inside-out. An inside-out polygon winds clockwise, and its solid
+     * region is the closed complement of the loop.
      *
-     * `true` when the raw [signedArea] is negative: the winding is the polygon's orientation,
-     * and a clockwise loop encloses everything outside itself. Reversing the vertex order
-     * flips it (`-polygon`). A loop whose raw area is exactly zero — a self-cancelling
-     * figure — is not inside-out.
+     * - Reads the raw [signedArea], so a zero-area self-cancelling loop is not inside-out.
      */
     public val isInsideOut: Boolean get() = signedArea < 0.0
 
     /**
-     * The area centroid — the balance point of the enclosed region — as a finite [FlatPoint].
+     * The area centroid, the balance point of the enclosed region.
      *
-     * Shoelace-weighted; when [signedArea] rounds to zero (a self-cancelling loop) it falls
-     * back to the vertex mean, so a well-defined point always comes back.
+     * - Falls back to the vertex mean when [signedArea] rounds to zero.
      */
     public val centroid: FlatPoint by cached {
         val a = signedArea
@@ -122,23 +109,47 @@ public open class Polygon(
         }
     }
 
+    /**
+     * Whether this polygon is convex. True when every vertex turns the same way and the loop winds once.
+     *
+     * - Either winding qualifies, and so do collinear vertices. A self-crossing or flat loop never does.
+     * - A vertex counts as collinear when its turn's sine rounds to zero at the `SCALE` quantum.
+     */
+    public val isConvex: Boolean by cached {
+        val n = vertices.size
+        var side = 0.0
+        var turning = 0.0
+        for (i in 0 until n) {
+            val a = vertices[i]
+            val b = vertices[(i + 1) % n]
+            val c = vertices[(i + 2) % n]
+            val ux = b.px - a.px
+            val uy = b.py - a.py
+            val vx = c.px - b.px
+            val vy = c.py - b.py
+            val cross = ux * vy - uy * vx
+            val sine = round(cross / (hypot(ux, uy) * hypot(vx, vy)))
+            if (sine * side < 0.0) return@cached false
+            if (sine != 0.0) side = sine
+            turning += atan2(cross, ux * vx + uy * vy)
+        }
+        // |Σ turns| = 2π·|turning number|: a pentagram turns the same way at every vertex, but twice around.
+        side != 0.0 && round(Angle(abs(turning))) == round(Angle(2 * PI))
+    }
+
     /*
     COPY
      */
 
     /**
-     * Returns this object rebuilt around the replacement geometry [polygon] — the hook the
-     * shape-preserving operations return through.
+     * Returns this object rebuilt around the replacement geometry [polygon]. Shape-preserving
+     * operations return through this hook.
      *
-     * Every operation that moves or reshapes a polygon computes its result as a plain
-     * [Polygon] and returns it through this hook. This base implementation returns [polygon]
-     * itself; a subclass overrides it to rebuild an instance of its own class around
-     * [polygon], and every such operation then comes back as that class. The result's runtime
-     * class must equal the receiver's — the operations check it and fail with a named error
-     * when a subclass misses the override.
+     * - Override it to rebuild your subclass. Every generic operation then returns that class.
+     * - The result's runtime class must equal the receiver's, or the operations fail with a named error.
      *
      * @param polygon The replacement geometry.
-     * @return [polygon] itself; an override returns its own class rebuilt around [polygon].
+     * @return [polygon] itself. An override returns its own class rebuilt around [polygon].
      */
     public open fun copy(polygon: Polygon): Polygon = polygon
 
@@ -147,16 +158,13 @@ public open class Polygon(
     */
 
     /**
-     * Rounded identity over the vertex cycle: equal when the vertex lists match pairwise at
-     * the `SCALE` quantum.
+     * Compares the vertex lists pairwise, rounded at the `SCALE` quantum.
      *
-     * Starting vertex and traversal direction both count — the same loop entered at a
-     * different vertex, or traversed in reverse, compares unequal. Identity is exact-class:
-     * a subclass instance and a plain [Polygon] never compare equal.
+     * - The starting vertex and the direction count. The same loop entered elsewhere or reversed compares unequal.
+     * - Classes must match exactly. A subclass instance never equals a plain [Polygon].
      *
      * @param other The object to compare against.
-     * @return `true` iff [other] shares this object's exact class and its vertices all match
-     *   after rounding.
+     * @return `true` when [other] has this exact class and matching vertices.
      */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -170,10 +178,10 @@ public open class Polygon(
     /** Returns the hash of the rounded vertices, consistent with [equals]. */
     override fun hashCode(): Int = _hashCode
 
-    /** Returns the vertices — raw components, full stored precision. */
+    /** Returns the vertices at full stored precision. */
     override fun toString(): String = "Polygon(vertices=$vertices)"
 
-    /** Returns the vertices rounded at the `SCALE` quantum — the debug-output convention of every shape. */
+    /** Returns the vertices rounded at the `SCALE` quantum, for debug output. */
     public fun toStringRounded(): String = "Polygon(vertices=${vertices.map { it.toStringRounded() }})"
 
     /*
@@ -183,20 +191,16 @@ public open class Polygon(
     public companion object {
 
         /**
-         * Builds the axis-aligned rectangle spanning two opposite corners.
+         * Builds the axis-aligned rectangle spanning two opposite corners, given in any order.
          *
-         * Any opposite pair in any order — the coordinates are normalized to min/max. The
-         * result is always the counter-clockwise quad bottom-left → bottom-right → top-right →
-         * top-left, so equal rectangles compare equal with no canonicalization and the edge
-         * indices are fixed: [edges]`[0]` bottom, `[1]` right, `[2]` top, `[3]` left. Integer
-         * indexing is structural — a moved rectangle keeps its indices — while [RectSide]
-         * indexing is visual, following the sides through any pose.
+         * - Always the counter-clockwise quad: `edges[0]` bottom, `[1]` right, `[2]` top, `[3]` left.
+         * - Integer indices follow the quad through any motion. `edges[RectSide]` follows the visual side.
          *
          * @param a One corner.
          * @param b The opposite corner.
-         * @return The four-vertex [Polygon] of the rectangle.
-         * @throws DegeneratePolygonException When a corner lies at infinity, or the corners
-         *   share a rounded x or y — zero extent, the quad collapses.
+         * @return The four-vertex polygon.
+         * @throws DegeneratePolygonException when a corner lies at infinity, or the corners share a
+         *   rounded x or y.
          */
         public fun Rectangle(a: FlatPoint, b: FlatPoint): Polygon {
             if (a.isAtInfinity || b.isAtInfinity) {
@@ -228,7 +232,7 @@ public open class Polygon(
          * @param b The second vertex.
          * @param c The third vertex.
          * @return The three-vertex [Polygon].
-         * @throws DegeneratePolygonException When a vertex lies at infinity, or two of the
+         * @throws DegeneratePolygonException when a vertex lies at infinity, or two of the
          *   three coincide at the `SCALE` quantum.
          */
         public fun Triangle(a: FlatPoint, b: FlatPoint, c: FlatPoint): Polygon = Polygon(listOf(a, b, c))
@@ -237,42 +241,111 @@ public open class Polygon(
 
 /**
  * `-Polygon => Polygon`<br>
- * Returns this polygon turned inside out — the same loop walked in reverse.
+ * Returns this polygon turned inside out, by walking the same loop in reverse.
  *
- * Reverses the vertex order, flipping the winding and the sign of [Polygon.signedArea]: a
- * classic loop comes back inside out and vice versa ([Polygon.isInsideOut] flips), so its solid
- * region is the complement of this polygon's. The vertex instances are kept — only the traversal
- * direction changes — and reversing twice restores the original vertex list exactly. Identity is traversal-sensitive, so a polygon and its
- * reversal compare unequal. The result is the receiver's own class: the reversed geometry
- * returns through [Polygon.copy], preserving a subclass that overrides the hook.
+ * - Its solid region is the complement of this polygon's. It compares unequal to the original.
  *
- * @receiver The [Polygon] to turn inside out.
+ * @receiver The polygon to turn inside out.
  * @param T The receiver's type, preserved in the result.
- * @return The reversed polygon, as the receiver's class.
+ * @return The reversed polygon.
  */
 public operator fun <T : Polygon> T.unaryMinus(): T =
     narrowed(copy(Polygon(vertices.reversed())))
 
 /**
+ * Returns this polygon cut into [n] convex pieces of equal area that tile it exactly.
+ *
+ * - Cuts run perpendicular to the longest edge and alternate on ties. A 2:1 rectangle splits into 8 as a 4×2 grid.
+ * - The pieces are plain [Polygon]s wound counter-clockwise, in no particular order.
+ *
+ * @receiver The classic convex polygon to split.
+ * @param n The number of pieces; `1` answers the outline itself.
+ * @return The [n] pieces.
+ * @throws IllegalArgumentException when [n] is below 1.
+ * @throws InsideOutPolygonException when this polygon is inside-out.
+ * @throws NonConvexPolygonException when this polygon is not convex.
+ * @throws DegeneratePolygonException when two vertices of a piece fall within a `SCALE` quantum.
+ */
+public fun Polygon.split(n: Int = 2): List<Polygon> {
+    require(n >= 1) { "split needs at least 1 piece, got $n" }
+    if (isInsideOut) throw InsideOutPolygonException("cannot split an inside-out polygon: ${toStringRounded()}")
+    if (!isConvex) throw NonConvexPolygonException("cannot split a non-convex polygon: ${toStringRounded()}")
+    return Polygon(vertices).bisected(n, previous = null)
+}
+
+// ⌈n/2⌉ : ⌊n/2⌋ by area, cut ⟂ the longest edge; among equal edges, one ∥ the previous cut makes cuts alternate.
+private fun Polygon.bisected(n: Int, previous: Direction?): List<Polygon> {
+    if (n == 1) return listOf(this)
+    val axis = cutAxis(previous)
+    val target = signedArea * ((n + 1) / 2) / n
+    var low = vertices.minOf { it.px * axis.px + it.py * axis.py }
+    var high = vertices.maxOf { it.px * axis.px + it.py * axis.py }
+    while (true) {
+        val mid = low + (high - low) / 2
+        if (mid <= low || mid >= high) break
+        if (shoelace(clipped(axis, mid, 1.0)) < target) low = mid else high = mid
+    }
+    val below = Polygon(clipped(axis, low, 1.0))
+    val above = Polygon(clipped(axis, low, -1.0))
+    return below.bisected((n + 1) / 2, axis) + above.bisected(n / 2, axis)
+}
+
+private fun Polygon.cutAxis(previous: Direction?): Direction {
+    val sides = vertices.indices.map { i -> vertices[(i + 1) % vertices.size] - vertices[i] }
+    val longest = sides.maxOf { round(it.norm) }
+    val ties = sides.filter { round(it.norm) == longest }
+    val side = previous?.let { p -> ties.firstOrNull {
+        round((it.px * p.px + it.py * p.py) / it.norm) == 0.0 }
+    } ?: ties.first()
+    return Direction(side.px / side.norm, side.py / side.norm)
+}
+
+// Sutherland–Hodgman against `sign·(p·axis − offset) ≤ 0`; a crossing rounding onto a kept vertex is dropped.
+private fun Polygon.clipped(axis: Direction, offset: Double, sign: Double): List<FlatPoint> {
+    val kept = mutableListOf<FlatPoint>()
+    fun keep(p: FlatPoint) {
+        if (kept.lastOrNull() != p) kept += p
+    }
+    vertices.forEachIndexed { i, a ->
+        val b = vertices[(i + 1) % vertices.size]
+        val da = sign * (a.px * axis.px + a.py * axis.py - offset)
+        val db = sign * (b.px * axis.px + b.py * axis.py - offset)
+        if (da <= 0.0) keep(a)
+        if ((da < 0.0 && db > 0.0) || (da > 0.0 && db < 0.0)) {
+            val s = da / (da - db)
+            keep(FlatPoint(a.px + s * (b.px - a.px), a.py + s * (b.py - a.py)))
+        }
+    }
+    if (kept.size > 1 && kept.first() == kept.last()) kept.removeAt(kept.lastIndex)
+    return kept
+}
+
+private fun shoelace(loop: List<FlatPoint>): Double {
+    var sum = 0.0
+    loop.forEachIndexed { i, a ->
+        val b = loop[(i + 1) % loop.size]
+        sum += a.px * b.py - b.px * a.py
+    }
+    return sum / 2
+}
+
+/**
  * The four visually named sides of a rectangle.
  *
- * Declaration order is [Polygon.Rectangle]'s counter-clockwise walk — bottom, right, top,
- * left — so on a freshly built rectangle each entry's `ordinal` is also its edge's index in
- * the rectangle's [Polygon.edges]. The names themselves are visual, not structural:
- * `edges[side]` answers by outward direction, so it keeps naming the visually right side
- * after mirrors or negation shuffle the indices; integer indexing stays the structural lane.
+ * - On a fresh [Polygon.Rectangle], each entry's `ordinal` is its edge's index in [Polygon.edges].
+ * - `edges[side]` answers by outward direction, so it keeps naming the visual side after mirrors.
  */
 public enum class RectSide {
-    /** The side facing down — outward direction `(0, −1)`. */
+    /** The side facing down, with outward direction `(0, −1)`. */
     BOTTOM,
 
-    /** The side facing right — outward direction `(1, 0)`. */
+    /** The side facing right, with outward direction `(1, 0)`. */
     RIGHT,
 
-    /** The side facing up — outward direction `(0, 1)`. */
+    /** The side facing up, with outward direction `(0, 1)`. */
     TOP,
 
-    /** The side facing left — outward direction `(−1, 0)`. */
+    /** The side facing left, with outward direction `(−1, 0)`. */
     LEFT,
 }
 
@@ -280,27 +353,19 @@ public enum class RectSide {
  * `edges[RectSide] => Segment`<br>
  * Returns the edge that visually faces [side]'s way, whatever the loop's pose or orientation.
  *
- * A geometric lookup, not an index: the loop's winding is read off the edges themselves, each
- * edge's outward normal derived from its carrier, and the edge whose outward normal points
- * most nearly along [side]'s direction — down for [RectSide.BOTTOM], right for
- * [RectSide.RIGHT], up, left — is the answer, raw at full `Double` precision. On a freshly
- * built [Polygon.Rectangle] the answers coincide with the ordinals (`edges[BOTTOM]` is
- * `edges[0]`); after a motor, a mirror, or negation the lookup follows the visual side. The
- * answer is unambiguous while the rectangle is tilted less than 45° — at exactly 45° two
- * edges tie and the pick is arbitrary. Meaningful on a rectangle's [Polygon.edges]; any other
- * closed loop is scanned all the same, answering its most [side]-facing edge. `edges[RIGHT]`
- * spells the lookup.
+ * - Unambiguous below a 45° tilt. At exactly 45°, two edges tie and the pick is arbitrary.
+ * - Meant for a rectangle's edges; any other loop answers its most [side]-facing edge.
  *
- * @receiver The edge loop to scan — a rectangle's [Polygon.edges] for the names to be truthful.
+ * @receiver The edge loop to scan. The names hold only for a rectangle's [Polygon.edges].
  * @param side The visual side whose edge to read.
- * @return The [Segment] facing [side]'s way.
- * @throws NoSuchElementException When the list is empty.
+ * @return The raw edge facing [side]'s way.
+ * @throws NoSuchElementException when the list is empty.
  */
 public operator fun List<Segment>.get(side: RectSide): Segment {
     // Shoelace over the loop's edges: positive = counter-clockwise walk.
     var doubledArea = 0.0
     for (edge in this) doubledArea += edge.start.ax * edge.end.ay - edge.end.ax * edge.start.ay
-    // Carrier normals point inward on a counter-clockwise loop — flip to outward.
+    // Carrier normals point inward on a counter-clockwise loop. Flip them outward.
     val outward = if (doubledArea < 0.0) 1.0 else -1.0
     val axisX = when (side) {
         RectSide.RIGHT -> 1.0

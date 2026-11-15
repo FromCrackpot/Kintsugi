@@ -1,8 +1,8 @@
 package fromcrackpot.kintsugi.compose.drawing.primitives
 
 import fromcrackpot.kintsugi.compose.tracing.canvasToTrace
-import fromcrackpot.kintsugi.cga.d2.products.join
-import fromcrackpot.kintsugi.cga.d2.products.meet
+import fromcrackpot.kintsugi.cga.d2.operations.products.join
+import fromcrackpot.kintsugi.cga.d2.operations.products.meet
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Circle
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.RoundPoint
 import fromcrackpot.kintsugi.scenegraph.nodes.primitives.DipoleNode
@@ -11,9 +11,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Trace snapshots for `drawDipole` through the production `drawShape` dispatch — recorded draw
+ * Trace snapshots for `drawDipole` through the production `drawShape` dispatch: recorded draw
  * calls asserted against inline goldens. The DEGENERATE section pins the skip+warn
- * contract — the expected trace is empty, never a throw.
+ * contract: the expected trace is empty, never a throw.
  */
 class DipoleDrawTest {
 
@@ -37,7 +37,7 @@ class DipoleDrawTest {
     @Test
     fun `dipole with fill-NONE still emits transparent draw calls`() {
         // Pins the uniform paint policy: every paint layer draws unconditionally, transparent
-        // included — alpha-0 culling is Skia's job, not ours. A NONE-fill dipole therefore
+        // included. Alpha-0 culling is Skia's job, not ours. A NONE-fill dipole therefore
         // produces three transparent draws (two dots + dashed connector).
         val shape = DipoleNode(
             RoundPoint(-40.0, 0.0) join RoundPoint(40.0, 0.0),
@@ -55,7 +55,7 @@ class DipoleDrawTest {
 
     @Test
     fun `imaginary dipole emits no draw calls`() {
-        // Two unit circles 10 apart don't intersect — Circle ∨ Circle returns an imaginary Dipole
+        // Two unit circles 10 apart don't intersect. Circle ∨ Circle returns an imaginary Dipole
         // (radius² < 0) carrying "they're 8 units apart in separation" info. No real points to
         // draw; drawDipole skip+warns, mirroring imaginary Circle.
         val dipole = Circle(0.0, 0.0, 1.0) meet Circle(10.0, 0.0, 1.0)

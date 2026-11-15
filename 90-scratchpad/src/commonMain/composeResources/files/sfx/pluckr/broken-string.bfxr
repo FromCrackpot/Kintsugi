@@ -1,0 +1,22 @@
+{
+  "synth_type": "Pluckr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.2665773956105113,
+    "material": 2,
+    "duration": 1.389830279094167,
+    "pitch": 0.16903498377650977,
+    "strings": 2,
+    "damping": 0.7019185665529222,
+    "brightness": 0.5764044025796465,
+    "pluck": 0.7215935537964105,
+    "coupling": 0.5359134311787784,
+    "strum": 0.3019397496711463,
+    "tremolo": 0,
+    "vibrato": 0,
+    "tremoloRate": 4,
+    "inharmonic": 0.9275967305060476
+  },
+  "renderSeed": 0.36905342526733875
+}

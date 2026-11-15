@@ -8,16 +8,15 @@ internal const val SVG_NS = "http://www.w3.org/2000/svg"
 
 /**
  * Kintsugi sidecar namespace, declared once as `xmlns:k` on the `<svg>` root.
- * It's an identifier, not a locator — it need not resolve. The `/v1` suffix leaves
+ * It's an identifier, not a locator, so it need not resolve. The `/v1` suffix leaves
  * room for future breaking format versions.
  */
 internal const val KINTSUGI_NS = "https://fromcrackpot.com/ns/kintsugi/svg/v1"
 internal const val KINTSUGI_PREFIX = "k"
 
 /*
- * The `k:*` wire vocabulary — a shared serialize/parse protocol. Centralized here (the namespace's
- * home) so a typo can't silently desync the read and write sides, since a mismatch wouldn't be a
- * compile error.
+ * The `k:*` wire vocabulary, a shared serialize/parse protocol. It lives here, the namespace's
+ * home, so a typo can't silently desync the read and write sides: a mismatch is no compile error.
  */
 
 // k:* attribute names
@@ -61,10 +60,10 @@ internal fun XmlReader.kAttrAsDouble(name: String): Double? =
     kAttr(name)?.trim()?.takeIf { it.isNotEmpty() }?.toDoubleOrNull()
 
 /**
- * Read the element's `k:tags` token set: trim, split on any whitespace, drop empties. Same
- * tolerance as `k:flags`, but an **open vocabulary** — tokens are game semantics, so there is no
- * known-token list, no unknown-token warn, and no lowercasing (tags are user vocabulary, preserved
- * verbatim). Absent attribute → empty set.
+ * Read the element's `k:tags` token set: trim, split on any whitespace, drop empties.
+ * - Same tolerance as `k:flags`, but an **open vocabulary**. Tokens are game semantics, so there is
+ *   no known-token list, no unknown-token warning and no lowercasing (tags stay verbatim).
+ * - Absent attribute → empty set.
  */
 internal fun XmlReader.kTags(): Set<String> =
     kAttr(KATTR_TAGS)?.trim()?.split(Regex("\\s+"))?.filter { it.isNotEmpty() }?.toSet() ?: emptySet()
@@ -87,7 +86,7 @@ internal fun parseKFlags(raw: String?, known: Set<String>, element: String, loca
 }
 
 /**
- * Write `k:tags` space-joined, **only when non-empty** — the optional feature attribute idiom
+ * Write `k:tags` space-joined, **only when non-empty**, like the other optional feature attributes
  * (`k:flags`, `stroke-linecap`). Insertion order is preserved as parsed/authored.
  */
 internal fun XmlWriter.kTagsAttr(tags: Set<String>) {

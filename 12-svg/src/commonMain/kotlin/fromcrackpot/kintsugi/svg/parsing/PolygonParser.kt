@@ -24,20 +24,17 @@ private val POINTS_SEPARATORS = Regex("[\\s,]+")
 private val KNOWN_POLYGON_FLAGS = setOf(KFLAG_INSIDE_OUT)
 
 /**
- * Parses a `<polygon>` element (cursor on its START_ELEMENT) into a `PolygonNode` —
- * the untagged (and only) reading; an unknown `k:type` warns and falls back. `points` is
- * **required**: whitespace/comma-separated coordinate pairs, even count, at least 3 pairs.
- * Vertices map through the Y-flip one by one.
+ * Parses a `<polygon>` element (cursor on its START_ELEMENT) into a `PolygonNode`, the untagged
+ * and only reading. An unknown `k:type` warns and falls back.
  *
- * Orientation rides `k:flags="inside-out"` as intent, model winding as truth: after the
- * Y-flip the vertex walk is reversed when its winding contradicts the flag — flagged loops
- * come out clockwise (inside-out), unflagged loops counter-clockwise (classic) — so an
- * authored `points` order is canonicalized once at parse and a serialized document re-parses
- * without any reversal. A zero-area loop has no orientation to flip; the flag warns and is
- * ignored there.
- *
- * Degenerate vertex lists collapse in `:cga` — [DegeneratePolygonException] wraps into
- * [MalformedPolygonException] at this boundary, per the exception-wrapping contract.
+ * - `points` is **required**: whitespace/comma-separated coordinate pairs, even count, at least
+ *   3 pairs. Vertices map through the Y-flip one by one.
+ * - `k:flags="inside-out"` is the intent, model winding the truth. After the Y-flip, the walk is
+ *   reversed when its winding contradicts the flag: flagged loops come out clockwise, unflagged
+ *   ones counter-clockwise. Authored order is canonicalized once, so a serialized document
+ *   re-parses with no reversal. A zero-area loop has no orientation; the flag warns and is ignored.
+ * - Degenerate vertex lists collapse in `:cga`. [DegeneratePolygonException] wraps into
+ *   [MalformedPolygonException] here, per the exception-wrapping contract.
  */
 internal fun XmlReader.parsePolygonElement(viewBox: SceneBounds, inherited: InheritedStyle): PolygonNode {
     val loc = extLocationInfo?.toString()

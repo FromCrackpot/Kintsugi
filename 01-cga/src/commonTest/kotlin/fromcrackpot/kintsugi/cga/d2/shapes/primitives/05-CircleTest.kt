@@ -82,14 +82,14 @@ class CircleTest {
     fun `center Euclidean position is orientation-independent for inside-out cw=+1 circle`() {
         // Same geometric circle as Circle(3,4,2) but inverted orientation:
         // negate all components of the unit cw=-1 form to get cw=+1.
-        // Round Center: (-(-3)(1), -(-4)(1), 1, 9+16−10.5) = (3, 4, 1, 14.5) — same as classic.
+        // Round Center: (-(-3)(1), -(-4)(1), 1, 9+16−10.5) = (3, 4, 1, 14.5), the same as classic.
         val c = Circle(-3.0, -4.0, 10.5, 1.0)
         assertEquals(RoundPoint(3.0, 4.0, 1.0, 14.5), c.center)
         assertEquals(FlatPoint(3.0, 4.0), c.center.toFlat)
     }
 
     @Test
-    fun `norm is the center magnitude sqrt(cx2+cy2)`() {
+    fun `norm is the center magnitude sqrt of cx2+cy2`() {
         assertEquals(5.0, Circle(3.0, 4.0, 2.0).norm)
         // Orientation-independent: the inside-out twin negates cx/cy but the norm is unchanged.
         assertEquals(5.0, Circle(-3.0, -4.0, 10.5, 1.0).norm)
@@ -147,14 +147,14 @@ class CircleTest {
 
     @Test
     fun `carrier is the antiscalar weight cw`() {
-        // car(c) = e4 ∧ c = cw·𝟙 — the carrier of a circle is the whole plane.
+        // car(c) = e4 ∧ c = cw·𝟙: the carrier of a circle is the whole plane.
         assertEquals(-1.0, Circle(3.0, 4.0, 2.0).carrier)
         assertEquals(1.0, Circle(-3.0, -4.0, 10.5, 1.0).carrier)
     }
 
     @Test
     fun `cocarrier is the flat center for both orientations`() {
-        // ccr(c) = e4 ∧ c^☆ = FlatPoint(−cx, −cy, cw) — homogeneous form, unitized by the ctor.
+        // ccr(c) = e4 ∧ c^☆ = FlatPoint(−cx, −cy, cw), a homogeneous form the ctor unitizes.
         val classic = Circle(3.0, 4.0, 2.0)
         assertEquals(FlatPoint(3.0, 4.0), classic.cocarrier)
         assertEquals(classic.center.toFlat, classic.cocarrier)
@@ -165,7 +165,7 @@ class CircleTest {
 
     @Test
     fun `container is the circle itself normalized to cw=+1`() {
-        // con(c) = cw·c — a circle is its own container up to orientation.
+        // con(c) = cw·c: a circle is its own container up to orientation.
         val classic = Circle(3.0, 4.0, 2.0)            // cw = −1
         val insideOut = Circle(-3.0, -4.0, 10.5, 1.0)  // same point set, cw = +1
         assertEquals(insideOut, classic.container)
@@ -254,7 +254,7 @@ class CircleTest {
     }
 
     @Test
-    fun `negation swaps the interior, keeping center and radius`() {
+    fun `negation swaps the interior - keeping center and radius`() {
         val c = Circle(3.0, 4.0, 2.0)
         val n = -c
         assertTrue(n.isInsideOut)

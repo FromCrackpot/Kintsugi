@@ -1,15 +1,16 @@
 package fromcrackpot.kintsugi.cga.d2.transforms.primitives
 
+import fromcrackpot.kintsugi.cga.assertSameShape
+import fromcrackpot.kintsugi.cga.dilator
+import fromcrackpot.kintsugi.cga.imaginaryDipole
+import fromcrackpot.kintsugi.cga.roundPoint
+import fromcrackpot.kintsugi.cga.sweep
+import fromcrackpot.kintsugi.cga.versor
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Dipole
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
-import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Line
-import fromcrackpot.kintsugi.cga.d2.shapes.primitives.RoundPoint
-import fromcrackpot.kintsugi.cga.d2.products.join
-import fromcrackpot.kintsugi.cga.d2.transforms.F
-import fromcrackpot.kintsugi.cga.d2.transforms.G
-import fromcrackpot.kintsugi.cga.d2.transforms.R
+import fromcrackpot.kintsugi.cga.d2.operations.products.join
+import fromcrackpot.kintsugi.cga.d2.transforms.D
 import fromcrackpot.kintsugi.cga.d2.transforms.T
-import fromcrackpot.kintsugi.cga.deg
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -19,7 +20,7 @@ class DipoleTimesTest {
     private fun dipole(ax: Double, ay: Double, bx: Double, by: Double): Dipole =
         FlatPoint(ax, ay).toRound join FlatPoint(bx, by).toRound
 
-    /* MOTOR — TRANSLATION */
+    /* MOTOR: TRANSLATION */
 
     @Test
     fun `translating a dipole equals the dipole of its translated endpoints`() {
@@ -49,48 +50,33 @@ class DipoleTimesTest {
         assertEquals(d, d * T(3.0, 4.0) * T(-3.0, -4.0))
     }
 
-    /* MOTOR — ROTATION */
+    /* DILATOR */
 
     @Test
-    fun `dipole rotation equals the dipole rebuilt from rotated endpoints`() {
-        val a = RoundPoint(1.0, 1.0)
-        val b = RoundPoint(4.0, 5.0)
-        val m = R(FlatPoint(2.0, -3.0), 37.deg)
-        assertEquals((a * m) join (b * m), (a join b) * m)
+    fun `dilation multiplies a dipole's radius by the scale`() {
+        val d = dipole(1.0, 1.0, 4.0, 5.0)
+        assertEquals(d.radius * 3.0, (d * D(FlatPoint(2.0, -3.0), 3.0)).radius, EPS)
+    }
+
+    /* SWEEPS */
+
+    @Test
+    fun `a moved dipole equals the dipole rebuilt from its moved endpoints`() = sweep {
+        val a = roundPoint()
+        val b = roundPoint()
+        val v = versor()
+        val s = dilator()
+        assertSameShape((a * v) join (b * v), (a join b) * v)
+        assertSameShape((a * s) join (b * s), (a join b) * s)
     }
 
     @Test
-    fun `imaginary dipole rotation equals the rebuild from rotated endpoints`() {
-        // radius² = −1 (see the containers invariant: start ∧ end reconstructs imaginary blades).
-        val d = Dipole(0.0, 1.0, 0.0, -1.0, 0.0, 1.0)
-        val m = R(FlatPoint(2.0, -3.0), 37.deg)
-        assertEquals((d.start * m) join (d.end * m), d * m)
-    }
-
-    /* FLECTOR */
-
-    @Test
-    fun `dipole reflection equals the dipole rebuilt from reflected endpoints`() {
-        val a = RoundPoint(1.0, 1.0)
-        val b = RoundPoint(4.0, 5.0)
-        val f = G(Line(1.0, -1.0, 0.0), 2.0)
-        assertEquals((a * f) join (b * f), (a join b) * f)
-    }
-
-    @Test
-    fun `dipole reflection by a pure mirror equals the endpoint rebuild`() {
-        val a = RoundPoint(1.0, 1.0)
-        val b = RoundPoint(4.0, 5.0)
-        val f = F(Line(2.0, 1.0, -3.0))
-        assertEquals((a * f) join (b * f), (a join b) * f)
-    }
-
-    @Test
-    fun `imaginary dipole reflection equals the rebuild from reflected endpoints`() {
-        // radius² = −1 (see the containers invariant: start ∧ end reconstructs imaginary blades).
-        val d = Dipole(0.0, 1.0, 0.0, -1.0, 0.0, 1.0)
-        val f = G(Line(1.0, -1.0, 0.0), 2.0)
-        assertEquals((d.start * f) join (d.end * f), d * f)
+    fun `a moved imaginary dipole equals the rebuild from its moved endpoints`() = sweep {
+        val d = imaginaryDipole()
+        val v = versor()
+        val s = dilator()
+        assertSameShape((d.start * v) join (d.end * v), d * v)
+        assertSameShape((d.start * s) join (d.end * s), d * s)
     }
 
     companion object {

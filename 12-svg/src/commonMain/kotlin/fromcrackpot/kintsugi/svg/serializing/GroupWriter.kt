@@ -8,11 +8,12 @@ import fromcrackpot.kintsugi.svg.warn
 import nl.adaptivity.xmlutil.XmlWriter
 
 /**
- * GroupNode → `<g>` carrying the recursively-encoded children. Plain `<g>` is the GroupNode
- * carrier in `/v1` — no `k:type` is emitted (mirrors the bare-`<circle>`-is-Circle /
- * bare-`<line>`-is-Segment defaults). Nested `GroupNode.bounds` is NOT persisted (only the root
- * bounds round-trips, as `<svg viewBox>`); on encounter we warn and drop, then still emit the
- * group so its children survive.
+ * GroupNode → `<g>` carrying the recursively-encoded children.
+ *
+ * - Plain `<g>` is the GroupNode carrier in `/v1`, with no `k:type` (like the bare-`<circle>`-is-Circle
+ *   and bare-`<line>`-is-Segment defaults).
+ * - Nested `GroupNode.bounds` is NOT persisted: only the root bounds round-trips, as `<svg viewBox>`.
+ *   It warns and drops them, then still emits the group so its children survive.
  */
 internal fun XmlWriter.writeGroupElement(
     group: GroupNode,

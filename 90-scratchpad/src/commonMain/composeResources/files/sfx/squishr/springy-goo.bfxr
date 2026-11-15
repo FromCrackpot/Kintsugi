@@ -1,0 +1,16 @@
+{
+  "synth_type": "Squishr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.7972654020413756,
+    "texture": 5,
+    "viscosity": 0.6688215908710845,
+    "stretch": 0.9693972997483797,
+    "pressure": 0.501615772396326,
+    "wetness": 0.286058077972848,
+    "bubbleSize": 0.6159301999025046,
+    "duration": 0.5348937806440517
+  },
+  "renderSeed": 0.36905342526733875
+}

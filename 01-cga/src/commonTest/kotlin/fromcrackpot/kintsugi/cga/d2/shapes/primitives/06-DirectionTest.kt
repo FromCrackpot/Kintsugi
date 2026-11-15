@@ -1,7 +1,7 @@
 package fromcrackpot.kintsugi.cga.d2.shapes.primitives
 
 import fromcrackpot.kintsugi.cga.d2.exceptions.FiniteDirectionException
-import fromcrackpot.kintsugi.cga.d2.products.times
+import fromcrackpot.kintsugi.cga.d2.operations.products.times
 import fromcrackpot.kintsugi.cga.d2.transforms.F
 import fromcrackpot.kintsugi.cga.d2.transforms.R
 import fromcrackpot.kintsugi.cga.d2.transforms.T
@@ -117,21 +117,21 @@ class DirectionTest {
     /* MATH */
 
     @Test
-    fun `a translation fixes a direction, as a direction`() {
+    fun `a translation fixes a direction - as a direction`() {
         val moved = Direction(3.0, 4.0) * T(10.0, 20.0)
         assertIs<Direction>(moved)
         assertEquals(Direction(3.0, 4.0), moved)
     }
 
     @Test
-    fun `a rotation turns a direction, as a direction`() {
+    fun `a rotation turns a direction - as a direction`() {
         val moved = Direction(1.0, 0.0) * R(FlatPoint(0.0, 0.0), 90.deg)
         assertIs<Direction>(moved)
         assertEquals(Direction(0.0, 1.0), moved)
     }
 
     @Test
-    fun `a flector reflects a direction, as a direction`() {
+    fun `a flector reflects a direction - as a direction`() {
         val moved = Direction(3.0, 4.0) * F(Line(0.0, 1.0, -7.0))
         assertIs<Direction>(moved)
         assertEquals(Direction(3.0, -4.0), moved)
@@ -144,21 +144,21 @@ class DirectionTest {
     }
 
     @Test
-    fun `a scalar scales a direction, as a direction`() {
+    fun `a scalar scales a direction - as a direction`() {
         val scaled = Direction(3.0, 4.0) * 2.0
         assertIs<Direction>(scaled)
         assertEquals(Direction(6.0, 8.0), scaled)
     }
 
     @Test
-    fun `directions add component-wise, as a direction`() {
+    fun `directions add component-wise - as a direction`() {
         val sum = Direction(3.0, 4.0) + Direction(1.0, -2.0)
         assertIs<Direction>(sum)
         assertEquals(Direction(4.0, 2.0), sum)
     }
 
     @Test
-    fun `directions subtract component-wise, as a direction`() {
+    fun `directions subtract component-wise - as a direction`() {
         val difference = Direction(3.0, 4.0) - Direction(1.0, -2.0)
         assertIs<Direction>(difference)
         assertEquals(Direction(2.0, 6.0), difference)
@@ -178,7 +178,7 @@ class DirectionTest {
     }
 
     @Test
-    fun `negation reverses the heading, as a direction`() {
+    fun `negation reverses the heading - as a direction`() {
         val negated = -Direction(3.0, 4.0)
         assertIs<Direction>(negated)
         assertEquals(Direction(-3.0, -4.0), negated)
@@ -191,7 +191,7 @@ class DirectionTest {
     }
 
     @Test
-    fun `the zero direction is its own negation, sanitized`() {
+    fun `the zero direction is its own negation - sanitized`() {
         val negated = -Direction(0.0, 0.0)
         assertEquals(Direction(0.0, 0.0), negated)
         assertEquals(0.0.toRawBits(), negated.px.toRawBits())

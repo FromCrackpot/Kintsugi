@@ -108,7 +108,7 @@ class PolylineTest {
         val b = Polyline(listOf(FlatPoint(0.0, 0.0), FlatPoint(4.0, 0.0), FlatPoint(0.0, 3.0)))
         assertEquals(a, b)
         assertEquals(a.hashCode(), b.hashCode())
-        // Starting vertex and traversal direction are data — the reversed walk is a different value.
+        // Starting vertex and traversal direction are data: the reversed walk is a different value.
         val reversed = Polyline(listOf(FlatPoint(0.0, 3.0), FlatPoint(4.0, 0.0), FlatPoint(0.0, 0.0)))
         assertNotEquals(a, reversed)
     }

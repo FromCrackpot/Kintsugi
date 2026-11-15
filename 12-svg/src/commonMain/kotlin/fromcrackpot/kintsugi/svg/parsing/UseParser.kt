@@ -17,28 +17,27 @@ import nl.adaptivity.xmlutil.XmlReader
 
 /**
  * Parses a `<use href="doc.svg" x=".." y=".."/>` element (cursor on its START_ELEMENT) by
- * **expanding** the referenced template document in place — parse-only, the `<rect>` precedent:
- * the expansion serializes back as plain placed shapes, never as a `<use>`.
+ * **expanding** the referenced template document in place. Parse-only, like `<rect>`: the
+ * expansion serializes back as plain placed shapes, never as a `<use>`.
  *
  * Reference semantics (external whole-document, the `/v1` contract):
- * - `href` is **required** and names a whole document in [ParseContext.templates]; a `#fragment`
+ * - `href` is **required** and names a whole document in [ParseContext.templates]. A `#fragment`
  *   suffix is tolerated and ignored (the path before `#` keys the map). A bare-fragment href
- *   (`#id` — internal reference) is unsupported and malformed.
- * - **Origin anchoring**, matching browser semantics for a referenced `<svg>` root: the template's
- *   viewport top-left lands at `(x, y)` in this document's coordinates. The template parses
- *   viewBox-centered on the CGA origin, so expansion is one translation — the template's center
- *   point `(x + w/2, y + h/2)` mapped through the Y-flip, applied as `* T(...)` over the
- *   template's children.
- * - **No scaling ever**: `width`/`height` on `<use>` are rejected — one CGA unit is one SVG user
+ *   (`#id`, an internal reference) is unsupported and malformed.
+ * - **Origin anchoring**, as browsers do for a referenced `<svg>` root: the template's viewport
+ *   top-left lands at `(x, y)` in this document. The template parses viewBox-centered on the CGA
+ *   origin, so expansion is one translation: the center `(x + w/2, y + h/2)` mapped through the
+ *   Y-flip, applied as `* T(...)` over the template's children.
+ * - **No scaling ever**: `width`/`height` on `<use>` are rejected. One CGA unit is one SVG user
  *   unit in every document (root tenet), so a bigger brick is a different template.
  * - Use-site presentation attrs and `k:tags` seed the template's inheritance chain (SVG's cascade
- *   into the use shadow tree): the template's *unset* slots inherit per-instance fill/stroke/tags,
+ *   into the use shadow tree). Unset template slots inherit per-instance fill/stroke/tags, and
  *   explicit template attrs win. Tags union onto every expanded leaf.
- * - Transitive templates are legal (a template may `<use>` another, resolved from the same map);
- *   a closed loop throws [SvgTemplateCycleException] naming the chain.
+ * - Transitive templates are legal: a template may `<use>` another from the same map. A closed
+ *   loop throws [SvgTemplateCycleException] naming the chain.
  *
- * The expansion returns one [GroupNode] wrapping the template's children (bounds `null` — only
- * the root document's bounds round-trip), so a multi-shape template splices as a unit.
+ * The expansion returns one [GroupNode] wrapping the template's children, so a multi-shape template
+ * splices as a unit. Its bounds is `null`: only the root document's bounds round-trip.
  */
 internal fun XmlReader.parseUseElement(
     viewBox: SceneBounds,
@@ -94,10 +93,12 @@ private fun XmlReader.skipToUseEnd(useLocation: String?) {
 
 /**
  * The template size contract, validated on a template's root `<svg>` (cursor on it): explicit
- * `width`/`height` equal to the viewBox extents. Required for browser fidelity — a sizeless
- * nested `<svg>` defaults to 100% and inflates to the whole viewport in standard renderers, so
- * the load boundary turns that silent blowup into a diagnosis. (A template with `width`/`height`
- * and no `viewBox` passes trivially: the viewBox fallback derives from those extents.)
+ * `width`/`height` equal to the viewBox extents.
+ *
+ * - Required for browser fidelity. A sizeless nested `<svg>` defaults to 100% and inflates to the
+ *   whole viewport in standard renderers, so the load boundary turns that silent blowup into a diagnosis.
+ * - A template with `width`/`height` and no `viewBox` passes trivially: the viewBox fallback derives
+ *   from those extents.
  */
 internal fun XmlReader.validateTemplateSize(viewBox: SceneBounds, templateKey: String, location: String?) {
     val w = attrAsDouble("width")

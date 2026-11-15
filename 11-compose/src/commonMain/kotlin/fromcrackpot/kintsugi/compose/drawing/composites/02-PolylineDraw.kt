@@ -15,12 +15,11 @@ internal fun DrawScope.drawPolyline(
     strokeWidth: Float,
     cap: StrokeCap,
 ) {
-    // No degenerate guard: the Polyline ctor makes < 2 vertices, at-infinity vertices, and
-    // collapsed edges unrepresentable — same by-construction posture as drawSegment.
-    // Same Path walk as drawPolygon but WITHOUT close(): the chain stays open, so the stroke
-    // has ends and honors the cap (segment's rule). Note Compose fills an open path as if
-    // closed (matching SVG); the default polyline style is stroke-only, so fill only shows
-    // when a caller asks for it explicitly.
+    // No degenerate guard: the Polyline ctor makes < 2 vertices, at-infinity vertices and
+    // collapsed edges unrepresentable, as drawSegment relies on too.
+    // Same Path walk as drawPolygon but WITHOUT close(): the open chain's stroke has ends and
+    // honors the cap (segment's rule). Compose fills an open path as if closed (matching SVG);
+    // the default polyline style is stroke-only, so fill shows only when a caller asks for it.
     val path = Path().apply {
         polyline.vertices.forEachIndexed { i, vertex ->
             val p = cgaToCanvas(vertex.px, vertex.py)

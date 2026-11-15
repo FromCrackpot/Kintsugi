@@ -1,0 +1,16 @@
+{
+  "synth_type": "Clonkr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.16978756128810346,
+    "material": 4,
+    "action": 0,
+    "size": 0.7429389609955251,
+    "hollowness": 0.7387945994967595,
+    "hardness": 0.11484064636752009,
+    "damping": 0.3412092319689691,
+    "duration": 0.6738952998537571
+  },
+  "renderSeed": 0.36905342526733875
+}

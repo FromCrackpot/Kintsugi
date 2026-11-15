@@ -1,0 +1,23 @@
+Bfxr pickup-coin laser-shoot explosion powerup hit-hurt jump blip-select
+Footsteppr snow grass dirt gravel wood
+Transfxr bright-whistles grainy-taps rocket-zips wavering-calls fuzzy-chirps bass-plucks soft-pips sand-sprays air-currents submarine-calls arcade-zaps bubble-pops rubber-clicks bubble-swells static-flecks morph
+Clonkr teacup glass-ping wood-knock dungeon-gate metal-clang ceramic-crack rubber-thud loose-bolts dragged-crate coin-drop
+Machinr tiny-motor rusty-winch camera-shutter clockwork engine-trouble servo windup-toy heavy-door
+Jinglr confirm message dismiss denied discovery victory failure secret warning checkpoint puzzle-solved lullaby
+Squishr slime-step bubble-pop suction-cup wet-splat gulp springy-goo bubbling-potion mud-pull water-drop jelly-wobble
+Mixr clockwork-familiar crystal-prize cyber-bird goo-machine alien-beacon garden-lute reality-error soft-landing spark-impact shockwave haunted-hardware haunted spell-hit heavy-magic phase-step hatchling sacred-treasure pocket-rattle demolition
+Crittr woof meow tiny-dragon cave-beast alien-purr insect-call ghost-whale clockwork-pet forest-spirit angry-blob
+Birdr chirp sparrow songbird canary warbler parrot crow owl cuckoo loon
+Signlr radar-blip target-lock derelict-beacon alien-handshake distress-burst broken-radio sonar-map encrypted-packet lost-satellite save-terminal
+Fractr glass-cascade ice-wall crystal-break stone-collapse brittle-armor bone-scatter shatter-freeze glass-snap ice-crack biscuit-crunch
+Riftr gravity-well time-rewind phase-dash force-field portal-tear teleport-arrive black-hole reality-glitch
+Swarmr nanobots cave-bats fireflies scarabs drone-patrol fairy-flock locusts seeking-missiles
+Rustlr card-flick page-turn bag-open equip-gear item-slide cloth-fold wrapper zip-pouch
+Boomr grenade barrel rocket depth-charge fireball meteor demolition tiny-pop gas-tank implosion distant-charge
+Zappr static-spark tesla-coil power-short lightning-arc stun-baton reactor magic-spark fuse-blow
+Whooshr sword-swing dodge arrow-pass heavy-swing fast-projectile wingbeat cloth-swipe air-dash
+Bouncr rubber-ball metal-ball wooden-dice basketball marble coin-spin cartoon-bounce heavy-tumble
+Breathr inhale exhale sigh snore tired-runner deep-breath held-breath gasp sleeping-beast diver helmet ghost-breath
+Choirr angelic ominous monks fairy-choir robot-choir ghost-chord victory-chord void-voices
+Pluckr harp kalimba muted-guitar metal-string magic-harp bass-pluck broken-string quest-pluck
+Glitchr save-corruption teleport-error bit-rot buffer-skip corrupt-pickup broken-terminal rewind-burst digital-death

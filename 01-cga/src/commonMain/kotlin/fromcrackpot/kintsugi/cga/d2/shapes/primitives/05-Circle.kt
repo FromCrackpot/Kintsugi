@@ -9,36 +9,28 @@ import kotlin.math.absoluteValue
 import kotlin.math.sqrt
 
 /**
- * A circle in the plane, oriented by which side counts as its interior — the 2D circle.
+ * A circle in the plane, oriented by which side counts as its interior.
  *
- * The grade-3 blade `cx·e423 + cy·e431 + cz·e412 + cw·e321`, the wedge of three round points.
- * The constructor unitizes by the round weight `|cw|`, preserving its sign — the orientation:
- * `cw = −1` is the classic circle whose interior is the bounded disk, `cw = +1` the inside-out
- * circle whose interior is everything outside. Center and radius are first-class views
- * ([center], [radius]); a negative [radius2] makes the circle imaginary — no real points,
- * first-class data, never an error (see [isImaginary]). Orientation is data: negating all four
- * components keeps the point set and swaps the interior, and [equals] distinguishes the two
- * ([canonical] for unoriented equivalence). A round weight that rounds to zero is not a circle
- * but the line `(cx, cy, cz)` — the constructor throws rather than build one. Components are
- * stored raw at full `Double` precision; [equals]/[hashCode] compare rounded at the `SCALE`
- * quantum.
+ * - Classic (`cw = −1`): the interior is the bounded disk; inside-out (`cw = +1`): everything outside.
+ * - A negative [radius2] makes it imaginary. It has no real points but is valid data, not an error.
+ * - Orientation is data, so `-circle` compares unequal. Use [canonical] for unoriented equivalence.
  */
 public open class Circle : Primitive {
-    /** The `e423` component — the center's x-coordinate for a classic circle; negated when inside-out. */
+    /** The `e423` component: the center's x-coordinate for a classic circle; negated when inside-out. */
     public val cx: Double // e423
 
-    /** The `e431` component — the center's y-coordinate for a classic circle; negated when inside-out. */
+    /** The `e431` component: the center's y-coordinate for a classic circle; negated when inside-out. */
     public val cy: Double // e431
 
     /**
-     * The `e412` component — minus half the origin's power with respect to the circle,
+     * The `e412` component: minus half the origin's power with respect to the circle,
      * `(radius² − ‖center‖²)/2`, for a classic circle; negated when inside-out.
      */
     public val cz: Double // e412
 
     /**
-     * The `e321` round weight — `−1` for a classic circle whose interior is the bounded disk,
-     * `+1` for an inside-out circle whose interior is everything outside it.
+     * The `e321` round weight: `−1` for a classic circle, whose interior is the bounded disk; `+1`
+     * for an inside-out one, whose interior is everything outside it.
      */
     public val cw: Double // e321
 
@@ -52,19 +44,15 @@ public open class Circle : Primitive {
     */
 
     /**
-     * Builds the circle `(cx, cy, cz, cw)`, unitized and zero-sanitized.
-     *
-     * A round weight [cw] that doesn't round to zero is divided out of every component by its
-     * magnitude, preserving its sign — the orientation survives unitization as `cw = ±1`. A
-     * weight that rounds to zero at the `SCALE` quantum is not a circle — the blade is the line
-     * `(cx, cy, cz)` — and the constructor throws. Signed zeroes sanitize to `+0.0`.
+     * Builds the circle `(cx, cy, cz, cw)`, unitized, with `-0.0` cleared to `0.0`. The sign of [cw]
+     * survives as the orientation.
      *
      * @param cx The `e423` component.
      * @param cy The `e431` component.
      * @param cz The `e412` component.
-     * @param cw The `e321` round weight; its sign picks the interior side.
-     * @throws DegenerateCircleException When [cw] rounds to zero — the blade collapses to the
-     *   payload `Line(cx, cy, cz)`.
+     * @param cw The `e321` round weight. Its sign picks the interior side.
+     * @throws DegenerateCircleException when [cw] rounds to zero at the `SCALE` quantum. The blade is
+     *   then the line `(cx, cy, cz)`.
      */
     public constructor(cx: Double, cy: Double, cz: Double, cw: Double) {
         if (round(cw) == 0.0) throw DegenerateCircleException(Line(cx, cy, cz))
@@ -78,16 +66,13 @@ public open class Circle : Primitive {
     }
 
     /**
-     * Builds a classic circle with the given center and radius.
-     *
-     * A convenience over the component constructor: `cw = −1`, so the interior is the bounded
-     * disk. The result is always real and classic — an imaginary or inside-out circle takes the
-     * component constructor. A zero radius is the single-point circle.
+     * Builds the classic circle with the given center and radius. It is always real, and its
+     * interior is the bounded disk.
      *
      * @param centerX The center's Euclidean x-coordinate.
      * @param centerY The center's Euclidean y-coordinate.
-     * @param radius The radius; non-negative.
-     * @throws IllegalArgumentException When [radius] is negative.
+     * @param radius The radius. Zero gives the single-point circle.
+     * @throws IllegalArgumentException when [radius] is negative.
      */
     public constructor(centerX: Double, centerY: Double, radius: Double) : this(
         cx = centerX,
@@ -98,7 +83,7 @@ public open class Circle : Primitive {
         require(radius >= 0.0) { "radius must be non-negative: $radius" }
     }
 
-    /** Adopts components as-is, skipping unitization; [raw] disambiguates from the public ctors. */
+    /** Adopts the components as-is, skipping unitization. [raw] only tells this ctor apart from the public ones. */
     private constructor(cx: Double, cy: Double, cz: Double, cw: Double, raw: Unit) {
         this.cx = cx
         this.cy = cy
@@ -111,37 +96,25 @@ public open class Circle : Primitive {
     */
 
     /**
-     * Whether this circle is imaginary — a negative squared radius, no real points.
+     * Whether this circle is imaginary. True when [radius2] rounds below zero at the `SCALE` quantum.
      *
-     * `true` when [radius2] rounds below zero at the `SCALE` quantum. Imaginary circles are
-     * first-class data (an imaginary dipole's [Dipole.container] is an imaginary circle),
-     * never an error.
+     * - An imaginary circle is valid data, not an error.
      */
     public val isImaginary: Boolean get() = round(radius2) < 0.0
 
     /**
-     * Whether this circle is inside-out — its interior is everything outside the bounded disk.
-     *
-     * `true` when [cw] rounds positive at the `SCALE` quantum: the constructor stores the
-     * orientation as `cw = ±1`, so this reads its sign. `-circle` flips it; [canonical]
-     * normalizes to the classic orientation, where this is `false`.
+     * Whether this circle is inside-out, with everything outside the disk as its interior. True when
+     * [cw] rounds positive.
      */
     public val isInsideOut: Boolean get() = round(cw) > 0.0
 
-    /**
-     * The center's distance from the origin `√(cx² + cy²)` — raw.
-     *
-     * The flat weight norm (also the center norm): the componentwise shortcut for the
-     * distance of [center] from the origin.
-     */
+    /** The raw distance of [center] from the origin, `√(cx² + cy²)`. */
     public val norm: Double get() = sqrt(cx * cx + cy * cy) // flat_weight_norm / center_norm
 
     /**
-     * The center of the circle, carrying its size — a [RoundPoint].
+     * The center of the circle. It carries the circle's size, so `center.radius2` equals [radius2].
      *
-     * The center's `aw` sits `radius2/2` above the null lift, so `center.radius2` equals this
-     * circle's [radius2]. Covers both orientations uniformly and is always unitized
-     * (`az = cw² = 1`; read the coordinates off `ax`/`ay`).
+     * - Use `center.toFlat` (or read `ax`/`ay`) for the bare position.
      */
     public val center: RoundPoint by cached {
         RoundPoint(
@@ -153,28 +126,21 @@ public open class Circle : Primitive {
     }
 
     /**
-     * The squared radius — raw and signed; negative for an imaginary circle.
+     * The raw, signed squared radius: zero for a single-point circle, negative for an imaginary one.
      *
-     * `cx² + cy² − 2·cz·cw`: exactly zero when the circle collapses to a single point, negative
-     * when no real points exist. To test imaginary-ness use [isImaginary], which rounds;
-     * comparing this raw value to zero is FP-fragile.
+     * - Test imaginary-ness with [isImaginary], which rounds. This raw value is unstable near zero.
      */
     public val radius2: Double get() = cx * cx + cy * cy - 2 * cz * cw
 
     /**
-     * The radius magnitude `√(|radius2|)` — raw, non-negative.
-     *
-     * For an imaginary circle this is the magnitude of the imaginary radius — gate on
-     * [isImaginary] where the distinction matters.
+     * The raw radius magnitude `√(|radius2|)`, never negative. Check [isImaginary] where the sign
+     * matters.
      */
     public val radius: Double get() = sqrt(radius2.absoluteValue)
 
     /**
-     * The purely directional part of this circle — a [Dipole] at infinity.
-     *
-     * The attitude `att(c) = c ∨ e412`, one antigrade up: the at-infinity [Dipole]
-     * `(0, 0, −cw, −cy, cx, 0)` with `radius2 = −1`, carrying every direction of the plane at
-     * once — a circle runs through them all.
+     * The purely directional part of this circle, as a [Dipole] at infinity that carries every
+     * direction of the plane.
      */
     public val attitude: Dipole by cached {
         Dipole(
@@ -185,28 +151,19 @@ public open class Circle : Primitive {
         )
     }
 
-    /**
-     * The carrier, saturated for a circle — the whole plane, as the antiscalar weight [cw].
-     *
-     * `car(c) = e4 ∧ c = cw·𝟙` is antiscalar-valued for a circle, and antiscalar results are
-     * plain `Double`s.
-     */
+    /** The carrier, saturated for a circle. It is the whole plane, as the weight [cw]. */
     public val carrier: Double get() = cw // AntiScalar
 
     /**
-     * The co-carrier — the circle's center as a [FlatPoint], dropping the size.
-     *
-     * `ccr(c) = e4 ∧ c^☆`: the flat point `(−cx, −cy, cw)`, component-identical to
+     * The circle's center as a [FlatPoint], without the size. It is component-identical to
      * `center.toFlat`.
      */
     public val cocarrier: FlatPoint by cached { FlatPoint(-cx, -cy, cw) }
 
     /**
-     * The smallest circle containing this circle — itself, orientation-normalized to
-     * inside-out.
+     * The smallest circle containing this one, which is itself made inside-out.
      *
-     * `con(c) = cw·c`, always inside-out (`cw = +1` — what the algebra gives); preserves the
-     * size: `container.radius2 == radius2`, so an imaginary circle gets an imaginary container.
+     * - An imaginary circle gets an imaginary container.
      */
     public val container: Circle by cached { Circle(cw * cx, cw * cy, cw * cz, cw * cw) }
 
@@ -215,18 +172,14 @@ public open class Circle : Primitive {
      */
 
     /**
-     * Returns this object rebuilt around the replacement geometry [circle] — the hook the
-     * shape-preserving operations return through.
+     * Returns this object rebuilt around the replacement geometry [circle]. Shape-preserving
+     * operations return through this hook.
      *
-     * Every operation that moves a circle computes its result as a plain [Circle] and returns
-     * it through this hook. This base implementation returns [circle] itself; a subclass
-     * overrides it to rebuild an instance of its own class around [circle], and every such
-     * operation then comes back as that class. The result's runtime class must equal the
-     * receiver's — the operations check it and fail with a named error when a subclass misses
-     * the override.
+     * - Override it to rebuild your subclass. Every generic operation then returns that class.
+     * - The result's runtime class must equal the receiver's, or the operations fail with a named error.
      *
      * @param circle The replacement geometry.
-     * @return [circle] itself; an override returns its own class rebuilt around [circle].
+     * @return [circle] itself. An override returns its own class rebuilt around [circle].
      */
     public open fun copy(circle: Circle): Circle = circle
 
@@ -235,30 +188,21 @@ public open class Circle : Primitive {
     */
 
     /**
-     * The canonical representative of this circle — useful for unoriented equivalence.
-     *
-     * `a.canonical == b.canonical` detects the same point set under opposed orientations. The
-     * canonical orientation is the classic one ([cw] negative), negating all four components
-     * when it flips; the sign decision reads rounded components, so `a == b` implies
-     * `a.canonical == b.canonical`. The representative is rebuilt through [copy], so a
-     * subclass comes back as its own class; an already-canonical circle returns `this`.
+     * The canonical representative of this circle, in the classic orientation. Both orientations
+     * share it.
      */
     public open val canonical: Circle by cached {
         if (_cw > 0) copy(Circle(-cx + 0.0, -cy + 0.0, -cz + 0.0, -cw + 0.0, Unit)) else this
     }
 
     /**
-     * Rounded, orientation-sensitive identity: equal when every component matches at the
-     * `SCALE` quantum.
+     * Compares the four components rounded at the `SCALE` quantum.
      *
-     * A circle and its inside-out twin (negated components) trace the same point set with
-     * opposite interiors and compare unequal; compare [canonical] on both sides for unoriented
-     * equivalence. Identity is exact-class: a subclass instance and a plain [Circle] never
-     * compare equal.
+     * - An inside-out twin compares unequal. Compare [canonical] on both sides for unoriented equivalence.
+     * - Classes must match exactly. A subclass instance never equals a plain [Circle].
      *
      * @param other The object to compare against.
-     * @return `true` iff [other] shares this object's exact class and its four components
-     *   all match after rounding.
+     * @return `true` when [other] has this exact class and every rounded component matches.
      */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -281,27 +225,22 @@ public open class Circle : Primitive {
     /** Returns the hash of the rounded components, consistent with [equals]. */
     override fun hashCode(): Int = _hashCode
 
-    /** Returns the raw components — full stored precision, no rounding. */
+    /** Returns the raw components at full stored precision. */
     override fun toString(): String = "Circle(cx=$cx, cy=$cy, cz=$cz, cw=$cw)"
 
-    /** Returns the components rounded at the `SCALE` quantum — the debug-output convention of every primitive. */
+    /** Returns the components rounded at the `SCALE` quantum, for debug output. */
     public fun toStringRounded(): String = "Circle(cx=$_cx, cy=$_cy, cz=$_cz, cw=$_cw)"
 }
 
 /**
  * `-Circle => Circle`<br>
- * Returns this circle turned inside out — the same point set with the interior swapped.
+ * Returns this circle turned inside out. The point set stays, the interior swaps.
  *
- * Negates all four components: a classic circle comes back inside out and vice versa
- * ([Circle.isInsideOut] flips), with center and radius untouched. Identity is
- * orientation-sensitive, so a circle and its negation compare unequal; compare
- * [Circle.canonical] for unoriented equivalence — `(-circle).canonical == circle.canonical`.
- * The result is the receiver's own class: the negated geometry returns through [Circle.copy],
- * preserving a subclass that overrides the hook.
+ * - Compares unequal to the original, but `(-circle).canonical == circle.canonical`.
  *
- * @receiver The [Circle] to turn inside out.
+ * @receiver The circle to turn inside out.
  * @param T The receiver's type, preserved in the result.
- * @return The negated circle, as the receiver's class.
+ * @return The negated circle.
  */
 public operator fun <T : Circle> T.unaryMinus(): T =
     narrowed(

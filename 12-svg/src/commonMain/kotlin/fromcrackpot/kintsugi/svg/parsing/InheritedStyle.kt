@@ -8,14 +8,17 @@ import nl.adaptivity.xmlutil.XmlReader
 
 /**
  * The presentation attributes (`fill`, `stroke`, `stroke-width`, `stroke-linecap`) inherited from
- * ancestor `<g>`/`<svg>` elements — SVG's attribute-inheritance model, materialized. Per-property
- * resolution order at each shape: own attr → this inherited chain (nearest ancestor first) →
- * [SvgDefaults]. Resolved at parse time into each shape's concrete
- * [fromcrackpot.kintsugi.scenegraph.style.ShapeStyle]; **NOT** stored on
- * [fromcrackpot.kintsugi.scenegraph.nodes.GroupNode] (which stays purely structural per `:scene-graph`'s
- * "no style cascade" rule). Scoped to the attributes each element's parser already consumes
- * (flat-point rect→fill; rectangle→fill/stroke/stroke-width; round-point→fill;
- * circle→fill/stroke/stroke-width; line→stroke/stroke-width/stroke-linecap).
+ * ancestor `<g>`/`<svg>` elements: SVG's attribute-inheritance model, materialized.
+ *
+ * - Per-property resolution at each shape: own attr → this inherited chain (nearest ancestor
+ *   first) → [SvgDefaults].
+ * - Resolved at parse time into each shape's concrete
+ *   [fromcrackpot.kintsugi.scenegraph.style.ShapeStyle]. **NOT** stored on
+ *   [fromcrackpot.kintsugi.scenegraph.nodes.GroupNode], which stays purely structural per
+ *   `:scene-graph`'s "no style cascade" rule.
+ * - Scoped to the attributes each element's parser already consumes (flat-point rect→fill;
+ *   rectangle→fill/stroke/stroke-width; round-point→fill; circle→fill/stroke/stroke-width;
+ *   line→stroke/stroke-width/stroke-linecap).
  */
 internal data class InheritedStyle(
     val fill: ShapeColor? = null,
@@ -26,9 +29,8 @@ internal data class InheritedStyle(
 ) {
     /**
      * The inherited style a child sees: the child element's own attrs overlaid on this chain.
-     * Style fields resolve nearest-wins (`?:`); [tags] **union** instead — a leaf accumulates
-     * every ancestor's `k:tags` (baked into the leaf at parse, like the style cascade — never
-     * stored on `GroupNode`).
+     * Style fields resolve nearest-wins (`?:`). [tags] **union** instead: a leaf accumulates every
+     * ancestor's `k:tags`, baked in at parse like the style cascade and never stored on `GroupNode`.
      */
     fun child(own: InheritedStyle): InheritedStyle =
         InheritedStyle(

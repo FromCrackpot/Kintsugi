@@ -1,0 +1,20 @@
+{
+  "synth_type": "Fractr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.637983652530238,
+    "material": 1,
+    "duration": 1.7935591464862228,
+    "fragments": 23,
+    "fragmentSize": 0.7519185665529221,
+    "spread": 0.6179150245152414,
+    "decay": 0.5391796206124126,
+    "gravity": 0.3087307449430227,
+    "bounce": 0.26116384980268775,
+    "stress": 0.8188215908710845,
+    "shards": 0.35,
+    "fracture": 0.9632767596980557
+  },
+  "renderSeed": 0.36905342526733875
+}

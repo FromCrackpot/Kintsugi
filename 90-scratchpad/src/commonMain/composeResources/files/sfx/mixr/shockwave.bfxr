@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.34470422074664386,
+    "sources": "[{\"synth\":\"Boomr\",\"name\":\"Barrel\",\"params\":{\"masterVolume\":0.5,\"seed\":0.7317822342738509,\"duration\":1.2718268623575568,\"size\":0.46116384980268776,\"pressure\":0.7232942783855834,\"blast\":0.7799732186831534,\"debris\":0.7007902803830802,\"gas\":0.686058077972848,\"aftershock\":0.24395346660166978,\"rubbleSize\":0.30093626838643106,\"spread\":0.21138379229232668,\"tail\":0.49370737611316146,\"muffle\":0.29274323433637617,\"mechanism\":1,\"space\":0.4891796206124127},\"generator\":\"*\",\"selectedGenerator\":\"generate_barrel\",\"renderSeed\":0.5443580111023039},{\"synth\":\"Breathr\",\"name\":\"Exhale\",\"params\":{\"masterVolume\":0.5,\"seed\":0.815871937200427,\"source\":0,\"mode\":0,\"duration\":0.7688122901599854,\"direction\":0.7549423277610913,\"cycles\":1,\"effort\":0.5436335149221122,\"inhale\":0.42,\"hold\":0.04,\"throat\":0.6720435579307378,\"rasp\":0.043039066751953216,\"flutter\":0.1680560227483511,\"space\":0.04748232314363122},\"generator\":\"*\",\"selectedGenerator\":\"generate_exhale\",\"renderSeed\":0.42341447132639587}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

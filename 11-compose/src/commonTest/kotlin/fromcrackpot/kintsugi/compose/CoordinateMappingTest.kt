@@ -90,9 +90,9 @@ class CoordinateMappingTest {
     /* WORLD BORDER */
 
     @Test
-    fun `worldBorder with bounds is the bounds' circumscribed circle, surface ignored`() {
+    fun `worldBorder with bounds is the bounds' circumscribed circle - surface ignored`() {
         // 800×600 bounds: half-diagonal = sqrt(400² + 300²) = 500, centered at CGA origin.
-        // Surface size and scale must not leak in — same circle at any surface.
+        // Surface size and scale must not leak in: the same circle at any surface.
         val expected = worldBorder(800.0, 600.0)
         assertEquals(expected, worldBorder(Size(800f, 600f), bounds, 1f))
         assertEquals(expected, worldBorder(Size(2400f, 600f), bounds, 1f))
@@ -102,7 +102,7 @@ class CoordinateMappingTest {
 
     @Test
     fun `worldBorder with bounds ignores minX and minY offsets`() {
-        // Border is always origin-centered — offset bounds give the same circle (scene-graph convention).
+        // Border is always origin-centered, so offset bounds give the same circle (scene-graph convention).
         assertEquals(
             worldBorder(size, bounds, 1f),
             worldBorder(size, SceneBounds(15.0, -7.0, 800.0, 600.0), 1f),

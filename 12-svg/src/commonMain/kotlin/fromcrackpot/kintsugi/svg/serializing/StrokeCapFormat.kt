@@ -11,7 +11,7 @@ internal fun ShapeStrokeCap.formatSvg(): String = when (this) {
 }
 
 /**
- * Write a `stroke-linecap` attribute. Callers gate on non-`Butt` — `butt` is the universal SVG
+ * Write a `stroke-linecap` attribute. Callers gate on non-`Butt`: `butt` is the universal SVG
  * default, so it's omitted. An optional feature attribute (emitted only when active), like `k:flags`.
  */
 internal fun XmlWriter.strokeCapAttr(name: String, cap: ShapeStrokeCap) {

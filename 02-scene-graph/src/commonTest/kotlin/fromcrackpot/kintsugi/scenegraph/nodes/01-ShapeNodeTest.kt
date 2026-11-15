@@ -1,6 +1,6 @@
 package fromcrackpot.kintsugi.scenegraph.nodes
 
-import fromcrackpot.kintsugi.cga.d2.products.meet
+import fromcrackpot.kintsugi.cga.d2.operations.products.meet
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polygon
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polyline
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Segment
@@ -18,12 +18,13 @@ import fromcrackpot.kintsugi.scenegraph.style.ShapeColor
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertSame
 
 class ShapeNodeTest {
 
-    /* CTOR DEFAULTS — style seeded from the per-shape constants */
+    /* CTOR DEFAULTS: style seeded from the per-shape constants */
 
     @Test fun `flat point node gets POINT default style`() {
         assertEquals(ShapeStyle.POINT, FlatPointNode(FlatPoint(0.0, 0.0)).style)
@@ -72,7 +73,7 @@ class ShapeNodeTest {
         assertEquals(setOf("brick", "steel"), node.tags)
     }
 
-    /* COPY CTOR — a node-typed argument preserves the decoration */
+    /* COPY CTOR: a node-typed argument preserves the decoration */
 
     @Test fun `flat point node copy keeps the source's style and tags`() {
         val source = FlatPointNode(FlatPoint(1.0, 2.0), ShapeStyle.POINT.copy(strokeWidth = 3.0), setOf("wall"))
@@ -158,7 +159,52 @@ class ShapeNodeTest {
         assertEquals(emptySet(), rewrapped.tags)
     }
 
-    /* TRANSPARENCY — a leaf is its shape */
+    /* RESTYLE / RETAG: decoration changes are new leaves */
+
+    @Test fun `restyled returns a new leaf with the new style - geometry and tags kept`() {
+        val source = PolygonNode(Polygon.Rectangle(FlatPoint(0.0, 0.0), FlatPoint(2.0, 1.0)), tags = setOf("brick"))
+        val restyled: PolygonNode = source.restyled(ShapeStyle.NONE)
+        assertEquals(ShapeStyle.NONE, restyled.style)
+        assertEquals(setOf("brick"), restyled.tags)
+        assertEquals(PolygonNode(source, ShapeStyle.NONE), restyled)
+        assertEquals(ShapeStyle.POLYGON, source.style, "the receiver keeps its own style")
+    }
+
+    @Test fun `retagged returns a new leaf with the new tags - geometry and style kept`() {
+        val style = ShapeStyle.LINE.copy(strokeWidth = 3.0)
+        val source = LineNode(Line(0.0, 1.0, -2.0), style)
+        val retagged: LineNode = source.retagged(setOf("wall"))
+        assertSame(style, retagged.style)
+        assertEquals(setOf("wall"), retagged.tags)
+        assertEquals(LineNode(source, tags = setOf("wall")), retagged)
+        assertEquals(emptySet(), source.tags, "the receiver keeps its own tags")
+    }
+
+    @Test fun `every leaf class survives a restyle typed as ShapeNode`() {
+        val leaves: List<ShapeNode> = listOf(
+            FlatPointNode(FlatPoint(1.0, 2.0)),
+            LineNode(Line(0.0, 1.0, -2.0)),
+            RoundPointNode(RoundPoint(1.0, 2.0)),
+            DipoleNode(Dipole(1.0, 0.0, 0.0, 0.0, 0.0, 1.0)),
+            CircleNode(Circle(0.0, 0.0, 1.0)),
+            SegmentNode(Segment(FlatPoint(0.0, 0.0), FlatPoint(1.0, 0.0))),
+            PolylineNode(Polyline(listOf(FlatPoint(0.0, 0.0), FlatPoint(1.0, 0.0), FlatPoint(1.0, 1.0)))),
+            PolygonNode(Polygon.Rectangle(FlatPoint(0.0, 0.0), FlatPoint(2.0, 1.0))),
+        )
+        for (leaf in leaves) {
+            val restyled = leaf.restyled(ShapeStyle.NONE)
+            assertEquals(leaf::class, restyled::class)
+            assertEquals(ShapeStyle.NONE, restyled.style)
+        }
+    }
+
+    @Test fun `a subclass without its own decoration copy fails fast on a restyle`() {
+        val bare = BareQuad(Polygon.Rectangle(FlatPoint(0.0, 0.0), FlatPoint(2.0, 1.0)))
+        val error = assertFailsWith<IllegalStateException> { bare.restyled(ShapeStyle.NONE) }
+        assertEquals("BareQuad.copy returned PolygonNode, not its own class", error.message)
+    }
+
+    /* TRANSPARENCY: a leaf is its shape */
 
     @Test fun `shape properties read directly off the leaf`() {
         val node = LineNode(Line(0.0, 1.0, -2.0))
@@ -178,9 +224,9 @@ class ShapeNodeTest {
         assertEquals(Line(0.0, 1.0, -2.0), node.shape)
     }
 
-    /* IDENTITY — exact-class, style-inclusive */
+    /* IDENTITY: exact-class, style-inclusive */
 
-    @Test fun `leaves are equal when geometry, style, and tags all match`() {
+    @Test fun `leaves are equal when geometry - style - and tags all match`() {
         val style = ShapeStyle.LINE.copy(strokeWidth = 3.0)
         val a = LineNode(Line(0.0, 1.0, -2.0), style, setOf("wall"))
         val b = LineNode(Line(0.0, 1.0, -2.0), style, setOf("wall"))
@@ -198,7 +244,7 @@ class ShapeNodeTest {
         assertNotEquals(LineNode(line), LineNode(line, tags = setOf("wall")))
     }
 
-    @Test fun `a leaf never equals the plain shape, in either direction`() {
+    @Test fun `a leaf never equals the plain shape - in either direction`() {
         val line = Line(0.0, 1.0, -2.0)
         val node = LineNode(line)
         assertNotEquals<Any>(line, node)
@@ -211,3 +257,5 @@ class ShapeNodeTest {
         assertNotEquals<Any>(flat, round)
     }
 }
+
+private class BareQuad(polygon: Polygon) : PolygonNode(polygon)

@@ -1,23 +1,38 @@
 package fromcrackpot.kintsugi.cga.d2.transforms.primitives
 
+import fromcrackpot.kintsugi.cga.REACH
+import fromcrackpot.kintsugi.cga.angle
+import fromcrackpot.kintsugi.cga.assertSameShape
+import fromcrackpot.kintsugi.cga.degenerate
+import fromcrackpot.kintsugi.cga.dilator
+import fromcrackpot.kintsugi.cga.flatPoint
+import fromcrackpot.kintsugi.cga.sweep
+import fromcrackpot.kintsugi.cga.versor
+import fromcrackpot.kintsugi.cga.d2.exceptions.DegenerateCircleException
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Circle
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Line
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.RoundPoint
-import fromcrackpot.kintsugi.cga.d2.products.join
+import fromcrackpot.kintsugi.cga.d2.operations.products.join
+import fromcrackpot.kintsugi.cga.d2.shapes.primitives.unaryMinus
+import fromcrackpot.kintsugi.cga.d2.transforms.D
 import fromcrackpot.kintsugi.cga.d2.transforms.F
 import fromcrackpot.kintsugi.cga.d2.transforms.G
 import fromcrackpot.kintsugi.cga.d2.transforms.R
 import fromcrackpot.kintsugi.cga.d2.transforms.T
 import fromcrackpot.kintsugi.cga.d2.transforms.times
 import fromcrackpot.kintsugi.cga.deg
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class CircleTimesTest {
 
-    /* MOTOR — TRANSLATION */
+    /* MOTOR: TRANSLATION */
 
     @Test
     fun `translating a circle equals the circle at the translated center`() {
@@ -46,7 +61,7 @@ class CircleTimesTest {
         assertEquals(c, c * T(3.0, 4.0) * T(-3.0, -4.0))
     }
 
-    /* MOTOR — ROTATION */
+    /* MOTOR: ROTATION */
 
     @Test
     fun `rotating a circle carries its center around the pivot`() {
@@ -70,21 +85,11 @@ class CircleTimesTest {
         assertEquals(c.cw, moved.cw, EPS)
     }
 
-    @Test
-    fun `circle rotation equals the circle rebuilt from moved generators`() {
-        // The sandwich is a wedge outermorphism: moving the spanning dipole and round point and
-        // re-joining must give the moved circle, orientation included.
-        val d = RoundPoint(1.0, 0.0) join RoundPoint(-1.0, 0.0)
-        val a = RoundPoint(0.0, 1.0)
-        val m = R(FlatPoint(2.0, -3.0), 37.deg) * T(1.5, -0.5)
-        assertEquals((d * m) join (a * m), (d join a) * m)
-    }
-
     /* FLECTOR */
 
     @Test
     fun `reflecting a circle carries its center across the mirror and flips cw`() {
-        // Center (0, 0), r = 1 reflected across x = 1: center (2, 0), r = 1 — and the improper
+        // Center (0, 0), r = 1 reflected across x = 1 gives center (2, 0), r = 1. The improper
         // motion reverses orientation: the classic circle comes back inside-out.
         val c = Circle(0.0, 0.0, 1.0) // classic: (0, 0, 0.5, −1)
         val reflected = c * F(Line(1.0, 0.0, -1.0))
@@ -113,18 +118,67 @@ class CircleTimesTest {
     }
 
     @Test
-    fun `circle reflection equals the circle rebuilt from reflected generators`() {
-        val d = RoundPoint(1.0, 0.0) join RoundPoint(-1.0, 0.0)
-        val a = RoundPoint(0.0, 1.0)
-        val f = G(Line(1.0, -1.0, 2.0), 2.0)
-        assertEquals((d * f) join (a * f), (d join a) * f)
-    }
-
-    @Test
     fun `reflecting twice across the same line returns the original circle`() {
         val c = Circle(1.0, 2.0, 5.0)
         val f = F(Line(1.0, 2.0, -1.0))
         assertEquals(c, c * f * f)
+    }
+
+
+    /* DILATOR */
+
+    @Test
+    fun `dilating a circle scales its center offset and its radius`() {
+        // Center (1, 2), radius 5, doubled about the origin: center (2, 4), radius 10.
+        assertEquals(Circle(2.0, 4.0, 10.0), Circle(1.0, 2.0, 5.0) * D(FlatPoint(0.0, 0.0), 2.0))
+    }
+
+    @Test
+    fun `dilating an inside-out circle preserves its orientation`() {
+        val c = Circle(1.0, 2.0, 5.0)
+        val v = D(FlatPoint(3.0, -1.0), 0.5)
+        assertEquals(-(c * v), -c * v)
+    }
+
+    @Test
+    fun `dilating an imaginary circle scales its signed radius`() {
+        // Classic circle at (1, 2) with radius² = −9, tripled about its center: radius² = −81.
+        val dilated = Circle(1.0, 2.0, -7.0, -1.0) * D(FlatPoint(1.0, 2.0), 3.0)
+        assertTrue(dilated.isImaginary, "dilation must preserve imaginariness")
+        assertEquals(-81.0, dilated.radius2, EPS)
+    }
+
+    @Test
+    fun `dilating a circle's center equals the dilated circle's center`() {
+        val c = Circle(1.0, 2.0, 5.0)
+        val v = D(FlatPoint(3.0, -1.0), 0.5)
+        assertEquals(c.center * v, (c * v).center)
+    }
+
+    /* SWEEPS */
+
+    @Test
+    fun `a moved circle equals the circle rebuilt from its moved generators`() = sweep {
+        val center = flatPoint()
+        val r = nextDouble(1.0, REACH / 2)
+        val phase = angle().radians
+        val (p1, p2, p3) = List(3) { k ->
+            val theta = phase + (k + nextDouble(-0.25, 0.25)) * 2.0 * PI / 3
+            RoundPoint(center.px + r * cos(theta), center.py + r * sin(theta))
+        }
+        val d = p1 join p2
+        val v = versor()
+        val s = dilator()
+        if (degenerate()) {
+            val t = nextDouble(-1.0, 2.0)
+            val a = RoundPoint(p1.ax + t * (p2.ax - p1.ax), p1.ay + t * (p2.ay - p1.ay))
+            assertFailsWith<DegenerateCircleException> { d join a }
+            assertFailsWith<DegenerateCircleException> { (d * v) join (a * v) }
+            assertFailsWith<DegenerateCircleException> { (d * s) join (a * s) }
+        } else {
+            assertSameShape((d * v) join (p3 * v), (d join p3) * v)
+            assertSameShape((d * s) join (p3 * s), (d join p3) * s)
+        }
     }
 
     companion object {

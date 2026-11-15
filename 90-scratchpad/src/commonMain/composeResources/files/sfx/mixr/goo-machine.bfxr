@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.5268225324479863,
+    "sources": "[{\"synth\":\"Squishr\",\"name\":\"Bubble Pop\",\"params\":{\"masterVolume\":0.5,\"seed\":0.637983652530238,\"texture\":1,\"viscosity\":0.28090692397672684,\"stretch\":0.18554648659192025,\"pressure\":0.5679150245152413,\"wetness\":0.9594530804082751,\"bubbleSize\":0.2179567155893892,\"duration\":0.12038794993422926},\"generator\":\"*\",\"selectedGenerator\":\"generate_bubble_pop\",\"renderSeed\":0.2665773956105113},{\"synth\":\"Machinr\",\"name\":\"Rusty Winch\",\"params\":{\"masterVolume\":0.5,\"seed\":0.8590837873052806,\"mechanism\":1,\"duration\":1.7529568056808784,\"speed\":0.15496590089052914,\"load\":0.9198405280709266,\"roughness\":0.8561237819958478,\"looseness\":0.7677432044409216,\"size\":0.6082360981381498,\"startTime\":0.17127950591035188,\"stopTime\":0.30940614507999276},\"generator\":\"*\",\"selectedGenerator\":\"generate_rusty_winch\",\"renderSeed\":0.8051088948268443}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

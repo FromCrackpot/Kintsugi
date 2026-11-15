@@ -5,24 +5,22 @@ import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polygon
 import kotlin.math.sqrt
 
 /**
- * An axis-aligned rectangle in CGA model space — the region a scene or sub-tree occupies.
- * A scene root carries one as its viewport: renderers paint into it and clip at it.
+ * An axis-aligned rectangle in CGA model space, giving the region a scene or sub-tree occupies. On a
+ * scene root, it is the viewport renderers paint into and clip at.
  *
- * Components are raw `Double`s in model units, and equality is the generated structural
- * one — raw comparison of all four components, with no `SCALE` rounding.
+ * - Stores raw components. Equality is exact, with no `SCALE` rounding.
  *
  * @constructor Builds the rectangle from its minimum corner and extents.
- * @throws IllegalArgumentException when [width] or [height] is not strictly positive — the
- *   raw value is compared, with no `SCALE` rounding.
+ * @throws IllegalArgumentException when [width] or [height] is not strictly positive.
  */
 public data class SceneBounds(
-    /** The left edge — the smallest x the region covers. */
+    /** The left edge, the smallest x the region covers. */
     val minX: Double,
-    /** The bottom edge — the smallest y the region covers (model space is Y-up). */
+    /** The bottom edge, the smallest y the region covers. Model space is Y-up. */
     val minY: Double,
-    /** The horizontal extent; strictly positive. */
+    /** The horizontal extent, strictly positive. */
     val width: Double,
-    /** The vertical extent; strictly positive. */
+    /** The vertical extent, strictly positive. */
     val height: Double,
 ) {
     init {
@@ -34,14 +32,9 @@ public data class SceneBounds(
 /**
  * Returns the axis-aligned bounding box of [polygon]'s vertices.
  *
- * The polygon and the resulting bounds both live in CGA model space, so this is a plain
- * min/extent read of the raw vertex coordinates — it lets a scene rectangle double as the
- * viewport with no separately maintained bounds constant.
- *
  * @param polygon The polygon to bound.
- * @return The tightest [SceneBounds] covering every vertex.
- * @throws IllegalArgumentException when the vertices span zero raw width or height — a
- *   collinear axis-aligned loop has no rectangular extent.
+ * @return The tightest bounds covering every vertex.
+ * @throws IllegalArgumentException when the vertices span zero raw width or height.
  */
 public fun SceneBounds(polygon: Polygon): SceneBounds {
     val minX = polygon.vertices.minOf { it.px }
@@ -55,18 +48,14 @@ public fun SceneBounds(polygon: Polygon): SceneBounds {
 }
 
 /**
- * Returns the circle centered at the model-space origin that circumscribes an
- * origin-centered [width] × [height] rectangle.
+ * Returns the origin-centered circle circumscribing an origin-centered [width] × [height]
+ * rectangle.
  *
- * Its radius is the rectangle's half-diagonal, so the rectangle lies entirely inside the
- * circle: any line crossing the rectangle also crosses the circle, and the chord between
- * the crossing points covers the line's whole visible span. Renderers clip an infinite
- * line by meeting it with this circle and drawing the chord between the resulting
- * dipole's endpoints.
+ * - Renderers clip an infinite line to the chord where it meets this circle.
  *
  * @param width The rectangle's horizontal extent.
  * @param height The rectangle's vertical extent.
- * @return The circumscribing [Circle], classic orientation.
+ * @return The circumscribing classic circle.
  */
 public fun worldBorder(width: Double, height: Double): Circle {
     val hw = width / 2.0
@@ -75,14 +64,11 @@ public fun worldBorder(width: Double, height: Double): Circle {
 }
 
 /**
- * Returns the circle centered at the model-space origin that circumscribes this bounds'
- * width × height rectangle.
+ * Returns the origin-centered circle circumscribing this bounds' width × height rectangle.
  *
- * Delegates to the two-argument `worldBorder`, ignoring [SceneBounds.minX] and
- * [SceneBounds.minY]: the circle sits at the origin regardless of the bounds' offset — the
- * renderers' offset-ignoring clip convention.
+ * - Ignores [SceneBounds.minX] and [SceneBounds.minY]. The circle sits at the origin regardless.
  *
  * @receiver The bounds whose extents size the circle.
- * @return The circumscribing [Circle], classic orientation.
+ * @return The circumscribing classic circle.
  */
 public fun SceneBounds.worldBorder(): Circle = worldBorder(width, height)

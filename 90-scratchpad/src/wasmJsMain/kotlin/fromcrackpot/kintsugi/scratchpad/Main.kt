@@ -5,8 +5,11 @@ import androidx.compose.ui.window.ComposeViewport
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-    // Scene selection is desktop-only (Gradle `-Pscene=`); the browser always shows the default.
+    val sketch = sketchParam()
     ComposeViewport {
-        App()
+        App(sketch)
     }
 }
+
+@OptIn(ExperimentalWasmJsInterop::class)
+private fun sketchParam(): String? = js("new URLSearchParams(window.location.search).get('sketch')")

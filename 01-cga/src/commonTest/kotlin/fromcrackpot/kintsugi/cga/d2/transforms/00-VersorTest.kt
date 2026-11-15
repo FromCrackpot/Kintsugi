@@ -1,9 +1,13 @@
 package fromcrackpot.kintsugi.cga.d2.transforms
 
+import fromcrackpot.kintsugi.cga.assertSameShape
+import fromcrackpot.kintsugi.cga.shape
+import fromcrackpot.kintsugi.cga.sweep
+import fromcrackpot.kintsugi.cga.versor
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Direction
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Line
-import fromcrackpot.kintsugi.cga.d2.products.times
+import fromcrackpot.kintsugi.cga.d2.operations.products.times
 import fromcrackpot.kintsugi.cga.d2.transforms.primitives.times
 import fromcrackpot.kintsugi.cga.deg
 import kotlin.test.Test
@@ -12,18 +16,7 @@ import kotlin.test.assertIs
 
 class VersorTest {
 
-    /* COMPOSITION — MOTOR * MOTOR */
-
-    @Test
-    fun `motor times motor applies the left operand first`() {
-        // The load-bearing order contract: `a * b` performs a, then b — which is exactly what
-        // makes `*` associative across application: p * (a * b) == (p * a) * b. Uses a
-        // non-commuting pair (rotation about a finite center + translation).
-        val a = R(FlatPoint(1.0, -2.0), 40.deg)
-        val b = T(3.0, 5.0)
-        val p = FlatPoint(4.0, 1.0)
-        assertEquals((p * a) * b, p * (a * b))
-    }
+    /* COMPOSITION: MOTOR * MOTOR */
 
     @Test
     fun `motor composition is not commutative for a rotation and a translation`() {
@@ -54,7 +47,7 @@ class VersorTest {
         assertEquals(m, id * m)
     }
 
-    /* COMPOSITION — FLECTOR * FLECTOR (→ MOTOR) */
+    /* COMPOSITION: FLECTOR * FLECTOR (→ MOTOR) */
 
     @Test
     fun `two reflections across the same line compose to the identity motor`() {
@@ -68,32 +61,7 @@ class VersorTest {
         assertEquals(T(6.0, 0.0), F(Line(1.0, 0.0, 0.0)) * F(Line(1.0, 0.0, -3.0)))
     }
 
-    @Test
-    fun `flector times flector applies the left operand first`() {
-        // f1 * f2 is a Motor; applying it must equal reflecting by f1, then by f2.
-        val f1 = G(Line(1.0, 0.0, 0.0), 2.0)
-        val f2 = G(Line(0.0, 1.0, -1.0), 3.0)
-        val p = FlatPoint(2.0, 3.0)
-        assertEquals((p * f1) * f2, p * (f1 * f2))
-    }
-
-    /* COMPOSITION — MIXED (→ FLECTOR) */
-
-    @Test
-    fun `flector times motor applies the left operand first`() {
-        val f = G(Line(1.0, 0.0, 0.0), 2.0)
-        val m = R(FlatPoint(1.0, -2.0), 40.deg)
-        val p = FlatPoint(4.0, 1.0)
-        assertEquals((p * f) * m, p * (f * m))
-    }
-
-    @Test
-    fun `motor times flector applies the left operand first`() {
-        val m = R(FlatPoint(1.0, -2.0), 40.deg)
-        val f = G(Line(0.0, 1.0, -1.0), 3.0)
-        val p = FlatPoint(4.0, 1.0)
-        assertEquals((p * m) * f, p * (m * f))
-    }
+    /* COMPOSITION: MIXED (→ FLECTOR) */
 
     @Test
     fun `the identity motor is neutral under mixed composition`() {
@@ -123,15 +91,6 @@ class VersorTest {
         assertEquals(p * F(Line(1.0, -1.0, 0.0)), p * f)
     }
 
-    @Test
-    fun `a stored composite motion equals its chained applications`() {
-        // The call-site contract the whole `*` surface exists for: build a motion once, apply it
-        // anywhere, get exactly the chained result — including a mixed (improper) chain.
-        val motion = T(2.0, 3.0) * R(FlatPoint(6.0, 4.0), 35.deg) * F(Line(1.0, 2.0, -1.0))
-        val p = FlatPoint(1.0, -2.0)
-        assertEquals(((p * T(2.0, 3.0)) * R(FlatPoint(6.0, 4.0), 35.deg)) * F(Line(1.0, 2.0, -1.0)), p * motion)
-    }
-
     /* GROUP LAWS THROUGH APPLICATION */
 
     @Test
@@ -153,9 +112,19 @@ class VersorTest {
 
     @Test
     fun `translator motors compose with the scaled-velocity idiom`() {
-        // `T(velocity * dt)` — the homogeneous FlatPoint * Double scales the free vector before
+        // `T(velocity * dt)`: the homogeneous FlatPoint * Double scales the free vector before
         // it becomes the translator's generator.
         val velocity = Direction(30.0, 40.0)
         assertEquals(FlatPoint(4.0, 6.0), FlatPoint(1.0, 2.0) * T(velocity * 0.1))
+    }
+
+    /* SWEEPS */
+
+    @Test
+    fun `a composite versor applies its left operand first on every shape`() = sweep {
+        val s = shape()
+        val a = versor()
+        val b = versor()
+        assertSameShape((s * a) * b, s * (a * b))
     }
 }

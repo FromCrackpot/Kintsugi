@@ -1,7 +1,10 @@
 package fromcrackpot.kintsugi.gameengine
 
 import androidx.compose.ui.input.key.Key
+import fromcrackpot.kintsugi.audio.Pcm
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
+import fromcrackpot.kintsugi.gameengine.input.Input
+import fromcrackpot.kintsugi.gameengine.input.Pointer
 import fromcrackpot.kintsugi.scenegraph.SceneBounds
 import fromcrackpot.kintsugi.scenegraph.nodes.GroupNode
 import kotlin.test.Test
@@ -58,6 +61,26 @@ class HeadlessTest {
     fun `drive returns the world it built`() {
         val world = ProbeWorld()
         assertSame(world, drive({ world }, seconds = 0.1, tickRate = 10), "the built world is the returned world")
+    }
+
+    @Test
+    fun `onStep reads the sounds each step played`() {
+        val beep = Sound(Pcm(floatArrayOf(0.5f), 44_100))
+        val heard = mutableListOf<List<Sound>>()
+        drive(
+            {
+                object : World(SceneBounds(-1.0, -1.0, 2.0, 2.0)) {
+                    context(step: Step)
+                    override fun update() {
+                        if (step.input.keys.isDown(RIGHT)) beep.play()
+                    }
+                }
+            },
+            seconds = 0.3, tickRate = 10,
+            onStep = { _, world -> heard += world.played },
+            controls = { elapsed, _ -> if (elapsed > 0.0) Controls(keys = setOf(RIGHT)) else Controls.NONE },
+        )
+        assertEquals(listOf(emptyList(), listOf(beep), listOf(beep)), heard)
     }
 
     /* KEY EDGES */

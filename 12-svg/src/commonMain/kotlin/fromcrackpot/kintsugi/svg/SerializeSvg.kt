@@ -10,23 +10,12 @@ import nl.adaptivity.xmlutil.core.KtXmlWriter
 import nl.adaptivity.xmlutil.core.XmlVersion
 
 /**
- * Serializes [root] into SVG text in the module's `/v1` format.
+ * Serializes [root] into SVG text in the module's `/v1` format, at full `Double` precision.
  *
- * The root's [GroupNode.bounds] becomes the `viewBox` and is required; a nested group's non-null
- * bounds cannot be encoded and is dropped with a warning. Numbers are written at full stored
- * `Double` precision, never quantized — the file keeps the raw components, and canonical equality
- * is rebuilt on load by the shapes' rounded identity — so `parseSvg(serializeSvg(scene)) == scene`.
- * Output is canonical: fixed attribute order, lowercase hex colors, shortest round-trippable
- * numbers. Canonical per platform, though — `Double.toString` differs between targets — so never
- * compare serialized text across platforms.
+ * - Round-trips exactly through `parseSvg`. The text is canonical per platform, so never compare it across targets.
+ * - Dropped with a warning: a nested group's bounds, shapes at infinity, zero-length segments and dipoles.
  *
- * Degenerate CGA states persist faithfully: imaginary and inside-out circles ride `k:flags`, and
- * an infinite line writes its world-border crossings as display endpoints with recognition riding
- * `k:type` — data loss is never the persistence layer's call. The exception is a shape the format
- * cannot place at all: a line at infinity, or a dipole whose endpoints lie at infinity, is skipped
- * with a warning.
- *
- * @param root The scene to write; its bounds must be non-null.
+ * @param root The scene to write. Its bounds must be non-null.
  * @return The complete SVG document text.
  * @throws MissingViewBoxException when [root]'s bounds is `null`.
  */

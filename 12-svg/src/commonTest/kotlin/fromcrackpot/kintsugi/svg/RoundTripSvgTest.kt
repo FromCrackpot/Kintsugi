@@ -1,6 +1,6 @@
 package fromcrackpot.kintsugi.svg
 
-import fromcrackpot.kintsugi.cga.d2.products.join
+import fromcrackpot.kintsugi.cga.d2.operations.products.join
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polygon
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Segment
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.unaryMinus
@@ -96,9 +96,9 @@ class RoundTripSvgTest {
         assertEquals(original, once)
     }
 
-    /* COLOR ROUND-TRIPS — explicit styles round-trip byte-for-byte at the model level */
+    /* COLOR ROUND-TRIPS: explicit styles round-trip byte-for-byte at the model level */
 
-    // The style a point fixture round-trips into — explicit fill + size from the geometry (size 8 == default).
+    // The style a point fixture round-trips into: explicit fill + size from the geometry (size 8 == default).
     private fun pointRoundTripStyle(fill: ShapeColor) =
         ShapeStyle(fill = fill, size = ShapeStyle.defaultFor(FlatPoint(0.0, 0.0)).size)
 
@@ -234,7 +234,7 @@ class RoundTripSvgTest {
         assertEquals(original, once)
     }
 
-    @Test fun `hand-authored round point without k aw parses, then re-emits with k aw`() {
+    @Test fun `hand-authored round point without k aw parses - then re-emits with k aw`() {
         // Canonicalization: bare <circle k:type="round-point"> (no k:aw) parses via the 2-arg
         // conformal lift; on re-serialize, k:aw is emitted explicitly. Same posture as #F00 → #ff0000
         // and the always-emit style defaults. Round-trip is Double-exact after the first save.
@@ -280,7 +280,7 @@ class RoundTripSvgTest {
 
     @Test fun `Line orientation survives parse-serialize-parse cycle`() {
         // The two sign-flipped twins must each round-trip exactly AND remain distinct from each
-        // other after the cycle — catching any silent canonicalization in the serialize/parse path
+        // other after the cycle. That catches any silent canonicalization in the serialize/parse path
         // that would symmetrize orientation (e.g. emitting endpoints in lexicographic order).
         val bounds = SceneBounds(0.0, 0.0, 100.0, 100.0)
         val forward = GroupNode(
@@ -337,8 +337,34 @@ class RoundTripSvgTest {
         )
     }
 
+    @Test fun `imaginary Segment is persisted via k flags and round-trips`() {
+        val segment = Dipole(1.0, 0.0, 1.0, 0.0, 2.0, 0.0).toSegment // radius² = -1, off-center
+        assertTrue(segment.isImaginary)
+        val original = GroupNode(
+            bounds = SceneBounds(-50.0, -50.0, 100.0, 100.0),
+            children = listOf(SegmentNode(segment)),
+        )
+        val once = parseSvg(serializeSvg(original))
+        val rt = (once.children.single() as ShapeNode).shape as Segment
+        assertEquals(segment, rt)
+        assertTrue(rt.isImaginary, "imaginary-ness was lost on segment round-trip")
+        assertIdempotent(original)
+    }
+
+    @Test fun `imaginary Segment far from the origin round-trips`() {
+        // Carrier 0.6x + 0.8y = 2000, center (1200, 1600), radius² = −9.
+        val segment = Dipole(0.6, 0.8, -2000.0, 1599996.4, -1199997.3, 0.0).toSegment
+        assertTrue(segment.isImaginary)
+        val original = GroupNode(
+            bounds = SceneBounds(0.0, 0.0, 100.0, 100.0),
+            children = listOf(SegmentNode(segment)),
+        )
+        val rt = (parseSvg(serializeSvg(original)).children.single() as ShapeNode).shape as Segment
+        assertEquals(segment, rt)
+    }
+
     @Test fun `Segment orientation survives parse-serialize-parse cycle`() {
-        // start ∧ end and end ∧ start are sign-flipped twins on the underlying Dipole — both must
+        // start ∧ end and end ∧ start are sign-flipped twins on the underlying Dipole. Both must
         // round-trip exactly AND stay distinct, catching any silent canonicalization in the codec.
         val bounds = SceneBounds(0.0, 0.0, 100.0, 100.0)
         val forward = GroupNode(
@@ -401,7 +427,7 @@ class RoundTripSvgTest {
         assertEquals(original, parseSvg(serializeSvg(original)))
     }
 
-    /* RECTANGLE-POLYGON ROUND-TRIPS — rect is parse-only; rectangles live as Polygon quads */
+    /* RECTANGLE-POLYGON ROUND-TRIPS: rect is parse-only; rectangles live as Polygon quads */
 
     @Test fun `rectangle Polygon is idempotent`() {
         assertIdempotent(
@@ -517,7 +543,7 @@ class RoundTripSvgTest {
     }
 
     @Test fun `dipole orientation survives parse-serialize-parse cycle`() {
-        // start ∧ end and end ∧ start are sign-flipped twins — both must round-trip exactly AND stay distinct.
+        // start ∧ end and end ∧ start are sign-flipped twins. Both must round-trip exactly AND stay distinct.
         val bounds = SceneBounds(0.0, 0.0, 100.0, 100.0)
         val forward = GroupNode(
             bounds = bounds,
@@ -596,7 +622,7 @@ class RoundTripSvgTest {
     }
 
     @Test fun `bare circle picks up SVG defaults explicitly on parse and re-emits the same attrs`() {
-        // <circle/> with no fill/stroke/stroke-width — SVG defaults fill=black, stroke=none, stroke-width=1.
+        // <circle/> with no fill/stroke/stroke-width: SVG defaults fill=black, stroke=none, stroke-width=1.
         // After serialize, the output must include all three attributes explicitly.
         val once = parseSvg(ONE_CIRCLE_SVG)
         val emitted = serializeSvg(once)
@@ -605,7 +631,7 @@ class RoundTripSvgTest {
         assertTrue(emitted.contains("""stroke-width="1""""), "actual:\n$emitted")
     }
 
-    /* FULL-BLEED RECT ROUND-TRIPS — backdrops are ordinary rectangle Polygons */
+    /* FULL-BLEED RECT ROUND-TRIPS: backdrops are ordinary rectangle Polygons */
 
     @Test fun `full-bleed-rect fixture parse-serialize-parse is idempotent`() {
         listOf(BACKGROUND_BLACK_THEN_POINT_SVG, BACKGROUND_OFFSET_VIEWBOX_SVG, TWO_FULL_BLEED_RECTS_SVG).forEach { svg ->
@@ -615,14 +641,14 @@ class RoundTripSvgTest {
         }
     }
 
-    /* ROOT-CASCADE ROUND-TRIPS — root presentation attrs are resolved into shapes at parse time
+    /* ROOT-CASCADE ROUND-TRIPS: root presentation attrs are resolved into shapes at parse time
      * and re-emerge as per-shape explicit attrs on serialize. Round-trip is canonical at the model
      * level (#F00 → #ff0000 posture), not byte-verbatim at the XML level.
      */
 
     @Test fun `root fill is absorbed into children and not re-emitted on the root tag`() {
         val emitted = serializeSvg(parseSvg(ROOT_FILL_BARE_CIRCLE_SVG))
-        // The root <svg> tag loses fill on re-emit — only viewBox and namespaces ride there.
+        // The root <svg> tag loses fill on re-emit. Only viewBox and namespaces ride there.
         assertTrue(
             !Regex("""<svg[^>]*\sfill=""").containsMatchIn(emitted),
             "root <svg> tag must not carry fill on re-emit, got:\n$emitted",
@@ -634,7 +660,7 @@ class RoundTripSvgTest {
         )
     }
 
-    /* GROUP ROUND-TRIPS — GroupNode ↔ <g> */
+    /* GROUP ROUND-TRIPS: GroupNode ↔ <g> */
 
     @Test fun `empty nested group round-trips`() {
         val original = GroupNode(
@@ -735,7 +761,7 @@ class RoundTripSvgTest {
 
     @Test fun `full-bleed rect with stroke=none round-trips as a polygon`() {
         // A rectangle Polygon always re-emits its core attrs (stroke="none" stroke-width
-        // included) and re-serializes as <polygon> — rect is parse-only.
+        // included) and re-serializes as <polygon>, since rect is parse-only.
         val once = parseSvg(LEADING_FULL_BLEED_RECT_STROKE_NONE_SVG)
         val emitted = serializeSvg(once)
         assertTrue(Regex("""<polygon[^>]*stroke="none"""").containsMatchIn(emitted), "actual:\n$emitted")

@@ -5,7 +5,7 @@ import nl.adaptivity.xmlutil.XmlWriter
 
 /**
  * Canonical SVG paint serialization. Any fully-transparent color (`alpha == 0`) collapses to
- * `"none"` — the canonical SVG spelling for "no paint." `#00000000` and `ShapeColor.NONE` are
+ * `"none"`, the canonical SVG spelling for "no paint." `#00000000` and `ShapeColor.NONE` are
  * the same equivalence class under data-class equality and both emit `"none"`. Opaque colors
  * emit 6-digit hex (`#rrggbb`); partial alpha emits 8-digit hex (`#rrggbbaa`).
  */

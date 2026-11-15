@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.4668225324479863,
+    "sources": "[{\"synth\":\"Whooshr\",\"name\":\"Dodge\",\"params\":{\"masterVolume\":0.5,\"seed\":0.2665773956105113,\"duration\":0.28090692397672684,\"size\":0.7159301999025047,\"air\":0.7924468903220259,\"whistle\":0.07972654020413757,\"movement\":0.3087307449430227,\"focus\":0.3713578247698024,\"flutter\":0.2275967305060476},\"generator\":\"*\",\"selectedGenerator\":\"generate_dodge\",\"renderSeed\":0.1451150868088007},{\"synth\":\"Riftr\",\"name\":\"Time Rewind\",\"params\":{\"masterVolume\":0.5,\"seed\":0.2869271116796881,\"excitation\":0,\"duration\":1.199805147945881,\"pitch\":0.7198405280709267,\"bend\":0.04519312256015828,\"space\":0.5677432044409215,\"feedback\":0.7582694359193556,\"dispersion\":0.6732564370147883,\"motion\":0.37920819343999035,\"field\":0.9577251361915842,\"reverse\":0.9863576226378791},\"generator\":\"*\",\"selectedGenerator\":\"generate_time_rewind\",\"renderSeed\":0.9253501421771944}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

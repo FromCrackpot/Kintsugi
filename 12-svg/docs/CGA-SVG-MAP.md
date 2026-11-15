@@ -43,7 +43,7 @@ Declared once on the `<svg>` root:
 | **Round point** | `<circle>` | `k:type="round-point"` | `r = size/2` (**render marker size, not radius²**); `cx`/`cy` = position; `az = 1` (unitization); `aw` from `k:aw` (default: `(x² + y²)/2` → null round point); `fill` |
 | **Circle** | `<circle>` | element name (no `k:type`) | `cx`, `cy`, `r` = geometric radius `√\|r²\|`; `fill`/`stroke`/`stroke-width`; `k:flags` tokens `imaginary`, `inside-out` |
 | **Unbounded line** | `<line>` | `k:type="line"` | `(x1,y1) → (x2,y2)`, order = orientation (`Line = FlatPoint(x1,y1) ∧ FlatPoint(x2,y2)`); endpoints recomputed at export from `blade ∩ worldBorder`; `stroke`/`stroke-width`; `stroke-linecap` (only when non-`butt`) |
-| **Segment** | `<line>` | element name (no `k:type`) | `(x1,y1) → (x2,y2)`, order = orientation; `stroke`/`stroke-width`; `stroke-linecap` (only when non-`butt`) |
+| **Segment** | `<line>` | element name (no `k:type`) | `(x1,y1) → (x2,y2)`, order = orientation; `stroke`/`stroke-width`; `stroke-linecap` (only when non-`butt`); `k:flags` token `imaginary` |
 | **Rectangle (Polygon quad)** | `<rect>` **parse-only** → writes `<polygon>` | element name (no `k:type`) | `x`/`y`/`width`/`height` decode through `Polygon.Rectangle` into the fixed CCW quad bl → br → tr → tl; `k:flags` token `inside-out` reverses the walk (wall reading); `fill`/`stroke`/`stroke-width`; non-zero `rx`/`ry` and negative extents rejected |
 | **Polygon** | `<polygon>` | element name (no `k:type`) | `points` = `x,y` pairs in traversal order (closes implicitly), canonicalized against the `k:flags` token `inside-out` — flagged loops decode clockwise (inside-out), unflagged counter-clockwise; `fill`/`stroke`/`stroke-width` |
 | **Polyline** | `<polyline>` | element name (no `k:type`) | `points` = `x,y` pairs in traversal order (≥ 2 pairs; open chain — no implicit close; first == last legal); `fill`/`stroke`/`stroke-width`; `stroke-linecap` (only when non-`butt`) |
@@ -125,10 +125,15 @@ the blade's orientation.
 ### Segment
 
 Bare `<line>` (no `k:type`) is the untagged default; decodes via `Segment(FlatPoint(x1,y1),
-FlatPoint(x2,y2))`. Endpoints stored as given (no worldBorder clipping).
+FlatPoint(x2,y2))`. Endpoints stored as given (no worldBorder clipping). An imaginary segment
+writes its real-valued endpoint pair plus `k:flags="imaginary"`; segments at infinity and
+zero-length segments (coincident endpoints) are skipped on save.
 
 ```xml
 <line x1="0" y1="0" x2="10" y2="0" stroke="#00ff00" stroke-width="1"/>
+
+<!-- Imaginary (r² < 0): same carrier and center as the real segment between the endpoints -->
+<line x1="0" y1="0" x2="10" y2="0" stroke="#00ff00" stroke-width="1" k:flags="imaginary"/>
 ```
 
 ### Rectangle (parse-only `<rect>`)

@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.39682253244798626,
+    "sources": "[{\"synth\":\"Machinr\",\"name\":\"Rusty Winch\",\"params\":{\"masterVolume\":0.5,\"seed\":0.1451150868088007,\"mechanism\":1,\"duration\":1.6369530838215722,\"speed\":0.3215348532423377,\"load\":0.7094256464508363,\"roughness\":0.8790428907144814,\"looseness\":0.6587307449430228,\"size\":0.6213578247698024,\"startTime\":0.29863542270846666,\"stopTime\":0.1799732186831534},\"generator\":\"*\",\"selectedGenerator\":\"generate_rusty_winch\",\"renderSeed\":0.15345948073081672},{\"synth\":\"Birdr\",\"name\":\"Sparrow\",\"params\":{\"masterVolume\":0.5,\"seed\":0.815871937200427,\"voice\":1,\"duration\":0.8740351155400277,\"pitch\":0.7244029798265547,\"syllables\":5,\"gap\":0.3882694359193556,\"sweep\":-0.5084294537315145,\"arch\":0.6490102417999879,\"trill\":0.1788625680957921,\"trill_rate\":0.4,\"duet\":0.2610217789653688,\"rasp\":0.12877760898554697,\"breath\":0.03,\"rhythm\":0.5738725497620181,\"variation\":0.19892150654923169},\"generator\":\"*\",\"selectedGenerator\":\"generate_sparrow\",\"renderSeed\":0.42341447132639587}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

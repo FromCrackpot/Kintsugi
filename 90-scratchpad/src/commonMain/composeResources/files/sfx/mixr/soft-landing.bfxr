@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.4168225324479863,
+    "sources": "[{\"synth\":\"Bouncr\",\"name\":\"Steel on Concrete\",\"params\":{\"masterVolume\":0.5,\"material\":2,\"surface\":0,\"force\":0.8986327010206878,\"duration\":0.5927207719301805,\"size\":0.6879069332033396,\"hardness\":0.750936268386431,\"tail\":0.3087307449430227,\"seed\":0.637983652530238,\"count\":1,\"bounce\":0.65,\"gravity\":0.5,\"spin\":0.05096987483557314},\"generator\":\"*\",\"selectedGenerator\":\"generate_metal_ball\",\"renderSeed\":0.2665773956105113},{\"synth\":\"Squishr\",\"name\":\"Bubble Pop\",\"params\":{\"masterVolume\":0.5,\"seed\":0.18314109253697097,\"texture\":1,\"viscosity\":0.296037844219245,\"stretch\":0.048721990017220385,\"pressure\":0.808389174938202,\"wetness\":0.9463564468547702,\"bubbleSize\":0.286089502775576,\"duration\":0.11663888518232852},\"generator\":\"*\",\"selectedGenerator\":\"generate_bubble_pop\",\"renderSeed\":0.6980204835999757}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

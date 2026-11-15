@@ -18,7 +18,7 @@ import kotlin.test.assertTrue
 
 /**
  * Untagged `<rect>` codec tests. Bare `<rect>` is **parse-only**: it decodes into a rectangle
- * [Polygon] (via `Polygon.Rectangle`) and re-serializes as `<polygon>` — deliberately lossy at
+ * [Polygon] (via `Polygon.Rectangle`) and re-serializes as `<polygon>`. This is deliberately lossy at
  * the element level, lossless at the CGA level. Only the flat-point reading of `<rect>` keeps
  * precedence (via its `k:type` tag).
  */
@@ -83,7 +83,7 @@ class RectangleTest {
         )
     }
 
-    @Test fun `unstyled rect materialises SVG defaults - fill black, stroke none, width 1`() {
+    @Test fun `unstyled rect materialises SVG defaults - fill black - stroke none - width 1`() {
         val shape = parseSvg(BARE_RECT_SVG).children.single() as ShapeNode
         assertEquals(
             ShapeStyle(fill = ShapeColor.BLACK, stroke = ShapeColor.NONE, strokeWidth = 1.0),
@@ -124,7 +124,7 @@ class RectangleTest {
         assertFailsWith<MalformedRectException> { parseSvg(RECTANGLE_NEGATIVE_HEIGHT_SVG) }
     }
 
-    /* FULL-BLEED RECTS — no special reading; position and size carry no extra semantics */
+    /* FULL-BLEED RECTS: no special reading; position and size carry no extra semantics */
 
     @Test fun `non-leading full-bleed fill-only rect is a rectangle Polygon`() {
         val root = parseSvg(NON_LEADING_FULL_BLEED_RECT_SVG)

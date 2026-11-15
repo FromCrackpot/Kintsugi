@@ -25,7 +25,7 @@ class MotorTest {
         assertFailsWith<DegenerateMotorException> { Motor(1.0, 1.0, 0.0, 0.0) }
     }
 
-    /* FACTORY — R */
+    /* FACTORY: R */
 
     @Test
     fun `R by zero angle is the identity motor`() {
@@ -45,11 +45,11 @@ class MotorTest {
 
     @Test
     fun `R by 180 about an at-infinity center has no unitized form`() {
-        // cos(90°) rounds to zero and the e43 part vanishes — zero weight norm.
+        // cos(90°) rounds to zero and the e43 part vanishes, leaving a zero weight norm.
         assertFailsWith<DegenerateMotorException> { R(Direction(1.0, 0.0), 180.deg) }
     }
 
-    /* FACTORY — T */
+    /* FACTORY: T */
 
     @Test
     fun `T builds the translator versor from the displacement`() {

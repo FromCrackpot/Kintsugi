@@ -1,6 +1,6 @@
 package fromcrackpot.kintsugi.scenegraph.nodes.composites
 
-import fromcrackpot.kintsugi.cga.d2.constraints.coerceOut
+import fromcrackpot.kintsugi.cga.d2.operations.constraints.coerceOut
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polygon
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.unaryMinus
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
@@ -16,7 +16,7 @@ class PolygonNodeTest {
     private val box = Polygon.Rectangle(FlatPoint(0.0, 0.0), FlatPoint(10.0, 10.0))
     private val wall = -box
 
-    /* COERCE OUT — WALL */
+    /* COERCE OUT: WALL */
 
     @Test
     fun `coerceOut of a wall nudges the geometry and carries the style untouched`() {
@@ -40,7 +40,7 @@ class PolygonNodeTest {
         assertSame(subject, subject coerceOut wall)
     }
 
-    /* COERCE OUT — OBSTACLE */
+    /* COERCE OUT: OBSTACLE */
 
     @Test
     fun `coerceOut of an obstacle nudges the geometry and carries the style untouched`() {

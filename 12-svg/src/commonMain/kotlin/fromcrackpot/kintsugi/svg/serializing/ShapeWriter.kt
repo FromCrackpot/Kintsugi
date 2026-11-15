@@ -44,9 +44,9 @@ internal fun XmlWriter.writeNodes(
 }
 
 /*
- * Leaf dispatch: ShapeNode is unsealed, the two families are — the nested `when`s stay
- * exhaustive (a new leaf is a compile error here), the `else` guards only a foreign ShapeNode
- * family. Deliberately the same convention as `:compose`'s `drawShape` — don't "fix" it in
+ * Leaf dispatch: ShapeNode is unsealed but its two families are sealed. The nested `when`s stay
+ * exhaustive (a new leaf is a compile error here), and the `else` guards only a foreign ShapeNode
+ * family. Deliberately the same convention as `:compose`'s `drawShape`; don't "fix" it in
  * either direction.
  */
 private fun XmlWriter.writeShape(node: ShapeNode, viewBox: SceneBounds, worldBorder: Circle) {

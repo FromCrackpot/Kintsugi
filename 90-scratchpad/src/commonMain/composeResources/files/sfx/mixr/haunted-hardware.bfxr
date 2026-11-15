@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.5868225324479863,
+    "sources": "[{\"synth\":\"Clonkr\",\"name\":\"Glass Ping\",\"params\":{\"masterVolume\":0.5,\"seed\":0.20387949934229255,\"material\":1,\"action\":0,\"size\":0.0685441543860361,\"hollowness\":0.5379069332033396,\"hardness\":0.750936268386431,\"damping\":0.2014804263878614,\"duration\":0.6766874605324119},\"generator\":\"*\",\"selectedGenerator\":\"generate_glass_ping\",\"renderSeed\":0.637983652530238},{\"synth\":\"Glitchr\",\"name\":\"Bit Rot\",\"params\":{\"masterVolume\":0.5,\"seed\":0.6980204835999757,\"duration\":0.7451150868088007,\"pitch\":0.20371081825578585,\"fragment\":0.206195197859779,\"repeat\":0.4969378218054771,\"chaos\":0.5658911171369254,\"dropout\":0.29052530388580633,\"crush\":0.7082360981381498,\"rate\":0.632413491641637,\"mode\":3},\"generator\":\"*\",\"selectedGenerator\":\"generate_bit_rot\",\"renderSeed\":0.8590837873052806}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

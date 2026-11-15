@@ -21,11 +21,11 @@ class FlectorTest {
 
     @Test
     fun `ctor throws on zero weight norm`() {
-        // fx = fy = 0 — the mirror line is at infinity, no unitized reflection.
+        // fx = fy = 0: the mirror line is at infinity, with no unitized reflection.
         assertFailsWith<DegenerateFlectorException> { Flector(0.0, 0.0, 5.0, 3.0) }
     }
 
-    /* FACTORY — F */
+    /* FACTORY: F */
 
     @Test
     fun `F is the line with zero glide`() {
@@ -33,7 +33,7 @@ class FlectorTest {
         assertEquals(Flector(1.0, 0.0, -3.0, 0.0), F(Line(1.0, 0.0, -3.0)))
     }
 
-    /* FACTORY — G */
+    /* FACTORY: G */
 
     @Test
     fun `G carries the scalar glide as fw = glide over 2`() {
@@ -43,7 +43,7 @@ class FlectorTest {
 
     @Test
     fun `G never shifts the mirror`() {
-        // The glide is along the line by construction — fz stays the line's own moment
+        // The glide is along the line by construction, so fz stays the line's own moment
         // (the retired direction-parameter factory could fold a perpendicular part into fz).
         assertEquals(Flector(1.0, 0.0, -3.0, 2.0), G(Line(1.0, 0.0, -3.0), 4.0))
     }

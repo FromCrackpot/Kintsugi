@@ -11,7 +11,7 @@ import nl.adaptivity.xmlutil.XmlReader
  * END_ELEMENT, dispatching each child element to its parser. Caller must have already consumed the
  * group's START_ELEMENT and read its presentational attributes into the [inherited] chain.
  *
- * Each arm is a one-liner: the element's parser owns everything about the element — attribute
+ * Each arm is a one-liner. The element's parser owns everything about the element: attribute
  * reads, the `k:type` fork (tagged reading vs untagged default), validation, construction.
  * Element identity is resolved by `k:type`, never by geometry. Any element outside the supported
  * set (`<rect>`, `<circle>`, `<line>`, `<polygon>`, `<polyline>`, `<g>`, `<use>`) raises
@@ -54,9 +54,8 @@ internal fun XmlReader.parseGroupChildren(
             EventType.ATTRIBUTE -> Unit
         }
     }
-    // Reached only if the document ends without the matching END_ELEMENT — malformed XML, but
-    // xmlutil's pull parser would already have thrown; reaching here means an empty document or
-    // a root element with no opening tag. Returning current state matches the prior parser's
-    // permissive behavior.
+    // Reached only if the document ends without the matching END_ELEMENT. xmlutil's pull parser
+    // throws on malformed XML first, so this means an empty document or a root element with no
+    // opening tag. Returning the current state matches the prior parser's permissive behavior.
     return children
 }

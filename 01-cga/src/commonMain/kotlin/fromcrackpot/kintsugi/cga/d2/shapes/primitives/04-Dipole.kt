@@ -12,43 +12,35 @@ import kotlin.math.sign
 import kotlin.math.sqrt
 
 /**
- * Two points of the plane joined into a single oriented object — the 2D dipole.
+ * Two points of the plane, joined into one oriented object.
  *
- * The grade-2 blade `gx·e23 + gy·e31 + gz·e12 + px·e41 + py·e42 + pz·e43`, the wedge of two
- * round points. The constructor unitizes by the round weight `‖(gx, gy)‖` — the distance
- * between the endpoints — and rejects component sets violating the Plücker blade constraint.
- * The endpoints are recovered as [start] and [end], with the line through them, their midpoint
- * and their half-distance as first-class views ([carrier], [center], [radius]); the wedge
- * rebuilds the blade: `start ∧ end == this`. A negative [radius2] makes the dipole imaginary —
- * no real endpoints, first-class data, never an error (see [isImaginary]). Orientation is data:
- * swapping the endpoints negates every component and [equals] distinguishes them ([canonical]
- * for unoriented equivalence). A round weight that rounds to zero leaves the dipole at infinity,
- * all six components raw ([isAtInfinity]). Components are stored raw at full `Double`
- * precision; [equals]/[hashCode] compare rounded at the `SCALE` quantum.
+ * - [start] and [end] recover the endpoints, and `start join end` rebuilds the dipole exactly.
+ * - A negative [radius2] makes it imaginary. It has no real endpoints but is valid data, not an error.
+ * - Orientation is data, so swapped endpoints compare unequal. Use [canonical] for unoriented equivalence.
  */
 public open class Dipole : Primitive {
-    /** The `e23` component — the carrier line's unit-normal x-component when finite. */
+    /** The `e23` component: the x-component of the carrier line's unit normal, when finite. */
     public val gx: Double // e23
 
-    /** The `e31` component — the carrier line's unit-normal y-component when finite. */
+    /** The `e31` component: the y-component of the carrier line's unit normal, when finite. */
     public val gy: Double // e31
 
-    /** The `e12` component — the carrier line's signed origin distance when finite. */
+    /** The `e12` component: the carrier line's signed distance from the origin, when finite. */
     public val gz: Double // e12
 
     /**
-     * The `e41` component — the flat bulk's x-component; with [py] and [pz] it fixes the
-     * endpoints' placement along the carrier.
+     * The `e41` component: the x-component of the flat bulk. With [py] and [pz], it fixes where the
+     * endpoints sit on the carrier.
      */
     public val px: Double // e41
 
     /**
-     * The `e42` component — the flat bulk's y-component; with [px] and [pz] it fixes the
-     * endpoints' placement along the carrier.
+     * The `e42` component: the y-component of the flat bulk. With [px] and [pz], it fixes where the
+     * endpoints sit on the carrier.
      */
     public val py: Double // e42
 
-    /** The `e43` component — minus the center's signed offset along [attitude] when finite. */
+    /** The `e43` component: minus the center's signed offset along [attitude], when finite. */
     public val pz: Double // e43
 
     private val _gx get() = round(gx)
@@ -64,17 +56,9 @@ public open class Dipole : Primitive {
     */
 
     /**
-     * Builds the dipole `(gx, gy, gz, px, py, pz)`, unitized, zero-sanitized, and blade-checked.
+     * Builds the dipole `(gx, gy, gz, px, py, pz)`, unitized, with `-0.0` cleared to `0.0`.
      *
-     * A round weight `‖(gx, gy)‖` that doesn't round to zero is divided out of every component,
-     * leaving the g-part the carrier line's unit normal and offset. A weight that rounds to zero
-     * at the `SCALE` quantum splits on [gz]: non-zero leaves the dipole at infinity with all six
-     * components raw (at-infinity weights are data — no unitization, no canonicalization), while
-     * a whole g-part of zero means the blade lies in the `e41/e42/e43` span — it is the flat
-     * point `(px, py, pz)`, not a dipole, and the constructor throws. Accepted components must
-     * satisfy the Plücker blade constraint `gx·px + gy·py + gz·pz = 0` — what separates a
-     * factorizable wedge of two points from a general bivector; the residual is evaluated on the
-     * unitized components and must round to zero. Signed zeroes sanitize to `+0.0`.
+     * - When the round weight rounds to zero but [gz] doesn't, the dipole lies at infinity and stays raw.
      *
      * @param gx The `e23` component: the carrier normal's x-component.
      * @param gy The `e31` component: the carrier normal's y-component.
@@ -82,10 +66,9 @@ public open class Dipole : Primitive {
      * @param px The `e41` component of the flat bulk.
      * @param py The `e42` component of the flat bulk.
      * @param pz The `e43` component of the flat bulk.
-     * @throws DegenerateDipoleException When the whole g-part rounds to zero — the blade
-     *   collapses to the payload `FlatPoint(px, py, pz)`.
-     * @throws NonBladeDipoleException When the Plücker residual doesn't round to zero; carries
-     *   the residual for diagnostics.
+     * @throws DegenerateDipoleException when the whole g-part rounds to zero at the `SCALE` quantum.
+     *   The blade is then the flat point `(px, py, pz)`.
+     * @throws NonBladeDipoleException when the components are not the wedge of two points.
      */
     public constructor(
         gx: Double, gy: Double, gz: Double,
@@ -93,7 +76,7 @@ public open class Dipole : Primitive {
     ) {
         val roundWeightNorm = sqrt(gx * gx + gy * gy)
         if (round(roundWeightNorm) == 0.0) {
-            // Must precede the Plücker check — a whole-zero g-part passes the residual trivially.
+            // Precedes the Plücker check, which a whole-zero g-part passes trivially.
             if (round(gz) == 0.0) throw DegenerateDipoleException(FlatPoint(px, py, pz))
 
             this.gx = gx + 0.0
@@ -118,9 +101,9 @@ public open class Dipole : Primitive {
     }
 
     /**
-     * Adopts components as-is, skipping unitization and the Plücker check — sound for
-     * [canonical], whose sign-negation of a valid blade is itself valid; [raw] disambiguates
-     * from the public ctor.
+     * Adopts the components as-is, skipping unitization and the Plücker check.
+     * [canonical] may use it, since negating a valid blade yields a valid blade.
+     * [raw] only tells this ctor apart from the public one.
      */
     private constructor(
         gx: Double, gy: Double, gz: Double,
@@ -141,40 +124,29 @@ public open class Dipole : Primitive {
      */
 
     /**
-     * Whether this dipole lies at infinity — a purely directional object rather than two points
-     * in the plane.
+     * Whether this dipole lies at infinity. True when [gx] and [gy] both round to zero at the `SCALE` quantum.
      *
-     * `true` when [gx] and [gy] both round to zero at the `SCALE` quantum; the remaining
-     * components are raw data. The derived points [center], [start] and [end] degenerate at
-     * infinity and the wedge identity `start ∧ end == this` doesn't apply — gate on this
-     * predicate before reading them.
+     * - [center], [start] and [end] degenerate at infinity. Check this before reading them.
      */
     public val isAtInfinity: Boolean get() = _gx == 0.0 && _gy == 0.0
 
     /**
-     * Whether this dipole is imaginary — a negative squared radius, no real endpoints.
+     * Whether this dipole is imaginary. True when [radius2] rounds below zero at the `SCALE` quantum.
      *
-     * `true` when [radius2] rounds below zero at the `SCALE` quantum. Imaginary dipoles are
-     * first-class data (an imaginary dipole can encode two separated circles' distance),
-     * never an error.
+     * - An imaginary dipole is valid data, not an error. The meet of two disjoint circles is one.
      */
     public val isImaginary: Boolean get() = round(radius2) < 0.0
 
     /**
-     * The flat bulk magnitude `√(px² + py²)` — raw.
-     *
-     * The flat bulk norm: for a finite real dipole, half the product of the endpoints'
-     * distances from the origin.
+     * The raw flat bulk magnitude `√(px² + py²)`. For a finite real dipole, it is half the product of
+     * the endpoints' distances from the origin.
      */
     public val norm: Double get() = sqrt(px * px + py * py) // flat_bulk_norm
 
     /**
-     * The midpoint of the endpoints, carrying the dipole's size — a [RoundPoint].
+     * The midpoint of the endpoints. It carries the dipole's size, so `center.radius2` equals [radius2].
      *
-     * The center's `aw` sits `radius2/2` above the null lift, so `center.radius2` equals this
-     * dipole's [radius2] — exactly what lets [start] and [end] fall out componentwise as
-     * `center ∓ radius·attitude`. Finite dipoles yield a unitized center (`az = 1`; read the
-     * coordinates off `ax`/`ay`); at infinity the center degenerates.
+     * - Degenerates at infinity.
      */
     public val center: RoundPoint by cached {
         RoundPoint(
@@ -185,39 +157,28 @@ public open class Dipole : Primitive {
         )
     }
 
-    /**
-     * The center's distance from the origin `√(gz² + pz²)` — raw.
-     *
-     * The center norm: the componentwise shortcut for the distance of [center] from the
-     * origin when finite.
-     */
+    /** The raw distance of [center] from the origin, when finite. */
     public val centerNorm: Double get() = sqrt(gz * gz + pz * pz)
 
     /**
-     * The squared radius — raw and signed; negative for an imaginary dipole.
+     * The raw, signed squared radius. For a real dipole it is the square of half the endpoint
+     * distance; for an imaginary one it is negative.
      *
-     * `pz² − gz² − 2·(gx·py − gy·px)`: the square of half the distance between the endpoints
-     * for a real dipole, exactly zero when they coincide — the limit of the endpoints merging
-     * into one point — and negative when no real endpoints exist. To test imaginary-ness use
-     * [isImaginary], which rounds; comparing this raw value to zero is FP-fragile.
+     * - Test imaginary-ness with [isImaginary], which rounds. This raw value is unstable near zero.
      */
     public val radius2: Double get() = pz * pz - gz * gz - 2 * (gx * py - gy * px)
 
     /**
-     * The radius magnitude `√(|radius2|)` — raw, non-negative.
-     *
-     * Half the distance between the endpoints for a real dipole. For an imaginary dipole this
-     * is the magnitude of the imaginary radius — gate on [isImaginary] where the distinction
-     * matters.
+     * Half the raw distance between the endpoints, never negative. For an imaginary dipole, it is the
+     * magnitude of the imaginary radius.
      */
     public val radius: Double get() = sqrt(radius2.absoluteValue)
 
     /**
-     * The first endpoint — `center − radius·attitude`.
+     * The first endpoint, at `center − radius·attitude`.
      *
-     * Paired with [end], it recovers the blade: the wedge `start ∧ end == this` holds exactly,
-     * for imaginary dipoles too — an imaginary dipole yields real-valued endpoints whose wedge
-     * rebuilds the imaginary blade. Degenerates at infinity ([isAtInfinity]).
+     * - Real even for an imaginary dipole. `start join end` still rebuilds the dipole exactly.
+     * - Degenerates at infinity.
      */
     public val start: RoundPoint by cached {
         RoundPoint(
@@ -229,11 +190,10 @@ public open class Dipole : Primitive {
     }
 
     /**
-     * The second endpoint — `center + radius·attitude`.
+     * The second endpoint, at `center + radius·attitude`.
      *
-     * Paired with [start], it recovers the blade: the wedge `start ∧ end == this` holds exactly,
-     * for imaginary dipoles too — an imaginary dipole yields real-valued endpoints whose wedge
-     * rebuilds the imaginary blade. Degenerates at infinity ([isAtInfinity]).
+     * - Real even for an imaginary dipole. `start join end` still rebuilds the dipole exactly.
+     * - Degenerates at infinity.
      */
     public val end: RoundPoint by cached {
         RoundPoint(
@@ -244,41 +204,25 @@ public open class Dipole : Primitive {
         )
     }
 
-    /**
-     * The direction from [start] toward [end] — a round point at infinity.
-     *
-     * The attitude `att(d) = d ∨ e412`, one antigrade up: the [RoundDirection]
-     * `(gy, −gx, 0, −pz)`, a purely directional object with `radius2 = −1` when finite.
-     */
+    /** The direction from [start] toward [end], as a round point at infinity. */
     public val attitude: RoundDirection by cached { RoundDirection(gy, -gx, aw = -pz) }
 
     /**
-     * The line through both points — the carrier `car(d) = e4 ∧ d`.
+     * The oriented line through both endpoints.
      *
-     * Componentwise the g-part itself: the [Line] `(gx, gy, gz)`. Orientation-sensitive — the
-     * g-part flips with the wedge order, so carriers of the same point set built from opposite
-     * orderings compare unequal; compare `carrier.canonical` for unoriented equivalence.
+     * - It flips when the endpoints swap. Compare `carrier.canonical` for unoriented equivalence.
      */
     public val carrier: Line by cached { Line(gx, gy, gz) }
 
-    /**
-     * The co-carrier — the perpendicular bisector of the endpoints.
-     *
-     * `ccr(d) = e4 ∧ d^☆`: the [Line] `(−gy, gx, −pz)`, whose normal runs opposite [attitude].
-     * Meets [carrier] at the dipole's center, and is orientation-sensitive like it.
-     */
+    /** The perpendicular bisector of the endpoints. Like [carrier], it flips when the endpoints swap. */
     public val cocarrier: Line by cached { Line(-gy, gx, -pz) }
 
     /**
-     * The smallest circle containing this dipole — the endpoints as a diameter.
+     * The smallest circle containing this dipole, with the endpoints as a diameter.
      *
-     * `con(d) = d ∧ car(d)^☆`, always inside-out (`cw = +1` — what the algebra gives);
-     * preserves the size: `container.radius2 == radius2`, so an imaginary dipole gets an
-     * imaginary container. At infinity the round weight `cw = gx² + gy²` collapses to zero,
-     * and no container exists.
+     * - Always inside-out. An imaginary dipole gets an imaginary container.
      *
-     * @throws DegenerateCircleException At infinity — the collapsed round weight leaves the
-     *   [Circle] constructor nothing to unitize by.
+     * @throws DegenerateCircleException when the dipole lies at infinity.
      */
     public val container: Circle by cached {
         Circle(
@@ -294,18 +238,14 @@ public open class Dipole : Primitive {
      */
 
     /**
-     * Returns this object rebuilt around the replacement geometry [dipole] — the hook the
-     * shape-preserving operations return through.
+     * Returns this object rebuilt around the replacement geometry [dipole]. Shape-preserving
+     * operations return through this hook.
      *
-     * Every operation that moves a dipole computes its result as a plain [Dipole] and returns
-     * it through this hook. This base implementation returns [dipole] itself; a subclass
-     * overrides it to rebuild an instance of its own class around [dipole], and every such
-     * operation then comes back as that class. The result's runtime class must equal the
-     * receiver's — the operations check it and fail with a named error when a subclass misses
-     * the override.
+     * - Override it to rebuild your subclass. Every generic operation then returns that class.
+     * - The result's runtime class must equal the receiver's, or the operations fail with a named error.
      *
      * @param dipole The replacement geometry.
-     * @return [dipole] itself; an override returns its own class rebuilt around [dipole].
+     * @return [dipole] itself. An override returns its own class rebuilt around [dipole].
      */
     public open fun copy(dipole: Dipole): Dipole = dipole
 
@@ -314,15 +254,10 @@ public open class Dipole : Primitive {
     */
 
     /**
-     * The canonical representative of this dipole — useful for unoriented equivalence.
+     * The canonical representative of this dipole. Both orders of the same endpoints share it.
      *
-     * `a.canonical == b.canonical` detects the same endpoints under opposed wedge orders. The
-     * canonical orientation makes the first non-zero of `(gx, gy)` positive, negating all six
-     * components when it flips; the sign decision reads rounded components, so `a == b` implies
-     * `a.canonical == b.canonical`. At infinity the rounded g-part is zero and the dipole is
-     * returned unchanged (at-infinity weights are data). The representative is rebuilt through
-     * [copy], so a subclass comes back as its own class; an already-canonical dipole returns
-     * `this`.
+     * - Makes the first non-zero of `(gx, gy)` positive, judged on the rounded components.
+     * - A dipole at infinity comes back unchanged.
      */
     public open val canonical: Dipole by cached {
         val s = if (_gx != 0.0) _gx.sign else _gy.sign
@@ -336,26 +271,20 @@ public open class Dipole : Primitive {
     }
 
     /**
-     * A fresh [Segment] wrapping this dipole — the promotion across the algebra/composite
-     * boundary.
+     * A fresh [Segment] wrapping this dipole. Queries against it respect the endpoints' bounds.
      *
-     * Selecting `Segment` makes geometric answers respect the chord's bounds instead of the
-     * whole carrier. The result is `!= this` — `Segment` wraps rather than subtypes `Dipole`.
+     * - A segment never equals a dipole, since `Segment` wraps `Dipole` instead of subtyping it.
      */
     public val toSegment: Segment by cached { Segment(this) }
 
     /**
-     * Rounded, orientation-sensitive identity: equal when every component matches at the
-     * `SCALE` quantum.
+     * Compares the six components rounded at the `SCALE` quantum.
      *
-     * Swapping the endpoints negates all six components and compares unequal; compare
-     * [canonical] on both sides for unoriented equivalence. At-infinity magnitudes compare
-     * as data. Identity is exact-class: a subclass instance and a plain [Dipole] never
-     * compare equal.
+     * - Swapped endpoints compare unequal. Compare [canonical] on both sides for unoriented equivalence.
+     * - Classes must match exactly. A subclass instance never equals a plain [Dipole].
      *
      * @param other The object to compare against.
-     * @return `true` iff [other] shares this object's exact class and its six components
-     *   all match after rounding.
+     * @return `true` when [other] has this exact class and every rounded component matches.
      */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -382,29 +311,22 @@ public open class Dipole : Primitive {
     /** Returns the hash of the rounded components, consistent with [equals]. */
     override fun hashCode(): Int = _hashCode
 
-    /** Returns the raw components — full stored precision, no rounding. */
+    /** Returns the raw components at full stored precision. */
     override fun toString(): String = "Dipole(gx=$gx, gy=$gy, gz=$gz, px=$px, py=$py, pz=$pz)"
 
-    /** Returns the components rounded at the `SCALE` quantum — the debug-output convention of every primitive. */
+    /** Returns the components rounded at the `SCALE` quantum, for debug output. */
     public fun toStringRounded(): String = "Dipole(gx=$_gx, gy=$_gy, gz=$_gz, px=$_px, py=$_py, pz=$_pz)"
 }
 
 /**
  * `-Dipole => Dipole`<br>
- * Returns this dipole with its endpoints exchanged — the same point pair, opposite orientation.
+ * Returns this dipole with its endpoints swapped. The points stay, the orientation flips.
  *
- * Negates all six components, raw at full `Double` precision — exactly what swapping the wedge
- * order does, so [Dipole.start] and [Dipole.end] exchange while [Dipole.center] and
- * [Dipole.radius2] are untouched; [Dipole.attitude] flips. A dipole at infinity negates its
- * raw components, which are data. Identity is orientation-sensitive, so a dipole and its
- * negation compare unequal; compare [Dipole.canonical] for unoriented equivalence —
- * `(-dipole).canonical == dipole.canonical`. The result is the receiver's own class: the
- * negated geometry returns through [Dipole.copy], preserving a subclass that overrides the
- * hook.
+ * - Compares unequal to the original, but `(-dipole).canonical == dipole.canonical`.
  *
- * @receiver The [Dipole] to negate.
+ * @receiver The dipole to negate.
  * @param T The receiver's type, preserved in the result.
- * @return The negated dipole, as the receiver's class.
+ * @return The negated dipole.
  */
 public operator fun <T : Dipole> T.unaryMinus(): T =
     narrowed(

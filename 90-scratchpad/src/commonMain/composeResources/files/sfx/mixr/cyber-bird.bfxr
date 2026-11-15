@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.4568225324479863,
+    "sources": "[{\"synth\":\"Birdr\",\"name\":\"Sparrow\",\"params\":{\"masterVolume\":0.5,\"seed\":0.7709729373455048,\"voice\":1,\"duration\":0.5066626939573325,\"pitch\":0.7223604466114193,\"syllables\":4,\"gap\":0.5333710424695164,\"sweep\":-0.46408656882122157,\"arch\":0.40193974967114626,\"trill\":0.1456975478795357,\"trill_rate\":0.4,\"duet\":0.15331547912210225,\"rasp\":0.10466956475749611,\"breath\":0.03,\"rhythm\":0.30371081825578583,\"variation\":0.1312195543665439},\"generator\":\"*\",\"selectedGenerator\":\"generate_sparrow\",\"renderSeed\":0.7317822342738509},{\"synth\":\"Bfxr\",\"name\":\"Powerup\",\"params\":{\"masterVolume\":0.5,\"waveType\":1,\"attackTime\":0,\"sustainTime\":0.11477084467187525,\"sustainPunch\":0,\"decayTime\":0.4701400568708778,\"compressionAmount\":0,\"frequency_start\":0.40940614507999273,\"frequency_slide\":0.4436335149221122,\"frequency_acceleration\":0,\"min_frequency_relative_to_starting_frequency\":0,\"vibratoDepth\":0,\"vibratoSpeed\":0,\"pitch_jump_repeat_speed\":0,\"pitch_jump_amount\":0,\"pitch_jump_onset_percent\":0,\"pitch_jump_2_amount\":0,\"pitch_jump_onset2_percent\":0,\"overtones\":0,\"overtoneFalloff\":0,\"squareDuty\":0,\"dutySweep\":0,\"repeatSpeed\":0.7220435579307378,\"flangerOffset\":0,\"flangerSweep\":0,\"lpFilterCutoff\":1,\"lpFilterCutoffSweep\":0,\"lpFilterResonance\":0,\"hpFilterCutoff\":0,\"hpFilterCutoffSweep\":0,\"bitCrush\":0,\"bitCrushSweep\":0},\"generator\":\"*\",\"selectedGenerator\":\"generate_powerup\",\"renderSeed\":0.39568602619692683}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

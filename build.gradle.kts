@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.compose.multiplatform) apply false
     alias(libs.plugins.compose.compiler) apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.kotlin.multiplatform.library) apply false
     alias(libs.plugins.dokka)
 }
 
@@ -15,6 +17,8 @@ dependencies {
     dokka(project(":compose"))
     dokka(project(":svg"))
     dokka(project(":game-engine"))
+    dokka(project(":audio"))
+    dokka(project(":bfxr"))
 }
 
 dokka {
@@ -23,10 +27,13 @@ dokka {
 
 allprojects {
     plugins.withId("org.jetbrains.dokka") {
+        val logo = rootProject.file("dokka/logo-icon.svg")
+        val css = rootProject.file("dokka/kintsugi.css")
         extensions.configure<DokkaExtension> {
             pluginsConfiguration.withType<DokkaHtmlPluginParameters>().configureEach {
-                customAssets.from(rootProject.file("dokka/logo-icon.svg"))
-                customStyleSheets.from(rootProject.file("dokka/kintsugi.css"))
+                customAssets.from(logo)
+                customStyleSheets.from(css)
+                homepageLink.set("https://kintsugi-engine.com/")
             }
         }
     }
@@ -35,6 +42,10 @@ allprojects {
 subprojects {
     val moduleName = name
     plugins.withId("maven-publish") {
+        val ios = providers.gradleProperty("ios").isPresent
+        tasks.withType<AbstractPublishToMaven>().configureEach {
+            doFirst { check(!ios) { "refusing to publish with -Pios: iOS artifacts wait until the tests run on a simulator" } }
+        }
         // published .module files name each file after its archive → archives carry the kintsugi- prefix too
         plugins.withType<BasePlugin> {
             extensions.configure<BasePluginExtension> { archivesName.set("kintsugi-$moduleName") }

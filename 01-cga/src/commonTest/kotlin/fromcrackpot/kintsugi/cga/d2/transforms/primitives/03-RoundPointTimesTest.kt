@@ -3,17 +3,19 @@ package fromcrackpot.kintsugi.cga.d2.transforms.primitives
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Line
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.RoundPoint
+import fromcrackpot.kintsugi.cga.d2.transforms.D
 import fromcrackpot.kintsugi.cga.d2.transforms.F
 import fromcrackpot.kintsugi.cga.d2.transforms.G
 import fromcrackpot.kintsugi.cga.d2.transforms.R
 import fromcrackpot.kintsugi.cga.d2.transforms.T
+import fromcrackpot.kintsugi.cga.d2.transforms.times
 import fromcrackpot.kintsugi.cga.deg
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class RoundPointTimesTest {
 
-    /* MOTOR — TRANSLATION */
+    /* MOTOR: TRANSLATION */
 
     @Test
     fun `translating a round point equals the lift of the translated euclidean point`() {
@@ -32,7 +34,7 @@ class RoundPointTimesTest {
 
     @Test
     fun `an at-infinity round point keeps its position and gains only the moment term`() {
-        // az = 0 kills the displacement; aw' = aw + tx·ax + ty·ay — the same moment shift
+        // az = 0 kills the displacement. aw' = aw + tx·ax + ty·ay is the same moment shift
         // Dipole.attitude exhibits under translation.
         assertEquals(RoundPoint(1.0, 0.0, 0.0, 0.5 + 5.0), RoundPoint(1.0, 0.0, 0.0, 0.5) * T(5.0, 7.0))
     }
@@ -49,7 +51,7 @@ class RoundPointTimesTest {
         assertEquals(rp, rp * T(3.0, 4.0) * T(-3.0, -4.0))
     }
 
-    /* MOTOR — ROTATION */
+    /* MOTOR: ROTATION */
 
     @Test
     fun `round point rotation agrees with the flat point action on lifts`() {
@@ -59,7 +61,7 @@ class RoundPointTimesTest {
 
     @Test
     fun `round point radius2 is invariant under rotation`() {
-        // Non-lift aw (radius2 = 5) — rigid motions preserve the radius, only the center moves.
+        // Non-lift aw (radius2 = 5): rigid motions preserve the radius, only the center moves.
         val a = RoundPoint(1.0, 2.0, 1.0, 5.0)
         val m = R(FlatPoint(-2.0, 3.0), 37.deg)
         assertEquals(a.radius2, (a * m).radius2, EPS)
@@ -80,11 +82,36 @@ class RoundPointTimesTest {
 
     @Test
     fun `round point radius2 is invariant under reflection`() {
-        // Non-lift aw (radius2 = 9) — an isometry preserves the radius, only the center moves.
+        // Non-lift aw (radius2 = 9): an isometry preserves the radius, only the center moves.
         val a = RoundPoint(1.0, 2.0, 1.0, (1.0 + 4.0) / 2.0 + 4.5)
         val f = G(Line(1.0, -1.0, 0.0), 2.0)
         assertEquals(9.0, a.radius2, EPS)
         assertEquals(9.0, (a * f).radius2, EPS)
+    }
+
+
+    /* DILATOR */
+
+    @Test
+    fun `dilating a round point equals the lift of the dilated euclidean point`() {
+        // (1, 2) + 3·((3, 1) − (1, 2)) = (7, −1).
+        assertEquals(RoundPoint(7.0, -1.0), RoundPoint(3.0, 1.0) * D(FlatPoint(1.0, 2.0), 3.0))
+    }
+
+    @Test
+    fun `dilating a sized round point scales its radius`() {
+        // Radius 3 at (1, 2), doubled about the origin: radius 6 at (2, 4).
+        val rp = RoundPoint(1.0, 2.0, 1.0, (1.0 + 4.0) / 2.0 + 4.5)
+        val dilated = rp * D(FlatPoint(0.0, 0.0), 2.0)
+        assertEquals(RoundPoint(2.0, 4.0, 1.0, (4.0 + 16.0) / 2.0 + 18.0), dilated)
+        assertEquals(36.0, dilated.radius2, EPS)
+    }
+
+    @Test
+    fun `round point dilation agrees with the flat point action on lifts`() {
+        val p = FlatPoint(2.0, 5.0)
+        val v = D(FlatPoint(1.0, -2.0), 0.4)
+        assertEquals((p * v).toRound, p.toRound * v)
     }
 
     companion object {

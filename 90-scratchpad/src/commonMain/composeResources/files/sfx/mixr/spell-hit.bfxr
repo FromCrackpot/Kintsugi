@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.6568225324479863,
+    "sources": "[{\"synth\":\"Whooshr\",\"name\":\"Dodge\",\"params\":{\"masterVolume\":0.5,\"seed\":0.2665773956105113,\"duration\":0.28090692397672684,\"size\":0.7159301999025047,\"air\":0.7924468903220259,\"whistle\":0.07972654020413757,\"movement\":0.3087307449430227,\"focus\":0.3713578247698024,\"flutter\":0.2275967305060476},\"generator\":\"*\",\"selectedGenerator\":\"generate_dodge\",\"renderSeed\":0.1451150868088007},{\"synth\":\"Fractr\",\"name\":\"Ice Wall\",\"params\":{\"masterVolume\":0.5,\"seed\":0.2869271116796881,\"material\":1,\"duration\":2.6976733514107765,\"fragments\":36,\"fragmentSize\":0.5582360981381498,\"spread\":0.6232564370147884,\"decay\":0.5094061450799927,\"gravity\":0.5436335149221122,\"bounce\":0.4415326684480533,\"stress\":0.6937073761131615,\"shards\":0.35,\"fracture\":0.9312918812036515},\"generator\":\"*\",\"selectedGenerator\":\"generate_ice_wall\",\"renderSeed\":0.9253501421771944}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

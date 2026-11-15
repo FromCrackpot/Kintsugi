@@ -1,0 +1,20 @@
+{
+  "synth_type": "Bouncr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.6,
+    "seed": 0.58,
+    "material": 0,
+    "surface": 1,
+    "force": 0.55,
+    "duration": 0.7,
+    "size": 0.25,
+    "hardness": 0.35,
+    "tail": 0.45,
+    "count": 1,
+    "bounce": 0.6,
+    "gravity": 0.5,
+    "spin": 0
+  },
+  "renderSeed": 0.58
+}

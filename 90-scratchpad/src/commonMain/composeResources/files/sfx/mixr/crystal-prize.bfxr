@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.5868225324479863,
+    "sources": "[{\"synth\":\"Jinglr\",\"name\":\"Message\",\"params\":{\"masterVolume\":0.5,\"seed\":0.6379863798637987,\"instrumentSeed\":69389,\"phrase\":\"[{\\\"degree\\\":1,\\\"beats\\\":0.75},{\\\"degree\\\":5,\\\"beats\\\":1}]\",\"instrument\":0,\"key\":0,\"scale\":2,\"contour\":4,\"rhythm\":1,\"noteCount\":2,\"octave\":5,\"tempo\":186.79150245152414,\"swing\":0,\"brightness\":0.25873074494302273,\"decay\":0.09669830988161265,\"echo\":0},\"generator\":\"*\",\"selectedGenerator\":\"generate_message\",\"renderSeed\":0.1451150868088007},{\"synth\":\"Clonkr\",\"name\":\"Glass Ping\",\"params\":{\"masterVolume\":0.5,\"seed\":0.18314109253697097,\"material\":1,\"action\":0,\"size\":0.0724780791439116,\"hollowness\":0.558389174938202,\"hardness\":0.9195346702821553,\"damping\":0.15342802210943773,\"duration\":0.6081527536851354},\"generator\":\"*\",\"selectedGenerator\":\"generate_glass_ping\",\"renderSeed\":0.6980204835999757}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

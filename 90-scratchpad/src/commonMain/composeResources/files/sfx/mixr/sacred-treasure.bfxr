@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.5168225324479863,
+    "sources": "[{\"synth\":\"Jinglr\",\"name\":\"Message\",\"params\":{\"masterVolume\":0.5,\"seed\":0.6379863798637987,\"instrumentSeed\":69389,\"phrase\":\"[{\\\"degree\\\":1,\\\"beats\\\":0.75},{\\\"degree\\\":5,\\\"beats\\\":1}]\",\"instrument\":0,\"key\":0,\"scale\":2,\"contour\":4,\"rhythm\":1,\"noteCount\":2,\"octave\":5,\"tempo\":186.79150245152414,\"swing\":0,\"brightness\":0.25873074494302273,\"decay\":0.09669830988161265,\"echo\":0},\"generator\":\"*\",\"selectedGenerator\":\"generate_message\",\"renderSeed\":0.1451150868088007},{\"synth\":\"Choirr\",\"name\":\"Ominous\",\"params\":{\"masterVolume\":0.5,\"seed\":0.8051088948268443,\"harmony\":2,\"duration\":2.8747320784255863,\"pitch\":0.22190431684255602,\"voices\":8,\"vowel\":0.2106459226645529,\"detune\":0.4082360981381498,\"swell\":0.31409938238793983,\"breath\":0.1916832773759961,\"motion\":0.40772513619158424},\"generator\":\"*\",\"selectedGenerator\":\"generate_ominous\",\"renderSeed\":0.2869271116796881}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

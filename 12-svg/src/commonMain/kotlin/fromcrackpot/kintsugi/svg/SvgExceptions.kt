@@ -3,14 +3,10 @@ package fromcrackpot.kintsugi.svg
 import fromcrackpot.kintsugi.scenegraph.nodes.GroupNode
 
 /**
- * The violation of the `/v1` format by a document or scene — the sealed base of every failure the
- * module's entry points raise.
+ * The violation of the `/v1` format by a document or scene. It is the sealed base of every failure
+ * the module's entry points raise.
  *
- * `parseSvg` surfaces each format violation as a subtype of this class naming its condition, so one
- * catch covers "this text does not load"; only XML well-formedness errors from the underlying
- * reader fall outside the hierarchy. Messages end with the source line/column when the reader knows
- * it. The serialize side shares the hierarchy: [MissingViewBoxException], its one failure, is a
- * subtype too.
+ * - One catch covers "this text does not load". Only XML well-formedness errors fall outside.
  */
 public sealed class SvgFormatException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
 
@@ -19,8 +15,8 @@ private fun at(location: String?): String = location?.let { " at $it" } ?: ""
 /**
  * The rejection of an SVG element outside the `/v1` vocabulary.
  *
- * Thrown for a child element that is none of `<rect>`, `<circle>`, `<line>`, `<polygon>`,
- * `<polyline>`, `<g>`, `<use>`, and for a document whose root element is not `<svg>`.
+ * - Thrown for a child outside `<rect>`, `<circle>`, `<line>`, `<polygon>`, `<polyline>`, `<g>`, `<use>`.
+ * - Thrown for a document whose root element is not `<svg>`.
  */
 public class UnsupportedSvgElementException(
     /** The offending element's local name, without brackets or namespace prefix. */
@@ -28,17 +24,14 @@ public class UnsupportedSvgElementException(
     location: String? = null,
 ) : SvgFormatException("Unsupported SVG element <$elementName>" + at(location))
 
-/** The rejection of input with no `<svg>` element at all — nothing to parse. */
+/** The rejection of input with no `<svg>` element at all, leaving nothing to parse. */
 public class MissingSvgRootException :
     SvgFormatException("Document has no <svg> root element")
 
 /**
  * The absence of a viewport on the document or scene root.
  *
- * The parse side throws it when the root `<svg>` carries neither a `viewBox` nor the
- * `width`/`height` fallback pair; the serialize side when the root [GroupNode]'s `bounds` is
- * `null`. The viewport anchors the format's viewBox-relative coordinate mapping, so neither
- * direction can proceed without one.
+ * - Parse: the root `<svg>` has neither `viewBox` nor `width`/`height`. Serialize: the root's bounds is `null`.
  */
 public class MissingViewBoxException :
     SvgFormatException("SVG root has no viewBox and no width/height attributes")
@@ -46,11 +39,8 @@ public class MissingViewBoxException :
 /**
  * The rejection of a `<rect>` that fits neither of the element's two readings.
  *
- * The rectangle reading requires all of `x`, `y`, `width`, `height`, rejects rounded corners
- * (non-zero `rx`/`ry`), and rejects zero or negative extents — an authoring error stays an error
- * rather than silently re-anchoring the rectangle. The flat-point reading
- * (`k:type="flat-point"`) requires a square `<rect>` of positive side: the side is the marker
- * size the point renders at, so a non-square rect carries no single size to read.
+ * - A rectangle needs `x`, `y`, `width`, `height`, positive extents, and no rounded corners.
+ * - A flat point (`k:type="flat-point"`) needs a square of positive side, its marker size.
  */
 public class MalformedRectException(
     reason: String,
@@ -60,8 +50,7 @@ public class MalformedRectException(
 /**
  * The rejection of a `<line k:type="line">` missing part of its geometry.
  *
- * The infinite-line reading requires all of `x1`, `y1`, `x2`, `y2`. Two coincident attribute
- * points are not rejected here — they parse into a degenerate line, kept as data.
+ * - Needs all of `x1`, `y1`, `x2`, `y2`. Coincident points parse into a degenerate line, kept as data.
  */
 public class MalformedLineException(
     reason: String,
@@ -71,8 +60,7 @@ public class MalformedLineException(
 /**
  * The rejection of a bare `<line>` that builds no segment.
  *
- * The segment reading requires all of `x1`, `y1`, `x2`, `y2`, naming two distinct points —
- * coincident endpoints leave no segment to build.
+ * - Needs all of `x1`, `y1`, `x2`, `y2`, naming two distinct points.
  */
 public class MalformedSegmentException(
     reason: String,
@@ -82,9 +70,7 @@ public class MalformedSegmentException(
 /**
  * The rejection of a `<polygon>` whose points close no polygon.
  *
- * Thrown for a missing `points` attribute, a non-numeric coordinate, an odd coordinate count
- * (never silently dropped the way browsers drop a trailing number), or a vertex list the CGA
- * `Polygon` constructor rejects — that diagnostic is carried through in the message.
+ * - Missing or non-numeric `points`, an odd coordinate count, or a vertex list `Polygon` rejects.
  */
 public class MalformedPolygonException(
     reason: String,
@@ -94,9 +80,7 @@ public class MalformedPolygonException(
 /**
  * The rejection of a `<polyline>` whose points chain into no polyline.
  *
- * Thrown for a missing `points` attribute, a non-numeric coordinate, an odd coordinate count
- * (never silently dropped the way browsers drop a trailing number), or a vertex list the CGA
- * `Polyline` constructor rejects — that diagnostic is carried through in the message.
+ * - Missing or non-numeric `points`, an odd coordinate count, or a vertex list `Polyline` rejects.
  */
 public class MalformedPolylineException(
     reason: String,
@@ -106,9 +90,7 @@ public class MalformedPolylineException(
 /**
  * The rejection of a `<circle>` with no usable radius.
  *
- * Thrown for a missing `r` attribute or a non-positive `r`. An imaginary circle is not written
- * this way — it persists with a positive `r` and a `k:flags` marker — so a non-positive radius
- * is always an authoring error.
+ * - Thrown for a missing or non-positive `r`. An imaginary circle persists with a positive `r` and `k:flags`.
  */
 public class MalformedCircleException(
     reason: String,
@@ -118,9 +100,7 @@ public class MalformedCircleException(
 /**
  * The rejection of a round-point `<circle>` (`k:type="round-point"`) with no usable marker size.
  *
- * Thrown for a missing `r` attribute or a non-positive `r`. On a round point `r` is the render
- * marker's radius, not geometry — the algebraic weight rides the optional `k:aw` attribute,
- * which is unconstrained here.
+ * - Thrown for a missing or non-positive `r`, which on a round point is the marker's radius.
  */
 public class MalformedRoundPointException(
     reason: String,
@@ -130,10 +110,8 @@ public class MalformedRoundPointException(
 /**
  * The rejection of a dipole carrier `<g k:type="dipole">` that holds no valid endpoint pair.
  *
- * The carrier must contain exactly two `<circle k:type="round-point">` children — child order is
- * the dipole's orientation — plus at most the connector `<line>` chrome, which is read past and
- * never interpreted. Thrown for any other child element, a missing or surplus round point, two
- * coincident round-point children (no dipole exists to build), or an unclosed carrier `<g>`.
+ * - It needs exactly two distinct round-point `<circle>` children, in orientation order.
+ * - Only the connector `<line>` may accompany them. The carrier must be closed.
  */
 public class MalformedDipoleException(
     reason: String,
@@ -143,8 +121,7 @@ public class MalformedDipoleException(
 /**
  * The rejection of a `viewBox` attribute that describes no viewport.
  *
- * The value must split into the four numbers `min-x min-y width height` (whitespace or comma
- * separated) with positive width and height.
+ * - It needs four numbers `min-x min-y width height`, with positive width and height.
  */
 public class MalformedViewBoxException(
     /** The attribute text exactly as it appeared in the document. */
@@ -154,9 +131,7 @@ public class MalformedViewBoxException(
 /**
  * The rejection of a paint value outside the `/v1` color grammar.
  *
- * `fill` and `stroke` accept `none`, hex colors (`#rgb`, `#rrggbb`, `#rgba`, `#rrggbbaa`), and
- * the `rgb()`/`rgba()` functions. Anything else — named colors, `currentColor`, `inherit`,
- * `url()` references, `hsl()` — is rejected rather than guessed at.
+ * - Accepts `none`, hex colors, `rgb()` and `rgba()`. Named colors, `currentColor`, `url()` and `hsl()` are rejected.
  */
 public class UnsupportedPaintException(
     /** The paint text exactly as it appeared in the attribute. */
@@ -167,10 +142,7 @@ public class UnsupportedPaintException(
 /**
  * The rejection of a `<use>` that doesn't fit the format's external-template form.
  *
- * `href` is required and must name an external document — a bare fragment (`href="#id"`, an
- * internal reference) is outside `/v1`, though a `#fragment` suffix after a document path is
- * tolerated and ignored. `width` and `height` are rejected: a template is never scaled, because
- * one CGA unit is one SVG user unit in every document. The element must be empty and closed.
+ * - `href` must name an external document. `width` and `height` are rejected, since templates never scale.
  */
 public class MalformedUseException(
     reason: String,
@@ -180,12 +152,10 @@ public class MalformedUseException(
 /**
  * The absence of a template document a `<use>` references.
  *
- * `parseSvg` resolves each `<use>` against its templates map; an [href] with no entry throws.
- * `scanSvgRefs` lists the documents a layout needs, so a caller can fetch them all before
- * parsing.
+ * - [scanSvgRefs] lists the documents a layout needs, so they can all be fetched before parsing.
  */
 public class MissingTemplateException(
-    /** The referenced document path — the `<use>` element's `href` up to any `#`. */
+    /** The referenced document path: the `<use>` element's `href` up to any `#`. */
     public val href: String,
     location: String? = null,
 ) : SvgFormatException("No template document supplied for <use> href=\"$href\"" + at(location))
@@ -193,22 +163,15 @@ public class MissingTemplateException(
 /**
  * The rejection of a template document that violates the template size contract.
  *
- * A document referenced by `<use>` must declare explicit `width` and `height` equal to its
- * viewBox extents — the size a browser renders the reference at; a sizeless nested `<svg>`
- * would silently inflate to 100%.
+ * - A template must declare `width` and `height` equal to its viewBox extents.
  */
 public class MalformedTemplateException(
     reason: String,
     location: String? = null,
 ) : SvgFormatException("Malformed template: $reason" + at(location))
 
-/**
- * The rejection of template documents that reference each other in a loop.
- *
- * Templates may `<use>` further templates; expansion tracks the documents being expanded and
- * throws when a `<use>` names one already on that chain, instead of recursing forever.
- */
+/** The rejection of template documents that reference each other in a loop. */
 public class SvgTemplateCycleException(
-    /** The documents in expansion order; the last entry names the document that closed the loop. */
+    /** The documents in expansion order. The last entry names the document that closed the loop. */
     public val chain: List<String>,
 ) : SvgFormatException("Template reference cycle: " + chain.joinToString(" -> "))

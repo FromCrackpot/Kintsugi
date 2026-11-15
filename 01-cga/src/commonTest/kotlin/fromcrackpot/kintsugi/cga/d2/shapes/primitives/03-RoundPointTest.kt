@@ -1,5 +1,6 @@
 package fromcrackpot.kintsugi.cga.d2.shapes.primitives
 
+import fromcrackpot.kintsugi.cga.d2.exceptions.AtInfinityException
 import fromcrackpot.kintsugi.cga.d2.exceptions.DegenerateCircleException
 import fromcrackpot.kintsugi.cga.d2.transforms.T
 import fromcrackpot.kintsugi.cga.d2.transforms.primitives.times
@@ -127,7 +128,7 @@ class RoundPointTest {
 
     @Test
     fun `container of an imaginary round point is an imaginary circle with the same radius2`() {
-        // container.radius2 = az²·radius2 — az = 1 preserves it exactly.
+        // container.radius2 = az²·radius2, so az = 1 preserves it exactly.
         val r = RoundPoint(0.0, 0.0, 1.0, -3.0)
         val container = r.container
         assertEquals(Circle(0.0, 0.0, 3.0, 1.0), container)
@@ -145,7 +146,7 @@ class RoundPointTest {
 
     @Test
     fun `sub-quantum negative radius2 is not imaginary`() {
-        // r² = 2·(0.5 − 1e-13) − 1 = −2e-13 — negative raw, but below the SCALE quantum.
+        // r² = 2·(0.5 − 1e-13) − 1 = −2e-13: negative raw, but below the SCALE quantum.
         // isImaginary is a rounded classification (like isAtInfinity), so FP noise on the
         // null cone classifies real; radius2 itself stays raw data.
         val r = RoundPoint(1.0, 0.0, 1.0, 0.5 - 1e-13)
@@ -154,7 +155,7 @@ class RoundPointTest {
     }
 
     @Test
-    fun `point difference is the displacement between positions, as a direction`() {
+    fun `point difference is the displacement between positions - as a direction`() {
         val diff = RoundPoint(3.0, 4.0) - RoundPoint(1.0, 1.0)
         assertIs<Direction>(diff)
         assertEquals(Direction(2.0, 3.0), diff)
@@ -175,6 +176,14 @@ class RoundPointTest {
     @Test
     fun `round directions difference to a flat direction`() {
         assertEquals(Direction(2.0, 2.0), RoundDirection(3.0, 4.0) - RoundDirection(1.0, 2.0))
+    }
+
+    @Test
+    fun `a position and a point at infinity have no difference`() {
+        val position = RoundPoint(1.0, 2.0)
+        val direction = RoundDirection(3.0, 4.0)
+        assertFailsWith<AtInfinityException> { direction - position }
+        assertFailsWith<AtInfinityException> { position - direction }
     }
 
     /*

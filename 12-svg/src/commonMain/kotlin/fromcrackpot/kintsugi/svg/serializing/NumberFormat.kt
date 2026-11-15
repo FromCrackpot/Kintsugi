@@ -13,7 +13,7 @@ package fromcrackpot.kintsugi.svg.serializing
  * otherwise the shortest round-trippable representation from `Double.toString`.
  *
  * Caveat: `Double.toString` is platform-divergent in KMP (JVM `"1.0E7"` vs wasmJs
- * `"10000000"`) — both are valid SVG numbers and Double-round-trip safe, but byte-identical
+ * `"10000000"`). Both are valid SVG numbers and Double-round-trip safe, but byte-identical
  * output across targets is NOT guaranteed. Don't golden-file or hash serializer output
  * cross-platform.
  */

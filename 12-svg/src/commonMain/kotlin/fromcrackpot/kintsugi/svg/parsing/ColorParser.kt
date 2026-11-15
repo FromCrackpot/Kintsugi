@@ -9,8 +9,8 @@ import nl.adaptivity.xmlutil.XmlReader
  * `rgb(r,g,b)`, `rgba(r,g,b,a)` (a in 0..1).
  *
  * Canonicalization: any zero-alpha color (`#00000000`, `#12345600`, `rgba(255,0,0,0)`, …)
- * collapses to [ShapeColor.NONE] — the SVG model treats all fully-transparent paints as
- * equivalent to "no paint."
+ * collapses to [ShapeColor.NONE]. The SVG model treats every fully-transparent paint as
+ * "no paint."
  */
 internal fun parseColor(raw: String): ShapeColor? {
     val v = raw.trim().lowercase()
@@ -84,8 +84,8 @@ private fun String.byteAt(i: Int): Int? {
 
 /**
  * Read a paint attribute (`fill` or `stroke`) and decode it via [parseColor]. A null return from
- * [parseColor] becomes [UnsupportedPaintException] carrying the raw value and source location —
- * one exception covers both fill and stroke since color parsing is identical for both.
+ * [parseColor] becomes [UnsupportedPaintException] carrying the raw value and source location.
+ * One exception covers both fill and stroke, since their color parsing is identical.
  */
 internal fun XmlReader.readColorAttr(name: String, location: String?): ShapeColor? =
     getAttributeValue(null, name)?.let { raw ->

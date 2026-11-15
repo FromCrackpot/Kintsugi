@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.2968225324479863,
+    "sources": "[{\"synth\":\"Fractr\",\"name\":\"Ice Wall\",\"params\":{\"masterVolume\":0.5,\"seed\":0.15345948073081672,\"material\":1,\"duration\":1.8546813419321553,\"fragments\":44,\"fragmentSize\":0.5951394018251449,\"spread\":0.631551799736917,\"decay\":0.49139509575907137,\"gravity\":0.3066309582442045,\"bounce\":0.24353452604264023,\"stress\":0.686058077972848,\"shards\":0.35,\"fracture\":0.9159301999025047},\"generator\":\"*\",\"selectedGenerator\":\"generate_ice_wall\",\"renderSeed\":0.12487821746617556},{\"synth\":\"Crittr\",\"name\":\"Clockwork Pet\",\"params\":{\"masterVolume\":0.5,\"seed\":0.815871937200427,\"voice\":5,\"duration\":1.0220148991327733,\"pitch\":0.5969766629976221,\"size\":0.1749083211016841,\"morph\":0.2915705462684855,\"calls\":4,\"gap\":0.36477094682632016,\"contour\":0.6830653368961066,\"growl\":0.07303906675195321,\"breath\":0.08328151279594749,\"flutter\":0.2505763886449859},\"generator\":\"*\",\"selectedGenerator\":\"generate_clockwork_pet\",\"renderSeed\":0.42341447132639587}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

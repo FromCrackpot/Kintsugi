@@ -1,8 +1,8 @@
 package fromcrackpot.kintsugi.cga.d2.shapes.composites
 
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.*
-import fromcrackpot.kintsugi.cga.d2.products.join
-import fromcrackpot.kintsugi.cga.d2.queries.predicates.on
+import fromcrackpot.kintsugi.cga.d2.operations.products.join
+import fromcrackpot.kintsugi.cga.d2.operations.queries.predicates.on
 import kotlin.test.*
 
 class SegmentTest {
@@ -30,7 +30,7 @@ class SegmentTest {
     @Test
     fun `segment from two RoundPoints matches the join dipole component-for-component`() {
         // The (RoundPoint, RoundPoint) ctor wedges directly without the FlatPoint→RoundPoint
-        // lift step — the components must agree with the explicit `join` Dipole.
+        // lift step. The components must agree with the explicit `join` Dipole.
         val a = RoundPoint(-10.0, 0.0)
         val b = RoundPoint(10.0, 0.0)
         val segment = Segment(a, b)
@@ -47,7 +47,7 @@ class SegmentTest {
     fun `segment exposes start and end as the dipole's contained round points`() {
         val segment = Segment(FlatPoint(-10.0, 0.0), FlatPoint(10.0, 0.0))
         // start/end are the two contained round points of the underlying blade. The dipole's
-        // attitude convention puts start = center − r·attitude, end = center + r·attitude — for
+        // attitude convention puts start = center − r·attitude, end = center + r·attitude. For
         // a horizontal dipole that means start is the (+x) endpoint, end the (−x) one.
         assertEquals(setOf(RoundPoint(-10.0, 0.0), RoundPoint(10.0, 0.0)), setOf(segment.start, segment.end))
     }
@@ -73,14 +73,35 @@ class SegmentTest {
         assertSame(b.toRound, segment.end)
     }
 
+    private class CopiedSegment(segment: Segment) : Segment(segment)
+
+    @Test
+    fun `copy ctor shares the dipole and the endpoints' instances`() {
+        val segment = Segment(FlatPoint(1.0, 2.0), FlatPoint(4.0, -3.0))
+        val copy = CopiedSegment(segment)
+        assertSame(segment.toDipole, copy.toDipole)
+        assertSame(segment.start, copy.start)
+        assertSame(segment.end, copy.end)
+    }
+
+    @Test
+    fun `copy ctor copies degenerate segments as is`() {
+        val atInfinity = Dipole(0.0, 0.0, 1.0, 0.0, 0.0, 0.0).toSegment
+        val imaginary = Dipole(1.0, 0.0, 1.0, 0.0, 0.0, 0.0).toSegment
+        val zeroLength = Dipole(0.0, 1.0, 0.0, 0.0, 0.0, 0.0).toSegment
+        for (segment in listOf(atInfinity, imaginary, zeroLength)) {
+            assertSame(segment.toDipole, CopiedSegment(segment).toDipole)
+        }
+    }
+
     /*
     ORDERING
      */
 
     @Test
-    fun `reversing endpoints yields a non-equal segment (sign-flipped blade)`() {
+    fun `reversing endpoints yields a non-equal segment - sign-flipped blade`() {
         // Segment(A, B) and Segment(B, A) lift to negated 6-component blades, so component-strict
-        // equality fails — the orientation is meaningful (matches SVG x1,y1 → x2,y2 fidelity).
+        // equality fails: the orientation is meaningful (matches SVG x1,y1 → x2,y2 fidelity).
         val a = FlatPoint(-10.0, 0.0)
         val b = FlatPoint(10.0, 0.0)
         assertNotEquals(Segment(a, b), Segment(b, a))
@@ -94,9 +115,9 @@ class SegmentTest {
     }
 
     @Test
-    fun `canonical returns a Segment, not a bare Dipole (covariant return)`() {
+    fun `canonical returns a Segment - not a bare Dipole - covariant return`() {
         val flipped = Segment(FlatPoint(10.0, 0.0), FlatPoint(-10.0, 0.0))
-        // Static type of `canonical` on a Segment receiver is Segment — assignment to Segment
+        // The static type of `canonical` on a Segment receiver is Segment: assignment to Segment
         // compiles without cast, and the runtime class is Segment.
         val canonical: Segment = flipped.canonical
         assertEquals(Segment::class, canonical::class)
@@ -121,8 +142,8 @@ class SegmentTest {
      */
 
     @Test
-    fun `dipole is never equal to a segment with matching components (different types)`() {
-        // Segment is not a Dipole subtype — under composition, the algebra/composite boundary is a
+    fun `dipole is never equal to a segment with matching components - different types`() {
+        // Segment is not a Dipole subtype. Under composition, the algebra/composite boundary is a
         // private-field invariant, so equality across the types falls out for free.
         val a = RoundPoint(-10.0, 0.0)
         val b = RoundPoint(10.0, 0.0)
@@ -151,7 +172,7 @@ class SegmentTest {
      */
 
     @Test
-    fun `toDipole yields the inner Dipole - same instance, equal to a freshly built Dipole`() {
+    fun `toDipole yields the inner Dipole - same instance - equal to a freshly built Dipole`() {
         val segment = Segment(FlatPoint(-10.0, 0.0), FlatPoint(10.0, 0.0))
         val asDipole: Dipole = segment.toDipole
         // Runtime class is exactly Dipole.
@@ -165,7 +186,7 @@ class SegmentTest {
         assertEquals(segment.px, asDipole.px)
         assertEquals(segment.py, asDipole.py)
         assertEquals(segment.pz, asDipole.pz)
-        // Different types are never equal — Segment is not a Dipole subtype.
+        // Different types are never equal: Segment is not a Dipole subtype.
         assertNotEquals<Any>(segment, asDipole)
         // But toDipole == another Dipole built the same way.
         val joinDipole = RoundPoint(-10.0, 0.0) join RoundPoint(10.0, 0.0)
@@ -189,7 +210,7 @@ class SegmentTest {
     @Test
     fun `toSegment path has no cached endpoints - start and end fall back to the derived points`() {
         // Promoting a bare Dipole carries no original endpoint instances; start/end are the
-        // Dipole-derived reconstructions — rounded-equal to the join operands, not identical.
+        // Dipole-derived reconstructions, rounded-equal to the join operands but not identical.
         val a = RoundPoint(-10.0, 0.0)
         val b = RoundPoint(10.0, 0.0)
         val promoted = (a join b).toSegment
@@ -238,11 +259,11 @@ class SegmentTest {
     }
 
     @Test
-    fun `radius stays robust at large coordinates (difference-first path)`() {
-        // The Dipole-forwarded radius² squares wedge components carrying O(coord³·ε) error — at
+    fun `radius stays robust at large coordinates - difference-first path`() {
+        // The Dipole-forwarded radius² squares wedge components carrying O(coord³·ε) error. At
         // ~10⁷ it returns garbage (−26108 here) and goes spuriously imaginary. Generic positions
         // that corrupted also fail the ctor's Plücker gate (loud), but exact-cancellation
-        // alignments like this axis-aligned segment construct fine — the silent corridor the
+        // alignments like this axis-aligned segment construct fine: the silent corridor the
         // difference-first path must cover.
         val segment = Segment(FlatPoint(1e7, 0.0), FlatPoint(1e7 + 4.0, 0.0))
         assertEquals(4.0, segment.radius2)

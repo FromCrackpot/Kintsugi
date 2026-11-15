@@ -1,6 +1,6 @@
 package fromcrackpot.kintsugi.svg
 
-import fromcrackpot.kintsugi.cga.d2.products.join
+import fromcrackpot.kintsugi.cga.d2.operations.products.join
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polygon
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Segment
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.*
@@ -107,7 +107,7 @@ class SerializeSvgTest {
     }
 
     @Test fun `dipole with at-infinity endpoints is silently skipped`() {
-        // Dipole at infinity (zero g-carrier, gz ≠ 0 — e.g. the meet of concentric circles):
+        // Dipole at infinity (zero g-carrier, gz ≠ 0, e.g. the meet of concentric circles):
         // its start/end round points are at infinity, so no <circle> children can be encoded.
         val out = serializeSvg(
             GroupNode(
@@ -185,7 +185,7 @@ class SerializeSvgTest {
                 children = listOf(FlatPointNode(FlatPoint(0.0, 0.0), ShapeStyle(fill = ShapeColor.rgb(0x12, 0x34, 0x56, 0x00), size = 8.0))),
             )
         ).normalizeXml()
-        // #12345600 has alpha=0 — collapses to ShapeColor.NONE which formats as "none".
+        // #12345600 has alpha=0, so it collapses to ShapeColor.NONE, which formats as "none".
         assertTrue(out.contains("""fill="none""""), "actual:\n$out")
         assertTrue(!out.contains("12345600"), "actual:\n$out")
     }
@@ -289,7 +289,7 @@ class SerializeSvgTest {
                 ),
             )
         ).normalizeXml()
-        // Endpoints are (±sqrt(5000), 0) — irrational, so don't pin x1/x2. Pin attribute order + y values.
+        // Endpoints are (±sqrt(5000), 0), irrational, so don't pin x1/x2. Pin attribute order + y values.
         val pattern = Regex("""<line k:type="line" x1="[^"]+" y1="50" x2="[^"]+" y2="50" stroke="#ff0000" stroke-width="2"/>""")
         assertTrue(pattern.containsMatchIn(out), "actual:\n$out")
     }
@@ -357,7 +357,7 @@ class SerializeSvgTest {
     }
 
     @Test fun `Segment with butt strokeCap omits stroke-linecap`() {
-        // Butt is the SVG default, so it's an optional feature attribute (like k:flags) — no attribute.
+        // Butt is the SVG default, so it's an optional feature attribute (like k:flags): no attribute.
         val out = serializeSvg(
             GroupNode(
                 bounds = SceneBounds(0.0, 0.0, 100.0, 100.0),
@@ -370,6 +370,45 @@ class SerializeSvgTest {
             )
         ).normalizeXml()
         assertTrue(!out.contains("stroke-linecap"), "actual:\n$out")
+    }
+
+    @Test fun `imaginary Segment is emitted with k flags imaginary`() {
+        // radius² = −1 on x = −1: the real-valued endpoints (−1, 1) and (−1, −1) → SVG (49, 49), (49, 51).
+        val imaginary = Dipole(1.0, 0.0, 1.0, 0.0, 0.0, 0.0).toSegment
+        val out = serializeSvg(
+            GroupNode(
+                bounds = SceneBounds(0.0, 0.0, 100.0, 100.0),
+                children = listOf(SegmentNode(imaginary)),
+            )
+        ).normalizeXml()
+        assertEquals(
+            svg(
+                "0 0 100 100",
+                """<line x1="49" y1="49" x2="49" y2="51" stroke="#000000" stroke-width="1" k:flags="imaginary"/>""",
+            ),
+            out,
+        )
+    }
+
+    @Test fun `Segment at infinity is silently skipped`() {
+        val out = serializeSvg(
+            GroupNode(
+                bounds = SceneBounds(0.0, 0.0, 100.0, 100.0),
+                children = listOf(SegmentNode(Dipole(0.0, 0.0, 1.0, 0.0, 0.0, 0.0).toSegment)),
+            )
+        ).normalizeXml()
+        assertEquals(svg("0 0 100 100"), out)
+    }
+
+    @Test fun `zero-length Segment is silently skipped`() {
+        // Its endpoints coincide, so the <line> would not reload.
+        val out = serializeSvg(
+            GroupNode(
+                bounds = SceneBounds(0.0, 0.0, 100.0, 100.0),
+                children = listOf(SegmentNode(Dipole(0.0, 1.0, 0.0, 0.0, 0.0, 0.0).toSegment)),
+            )
+        ).normalizeXml()
+        assertEquals(svg("0 0 100 100"), out)
     }
 
     @Test fun `Line at infinity is silently skipped`() {
@@ -427,7 +466,7 @@ class SerializeSvgTest {
     }
 
     @Test fun `imaginary dipole is emitted without k flags and round-trips via start join end`() {
-        // Dipole(1, 0, 1, 0, 0, 0) has radius² = -1 (imaginary). No flag needed — start ∧ end
+        // Dipole(1, 0, 1, 0, 0, 0) has radius² = -1 (imaginary). No flag needed: start ∧ end
         // reconstructs the blade canonically thanks to the sqrt(|r²|) substitution preserving gz².
         val dipole = Dipole(1.0, 0.0, 1.0, 0.0, 0.0, 0.0)
         assertTrue(dipole.isImaginary)
@@ -441,10 +480,21 @@ class SerializeSvgTest {
         assertTrue(!out.contains("k:flags"), "imaginary dipole must not emit k:flags; actual:\n$out")
     }
 
+    @Test fun `zero-radius dipole is silently skipped`() {
+        // A tangent meet: both round-point children land on one point, so the <g> would not reload.
+        val out = serializeSvg(
+            GroupNode(
+                bounds = SceneBounds(0.0, 0.0, 100.0, 100.0),
+                children = listOf(DipoleNode(Dipole(0.0, 1.0, 0.0, 0.0, 0.0, 0.0))),
+            )
+        ).normalizeXml()
+        assertEquals(svg("0 0 100 100"), out)
+    }
+
     /* GROUPS (GroupNode → <g>) */
 
     @Test fun `bare GroupNode emits a plain g with no k type`() {
-        // Bare <g> is the GroupNode carrier — no k:type, mirrors bare-<circle>-is-Circle.
+        // Bare <g> is the GroupNode carrier: no k:type, mirroring bare-<circle>-is-Circle.
         val out = serializeSvg(
             GroupNode(
                 bounds = SceneBounds(0.0, 0.0, 100.0, 100.0),
@@ -515,7 +565,7 @@ class SerializeSvgTest {
         assertEquals(null, nested.bounds)
     }
 
-    @Test fun `GroupNode with k type dipole shape still serializes as a dipole g, not a plain g`() {
+    @Test fun `GroupNode with k type dipole shape still serializes as a dipole g - not a plain g`() {
         // DipoleNode sits at the same level as a nested GroupNode; make sure the writer's
         // node dispatch routes through writeDipoleGroup (k:type="dipole" carrier) and NOT through
         // writeGroupElement (the new plain-<g> path).
@@ -531,7 +581,7 @@ class SerializeSvgTest {
         assertTrue(!out.contains("<g>"), "Dipole carrier must not collide with plain-<g>, got:\n$out")
     }
 
-    /* K:TAGS — optional feature attribute, emitted only when non-empty */
+    /* K:TAGS: optional feature attribute, emitted only when non-empty */
 
     @Test fun `tagged polygon emits k tags space-joined after style attrs`() {
         val out = serializeSvg(

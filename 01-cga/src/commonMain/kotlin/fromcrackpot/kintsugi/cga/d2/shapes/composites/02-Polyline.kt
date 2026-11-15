@@ -7,19 +7,17 @@ import fromcrackpot.kintsugi.cga.cached
 import fromcrackpot.kintsugi.cga.narrowed
 
 /**
- * Open chain of straight edges through a sequence of vertices.
+ * An open chain of straight edges through a sequence of vertices. N vertices make N − 1 [edges].
  *
- * The open sibling of [Polygon]: N [vertices] make N − 1 [edges], with no closing edge and no
- * interior. Starting vertex and traversal direction are data — [equals] distinguishes both.
- * The first and last vertices may coincide — a closed walk, detected at the `SCALE` quantum
- * (see [toPolygon]); only consecutive coincident vertices are rejected.
+ * - The starting vertex and the traversal direction are data. [equals] distinguishes both.
+ * - The first and last vertices may coincide, as in a closed walk. Only consecutive ones may not.
  *
- * @constructor Validates the vertex list and throws on degenerate input.
- * @throws DegeneratePolylineException When fewer than 2 vertices are given, a vertex lies at
+ * @constructor Validates the vertex list.
+ * @throws DegeneratePolylineException when fewer than 2 vertices are given, a vertex lies at
  *   infinity, or two consecutive vertices coincide at the `SCALE` quantum.
  */
 public open class Polyline(
-    /** The points the chain passes through — finite [FlatPoint]s in traversal order. */
+    /** The finite [FlatPoint]s the chain passes through, in traversal order. */
     public val vertices: List<FlatPoint>,
 ) : Composite {
 
@@ -46,22 +44,18 @@ public open class Polyline(
      */
 
     /**
-     * The edges, one [Segment] per consecutive vertex pair — N − 1 for N vertices, no wrap.
+     * The edges, one [Segment] per consecutive vertex pair. N vertices give N − 1 edges, with no wrap.
      *
-     * Adjacent edges share their endpoint instances: `edges[i].end === edges[i + 1].start`.
+     * - Adjacent edges share their endpoint instances: `edges[i].end === edges[i + 1].start`.
      */
     public val edges: List<Segment> by cached {
         vertices.zipWithNext { a, b -> Segment(a, b) }
     }
 
     /**
-     * The closed [Polygon] over the same walk.
+     * The closed [Polygon] over the same walk. A last vertex that coincides with the first is dropped.
      *
-     * A last vertex coinciding with the first at the `SCALE` quantum is dropped — the
-     * polygon's closing edge is implicit.
-     *
-     * @throws DegeneratePolygonException When fewer than 3 vertices remain — a 2-vertex
-     *   polyline has no polygon form.
+     * @throws DegeneratePolygonException when fewer than 3 vertices remain.
      */
     public val toPolygon: Polygon by cached {
         Polygon(if (vertices.first() == vertices.last()) vertices.dropLast(1) else vertices)
@@ -72,18 +66,14 @@ public open class Polyline(
      */
 
     /**
-     * Returns this object rebuilt around the replacement geometry [polyline] — the hook the
-     * shape-preserving operations return through.
+     * Returns this object rebuilt around the replacement geometry [polyline]. Shape-preserving
+     * operations return through this hook.
      *
-     * Every operation that moves a polyline computes its result as a plain [Polyline] and
-     * returns it through this hook. This base implementation returns [polyline] itself; a
-     * subclass overrides it to rebuild an instance of its own class around [polyline], and
-     * every such operation then comes back as that class. The result's runtime class must
-     * equal the receiver's — the operations check it and fail with a named error when a
-     * subclass misses the override.
+     * - Override it to rebuild your subclass. Every generic operation then returns that class.
+     * - The result's runtime class must equal the receiver's, or the operations fail with a named error.
      *
      * @param polyline The replacement geometry.
-     * @return [polyline] itself; an override returns its own class rebuilt around [polyline].
+     * @return [polyline] itself. An override returns its own class rebuilt around [polyline].
      */
     public open fun copy(polyline: Polyline): Polyline = polyline
 
@@ -92,16 +82,13 @@ public open class Polyline(
     */
 
     /**
-     * Rounded identity over the vertex walk: equal when the vertex lists match pairwise at the
-     * `SCALE` quantum.
+     * Compares the vertex lists pairwise, rounded at the `SCALE` quantum.
      *
-     * Starting vertex and traversal direction both count — the reversed chain compares
-     * unequal. Identity is exact-class: a subclass instance and a plain [Polyline] never
-     * compare equal.
+     * - The starting vertex and the traversal direction count, so the reversed chain compares unequal.
+     * - Classes must match exactly. A subclass instance never equals a plain [Polyline].
      *
      * @param other The object to compare against.
-     * @return `true` iff [other] shares this object's exact class and its vertices all match
-     *   after rounding.
+     * @return `true` when [other] has this exact class and matching vertices.
      */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -115,27 +102,22 @@ public open class Polyline(
     /** Returns the hash of the rounded vertices, consistent with [equals]. */
     override fun hashCode(): Int = _hashCode
 
-    /** Returns the vertices — raw components, full stored precision. */
+    /** Returns the vertices at full stored precision. */
     override fun toString(): String = "Polyline(vertices=$vertices)"
 
-    /** Returns the vertices rounded at the `SCALE` quantum — the debug-output convention of every shape. */
+    /** Returns the vertices rounded at the `SCALE` quantum, for debug output. */
     public fun toStringRounded(): String = "Polyline(vertices=${vertices.map { it.toStringRounded() }})"
 }
 
 /**
  * `-Polyline => Polyline`<br>
- * Returns this chain walked in reverse — the same edges traversed from the other end.
+ * Returns this chain walked in reverse, from the other end over the same edges.
  *
- * Reverses the vertex order: the first vertex becomes the last and every edge flips its
- * running direction. The vertex instances are kept — only the traversal direction changes —
- * and reversing twice restores the original vertex list exactly. Identity is
- * traversal-sensitive, so a chain and its reversal compare unequal (a palindromic chain being
- * its own reversal). The result is the receiver's own class: the reversed geometry returns
- * through [Polyline.copy], preserving a subclass that overrides the hook.
+ * - Compares unequal to the original, unless the chain is a palindrome.
  *
- * @receiver The [Polyline] to reverse.
+ * @receiver The polyline to reverse.
  * @param T The receiver's type, preserved in the result.
- * @return The reversed polyline, as the receiver's class.
+ * @return The reversed polyline.
  */
 public operator fun <T : Polyline> T.unaryMinus(): T =
     narrowed(copy(Polyline(vertices.reversed())))

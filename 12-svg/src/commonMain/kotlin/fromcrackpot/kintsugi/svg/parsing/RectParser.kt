@@ -29,11 +29,12 @@ private val KNOWN_RECT_FLAGS = setOf(KFLAG_INSIDE_OUT)
  * Parses a `<rect>` element (cursor on its START_ELEMENT). The `k:type` fork:
  *
  * - `k:type="flat-point"` → [FlatPoint] (the tagged reading; square rect, side = render size).
- * - untagged (or unknown `k:type`, which warns) → rectangle [Polygon] — the untagged default,
- *   mirroring bare `<circle>` → Circle and bare `<line>` → Segment. **Parse-only**: there is no
- *   Rectangle type in `:cga`; the element decodes through `Polygon.Rectangle` and re-serializes
- *   as `<polygon>`. There is no background reading — a full-bleed rect is just a rectangle
- *   Polygon that happens to cover the viewBox.
+ * - untagged (or unknown `k:type`, which warns) → rectangle [Polygon], the untagged default,
+ *   mirroring bare `<circle>` → Circle and bare `<line>` → Segment.
+ * - **Parse-only**: `:cga` has no Rectangle type. The element decodes through `Polygon.Rectangle`
+ *   and re-serializes as `<polygon>`.
+ * - There is no background reading. A full-bleed rect is just a rectangle Polygon that happens to
+ *   cover the viewBox.
  */
 internal fun XmlReader.parseRectElement(viewBox: SceneBounds, inherited: InheritedStyle): ShapeNode {
     val loc = extLocationInfo?.toString()
@@ -104,16 +105,15 @@ private fun flatPointFrom(
 /**
  * Builds a `PolygonNode` from the attributes of a bare `<rect>` (no `k:type`).
  *
- * All four geometry attributes are **required** — deliberately stricter than flat-point/circle's
- * default-absent-position-to-0 posture: a designer `<rect>` without extents is a mistake, not a
- * degenerate default. Non-zero `rx`/`ry` (rounded corners) are unsupported geometry and throw
- * rather than silently flattening the corners on load; zero/absent are fine.
- * `k:flags="inside-out"` reverses the factory's counter-clockwise walk, so the flagged rect
- * decodes as an inside-out rectangle Polygon — the wall reading.
- *
- * Zero/negative extents collapse in `:cga` — [DegeneratePolygonException] wraps into
- * [MalformedRectException] at this boundary (rect vocabulary — the caller authored a `<rect>`),
- * per the exception-wrapping contract.
+ * - All four geometry attributes are **required**. This is stricter than flat-point/circle, which
+ *   default an absent position to 0: a designer `<rect>` without extents is a mistake.
+ * - Non-zero `rx`/`ry` (rounded corners) are unsupported geometry and throw, instead of silently
+ *   flattening the corners. Zero or absent is fine.
+ * - `k:flags="inside-out"` reverses the factory's counter-clockwise walk, so the flagged rect
+ *   decodes as an inside-out rectangle Polygon: the wall reading.
+ * - Zero/negative extents collapse in `:cga`. [DegeneratePolygonException] wraps into
+ *   [MalformedRectException] here (rect vocabulary, since the caller authored a `<rect>`), per the
+ *   exception-wrapping contract.
  */
 private fun rectangleFrom(
     x: Double?,

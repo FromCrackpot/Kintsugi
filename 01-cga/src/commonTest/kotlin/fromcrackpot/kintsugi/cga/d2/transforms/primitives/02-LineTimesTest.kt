@@ -1,15 +1,19 @@
 package fromcrackpot.kintsugi.cga.d2.transforms.primitives
 
-import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Dipole
+import fromcrackpot.kintsugi.cga.assertSameShape
+import fromcrackpot.kintsugi.cga.dilator
+import fromcrackpot.kintsugi.cga.dipole
+import fromcrackpot.kintsugi.cga.flatPoint
+import fromcrackpot.kintsugi.cga.sweep
+import fromcrackpot.kintsugi.cga.versor
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Line
-import fromcrackpot.kintsugi.cga.d2.products.join
-import fromcrackpot.kintsugi.cga.d2.queries.predicates.on
+import fromcrackpot.kintsugi.cga.d2.operations.products.join
+import fromcrackpot.kintsugi.cga.d2.operations.queries.predicates.on
+import fromcrackpot.kintsugi.cga.d2.transforms.D
 import fromcrackpot.kintsugi.cga.d2.transforms.F
-import fromcrackpot.kintsugi.cga.d2.transforms.G
 import fromcrackpot.kintsugi.cga.d2.transforms.R
 import fromcrackpot.kintsugi.cga.d2.transforms.T
-import fromcrackpot.kintsugi.cga.d2.transforms.times
 import fromcrackpot.kintsugi.cga.deg
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,11 +21,7 @@ import kotlin.test.assertTrue
 
 class LineTimesTest {
 
-    // Dipole spanning euclidean endpoints (ax, ay) and (bx, by).
-    private fun dipole(ax: Double, ay: Double, bx: Double, by: Double): Dipole =
-        FlatPoint(ax, ay).toRound join FlatPoint(bx, by).toRound
-
-    /* MOTOR — TRANSLATION */
+    /* MOTOR: TRANSLATION */
 
     @Test
     fun `translating a line shifts its moment along the normal`() {
@@ -41,7 +41,7 @@ class LineTimesTest {
         assertEquals(Line(0.0, 0.0, 5.0), Line(0.0, 0.0, 5.0) * T(3.0, 4.0))
     }
 
-    /* MOTOR — ROTATION */
+    /* MOTOR: ROTATION */
 
     @Test
     fun `rotating a line turns its normal with the motion`() {
@@ -49,55 +49,15 @@ class LineTimesTest {
         assertEquals(Line(0.0, 1.0, -3.0), Line(1.0, 0.0, -3.0) * R(FlatPoint(0.0, 0.0), 90.deg))
     }
 
-    @Test
-    fun `line rotation equals the line rebuilt from rotated points`() {
-        // The sandwich commutes with the projective join: moving the two spanning points and
-        // re-joining must give the moved line, orientation included.
-        val p1 = FlatPoint(1.0, 1.0)
-        val p2 = FlatPoint(4.0, 5.0)
-        val m = R(FlatPoint(2.0, -3.0), 37.deg) * T(1.5, -0.5)
-        assertEquals((p1 * m) join (p2 * m), (p1 join p2) * m)
-    }
-
-    @Test
-    fun `moving a dipole's carrier equals the moved dipole's carrier`() {
-        val d = dipole(1.0, 1.0, 4.0, 5.0)
-        val m = R(FlatPoint(2.0, -3.0), 37.deg) * T(7.0, -2.0)
-        assertEquals(d.carrier * m, (d * m).carrier)
-    }
-
     /* FLECTOR */
 
     @Test
     fun `reflecting a line across the y-axis mirrors its point set`() {
-        // x = 3 reflects to x = −3. The improper grade-3 sign keeps the normal at +x — pinned
-        // by the join-rebuild below; the point set is the geometric check here.
+        // x = 3 reflects to x = −3. The improper grade-3 sign keeps the normal at +x, as pinned
+        // by the join-rebuild sweep below; the point set is the geometric check here.
         val reflected = Line(1.0, 0.0, -3.0) * F(Line(1.0, 0.0, 0.0))
         assertTrue(FlatPoint(-3.0, 0.0) on reflected)
         assertTrue(FlatPoint(-3.0, 7.0) on reflected)
-    }
-
-    @Test
-    fun `line reflection equals the line rebuilt from reflected points`() {
-        val p1 = FlatPoint(1.0, 1.0)
-        val p2 = FlatPoint(4.0, 5.0)
-        val f = G(Line(1.0, -1.0, 2.0), 2.0)
-        assertEquals((p1 * f) join (p2 * f), (p1 join p2) * f)
-    }
-
-    @Test
-    fun `line reflection by a pure mirror equals the rebuilt line`() {
-        val p1 = FlatPoint(1.0, 1.0)
-        val p2 = FlatPoint(4.0, 5.0)
-        val f = F(Line(2.0, 1.0, -3.0))
-        assertEquals((p1 * f) join (p2 * f), (p1 join p2) * f)
-    }
-
-    @Test
-    fun `reflecting a dipole's carrier equals the reflected dipole's carrier`() {
-        val d = dipole(1.0, 1.0, 4.0, 5.0)
-        val f = G(Line(1.0, -1.0, 2.0), 2.0)
-        assertEquals(d.carrier * f, (d * f).carrier)
     }
 
     @Test
@@ -115,5 +75,46 @@ class LineTimesTest {
         val line = Line(3.0, -1.0, 2.0)
         val f = F(Line(1.0, 2.0, -1.0))
         assertEquals(line, line * f * f)
+    }
+
+    /* DILATOR */
+
+    @Test
+    fun `dilating a line scales its distance from the center`() {
+        // x = 3 doubled about the origin is x = 6.
+        assertEquals(Line(1.0, 0.0, -6.0), Line(1.0, 0.0, -3.0) * D(FlatPoint(0.0, 0.0), 2.0))
+    }
+
+    @Test
+    fun `dilation fixes a line through its center`() {
+        val c = FlatPoint(1.0, 2.0)
+        val line = c join FlatPoint(4.0, -1.0)
+        assertEquals(line, line * D(c, 3.0))
+    }
+
+    @Test
+    fun `dilation scales the moment of a line at infinity`() {
+        assertEquals(Line(0.0, 0.0, 10.0), Line(0.0, 0.0, 5.0) * D(FlatPoint(3.0, 4.0), 2.0))
+    }
+
+    /* SWEEPS */
+
+    @Test
+    fun `a moved line equals the line rebuilt from its moved points`() = sweep {
+        val p1 = flatPoint()
+        val p2 = flatPoint()
+        val v = versor()
+        val s = dilator()
+        assertSameShape((p1 * v) join (p2 * v), (p1 join p2) * v)
+        assertSameShape((p1 * s) join (p2 * s), (p1 join p2) * s)
+    }
+
+    @Test
+    fun `a moved dipole's carrier equals the moved carrier`() = sweep {
+        val d = dipole()
+        val v = versor()
+        val s = dilator()
+        assertSameShape(d.carrier * v, (d * v).carrier)
+        assertSameShape(d.carrier * s, (d * s).carrier)
     }
 }

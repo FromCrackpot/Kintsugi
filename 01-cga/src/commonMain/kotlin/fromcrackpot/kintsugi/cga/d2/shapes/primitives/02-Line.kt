@@ -8,28 +8,22 @@ import kotlin.math.sign
 import kotlin.math.sqrt
 
 /**
- * An oriented infinite line in the plane, or a weighted line at infinity — the 2D line.
+ * An oriented infinite line in the plane, or a weighted line at infinity.
  *
- * The grade-3 blade `gx·e423 + gy·e431 + gz·e412`, cutting the plane along
- * `gx·x + gy·y + gz = 0`. The constructor unitizes by the gradient magnitude `‖(gx, gy)‖`, so
- * a finite line stores its unit normal in ([gx], [gy]) and the origin's signed distance in
- * [gz]. Orientation is data: `−g` cuts the same point set with
- * the opposite orientation and [equals] distinguishes them ([canonical] for unoriented
- * equivalence). A weight that rounds to zero leaves the line at infinity with all three components
- * raw — at-infinity magnitudes are data, so `Line(0, 0, 5) != Line(0, 0, 1)`. Components are
- * stored raw at full `Double` precision; [equals]/[hashCode] compare rounded at the `SCALE`
- * quantum.
+ * - Finite lines are unitized. ([gx], [gy]) is the unit normal, and [gz] the origin's signed distance.
+ * - Orientation is data, so `-line` compares unequal. Use [canonical] for unoriented equivalence.
+ * - Stored raw. [equals] and [hashCode] round at the `SCALE` quantum.
  */
 public open class Line : Primitive {
-    /** The `e423` component — the unit normal's x-component when finite. */
+    /** The `e423` component: the unit normal's x-component, when finite. */
     public val gx: Double // e423
 
-    /** The `e431` component — the unit normal's y-component when finite. */
+    /** The `e431` component: the unit normal's y-component, when finite. */
     public val gy: Double // e431
 
     /**
-     * The `e412` component — the origin's signed distance when finite;
-     * the raw at-infinity magnitude otherwise.
+     * The `e412` component: the origin's signed distance when finite; the raw magnitude at
+     * infinity.
      */
     public val gz: Double // e412
 
@@ -42,12 +36,9 @@ public open class Line : Primitive {
      */
 
     /**
-     * Builds the line `(gx, gy, gz)`, unitized and zero-sanitized.
+     * Builds the line `gx·x + gy·y + gz = 0`, unitized, with `-0.0` cleared to `0.0`.
      *
-     * A g-part whose weight `‖(gx, gy)‖` doesn't round to zero is divided out to the unit
-     * normal, leaving [gz] the origin's signed distance. A weight that rounds to zero at the
-     * `SCALE` quantum leaves the line at infinity, all three components kept raw: the
-     * magnitude [gz] is data. Signed zeroes sanitize to `+0.0`.
+     * - When the normal rounds to zero at the `SCALE` quantum, the line lies at infinity and [gz] stays raw.
      *
      * @param gx The `e423` component: the normal's x-component.
      * @param gy The `e431` component: the normal's y-component.
@@ -67,7 +58,7 @@ public open class Line : Primitive {
         }
     }
 
-    /** Adopts components as-is, skipping unitization; [raw] disambiguates from the public ctor. */
+    /** Adopts the components as-is, skipping unitization. [raw] only tells this ctor apart from the public one. */
     private constructor(gx: Double, gy: Double, gz: Double, raw: Unit) {
         this.gx = gx
         this.gy = gy
@@ -79,35 +70,27 @@ public open class Line : Primitive {
      */
 
     /**
-     * Whether this line lies at infinity — a weighted horizon rather than a line in the plane.
+     * Whether this line lies at infinity. True when [gx] and [gy] both round to zero at the `SCALE` quantum.
      *
-     * `true` when [gx] and [gy] both round to zero at the `SCALE` quantum; the remaining
-     * magnitude [gz] is data. [normal] and [attitude] degenerate to the zero direction there —
-     * gate on this predicate before reading them.
+     * - [normal] and [attitude] degenerate to the zero direction at infinity. Check this before reading them.
      */
     public val isAtInfinity: Boolean get() = _gx == 0.0 && _gy == 0.0
 
-    /**
-     * The distance from the origin `|gz|` — raw.
-     *
-     * The flat bulk norm: the unsigned origin distance for a unitized finite line, the
-     * magnitude of a line at infinity.
-     */
+    /** The raw origin distance `|gz|` for a finite line; the magnitude of a line at infinity. */
     public val norm: Double get() = abs(gz) // flat_bulk_norm
 
     /**
-     * The unit normal as a free vector — [Direction] `(gx, gy)`.
+     * The unit normal as the [Direction] `(gx, gy)`. It points toward the positive side, where
+     * `gx·x + gy·y + gz > 0`.
      *
-     * Perpendicular to the line, pointing toward the positive side (where
-     * `gx·x + gy·y + gz > 0`). Degenerates to the zero direction at infinity.
+     * - Degenerates at infinity.
      */
     public val normal: Direction by cached { Direction(gx, gy) }
 
     /**
-     * The line's running direction as a free vector, 90° CCW from [normal].
+     * The line's running direction as a free vector, 90° counter-clockwise from [normal].
      *
-     * The attitude `att(g) = g ∨ e412` — the carrier tangent, one antigrade up: the free
-     * vector [Direction] `(−gy, gx)`. Degenerates to the zero direction at infinity.
+     * - Degenerates at infinity.
      */
     public val attitude: Direction by cached { Direction(-gy, gx) }
 
@@ -116,17 +99,14 @@ public open class Line : Primitive {
      */
 
     /**
-     * Returns this object rebuilt around the replacement geometry [line] — the hook the
-     * shape-preserving operations return through.
+     * Returns this object rebuilt around the replacement geometry [line]. Shape-preserving
+     * operations return through this hook.
      *
-     * Every operation that moves a line computes its result as a plain [Line] and returns it
-     * through this hook. This base implementation returns [line] itself; a subclass overrides
-     * it to rebuild an instance of its own class around [line], and every such operation then
-     * comes back as that class. The result's runtime class must equal the receiver's — the
-     * operations check it and fail with a named error when a subclass misses the override.
+     * - Override it to rebuild your subclass. Every generic operation then returns that class.
+     * - The result's runtime class must equal the receiver's, or the operations fail with a named error.
      *
      * @param line The replacement geometry.
-     * @return [line] itself; an override returns its own class rebuilt around [line].
+     * @return [line] itself. An override returns its own class rebuilt around [line].
      */
     public open fun copy(line: Line): Line = line
 
@@ -135,16 +115,10 @@ public open class Line : Primitive {
      */
 
     /**
-     * The canonical representative of this line — useful for unoriented equivalence.
+     * The canonical representative of this line, the same for both orientations.
      *
-     * `a.canonical == b.canonical` detects the same point set under opposed orientations. The
-     * canonical orientation makes the first non-zero of `(gx, gy)` positive; the sign decision
-     * reads rounded components, so `a == b` implies `a.canonical == b.canonical`. At infinity
-     * the point set is unique, so canonicalization is scale-blind as well as sign-blind: an
-     * at-infinity line whose [gz] doesn't round to zero at the `SCALE` quantum maps to
-     * `Line(0, 0, 1)`; one that rounds all-zero stays itself. The representative is rebuilt
-     * through [copy], so a subclass comes back as its own class; an already-canonical line
-     * returns `this`.
+     * - Makes the first non-zero of `(gx, gy)` positive, judged on the rounded components.
+     * - At infinity it also ignores scale. Any non-zero line at infinity maps to `Line(0, 0, 1)`.
      */
     public open val canonical: Line by cached {
         if (_gx == 0.0 && _gy == 0.0) {
@@ -156,17 +130,13 @@ public open class Line : Primitive {
     }
 
     /**
-     * Rounded, orientation-sensitive identity: equal when every component matches at the
-     * `SCALE` quantum.
+     * Compares the three components rounded at the `SCALE` quantum.
      *
-     * `+e423 ≠ −e423` — the negated line cuts the same point set with the opposite orientation
-     * and compares unequal; compare [canonical] on both sides for unoriented equivalence.
-     * At-infinity magnitudes compare as data. Identity is exact-class: a subclass instance
-     * and a plain [Line] never compare equal.
+     * - The negated line compares unequal. Compare [canonical] on both sides for unoriented equivalence.
+     * - Classes must match exactly. A subclass instance never equals a plain [Line].
      *
      * @param other The object to compare against.
-     * @return `true` iff [other] shares this object's exact class and its three components
-     *   all match after rounding.
+     * @return `true` when [other] has this exact class and every rounded component matches.
      */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -187,29 +157,23 @@ public open class Line : Primitive {
     /** Returns the hash of the rounded components, consistent with [equals]. */
     override fun hashCode(): Int = _hashCode
 
-    /** Returns the raw components — full stored precision, no rounding. */
+    /** Returns the raw components at full stored precision. */
     override fun toString(): String = "Line(gx=$gx, gy=$gy, gz=$gz)"
 
-    /** Returns the components rounded at the `SCALE` quantum — the debug-output convention of every primitive. */
+    /** Returns the components rounded at the `SCALE` quantum, for debug output. */
     public fun toStringRounded(): String = "Line(gx=$_gx, gy=$_gy, gz=$_gz)"
 }
 
 /**
  * `-Line => Line`<br>
- * Returns this line with the opposite orientation — the same cut through the plane, positive
- * side swapped.
+ * Returns this line with the opposite orientation. It cuts the plane in the same place, with the
+ * positive side swapped.
  *
- * Negates all three components, raw at full `Double` precision: for a finite line the unit
- * [Line.normal] and the running [Line.attitude] both flip and the origin's signed distance
- * changes sign; a line at infinity negates its raw magnitude, which is data. Identity is
- * orientation-sensitive, so a line and its negation compare unequal (the all-zero line at
- * infinity being its own negation); compare [Line.canonical] for unoriented equivalence —
- * `(-line).canonical == line.canonical`. The result is the receiver's own class: the negated
- * geometry returns through [Line.copy], preserving a subclass that overrides the hook.
+ * - Compares unequal to the original, but `(-line).canonical == line.canonical`.
  *
- * @receiver The [Line] to negate.
+ * @receiver The line to negate.
  * @param T The receiver's type, preserved in the result.
- * @return The negated line, as the receiver's class.
+ * @return The negated line.
  */
 public operator fun <T : Line> T.unaryMinus(): T =
     narrowed(

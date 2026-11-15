@@ -141,7 +141,7 @@ class ParseSvgTest {
         assertTrue(root.children.isEmpty())
     }
 
-    /* COLOR — SVG defaults applied explicitly on parse */
+    /* COLOR: SVG defaults applied explicitly on parse */
 
     @Test fun `missing fill on rect materialises SVG default black`() {
         val root = parseSvg(ONE_FLAT_POINT_SVG)
@@ -257,14 +257,14 @@ class ParseSvgTest {
         assertTrue((root.children.single() as ShapeNode).shape is Circle)
     }
 
-    /* LINES — SVG-default stroke=none means invisible, but the model carries the line */
+    /* LINES: SVG-default stroke=none means invisible, but the model carries the line */
 
     @Test fun `line with no stroke parses with SVG-default stroke=none`() {
         val root = parseSvg(LINE_DIAGONAL_SVG)
         assertEquals(lineDefaultStyle, (root.children.single() as ShapeNode).style)
     }
 
-    /* FULL-BLEED RECTS — there is no background concept: a full-bleed rect is an ordinary rectangle Polygon */
+    /* FULL-BLEED RECTS: there is no background concept; a full-bleed rect is an ordinary rectangle Polygon */
 
     @Test fun `leading full-bleed fill-only rect parses as a rectangle Polygon child`() {
         // The old format lifted this into GroupNode.background; now it's just a backdrop-sized
@@ -304,7 +304,7 @@ class ParseSvgTest {
         assertEquals(ShapeColor.rgb(0xFF, 0xFF, 0xFF), shape.style.stroke)
     }
 
-    /* ROOT-CASCADE — root <svg fill/stroke/stroke-width> falls back to children whose own attr is absent. */
+    /* ROOT-CASCADE: root <svg fill/stroke/stroke-width> falls back to children whose own attr is absent. */
 
     @Test fun `root fill propagates to a bare circle`() {
         val root = parseSvg(ROOT_FILL_BARE_CIRCLE_SVG)
@@ -348,7 +348,7 @@ class ParseSvgTest {
     }
 
     @Test fun `root fill cascades into a bare leading full-bleed rect`() {
-        // The leading rect has no own fill; the root provides fill=red — a rectangle Polygon whose fill
+        // The leading rect has no own fill; the root provides fill=red. It is a rectangle Polygon whose fill
         // cascades from the root, like any other bare shape.
         val root = parseSvg(ROOT_FILL_LEADING_BARE_RECT_SVG)
         val shape = root.children.single() as ShapeNode
@@ -364,7 +364,7 @@ class ParseSvgTest {
         val expected = Dipole(0.0, 1.0, 0.0, 50.0, 0.0, 0.0)
         val shape = root.children.single() as ShapeNode
         assertEquals(expected, shape.shape)
-        // Style takes the first child's style — fill defaults to SVG black, size = 2·r = 8.
+        // Style takes the first child's style: fill defaults to SVG black, size = 2·r = 8.
         assertEquals(pointStyle(ShapeColor.BLACK), shape.style)
     }
 
@@ -481,7 +481,7 @@ class ParseSvgTest {
     }
 
     @Test fun `dipole carrier fill cascades into its round-point children`() {
-        // Designer authoring `<g k:type="dipole" fill="#ff0000">` — the dipole carrier's own fill
+        // Designer authoring `<g k:type="dipole" fill="#ff0000">`: the dipole carrier's own fill
         // overlays on top of the inherited cascade, same posture as bare `<g fill=...>`.
         val root = parseSvg(DIPOLE_GROUP_FILL_CASCADE_SVG)
         val shape = root.children.single() as ShapeNode

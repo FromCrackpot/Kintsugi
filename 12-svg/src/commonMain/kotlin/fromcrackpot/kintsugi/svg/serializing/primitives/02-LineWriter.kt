@@ -2,7 +2,7 @@ package fromcrackpot.kintsugi.svg.serializing.primitives
 
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Circle
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Line
-import fromcrackpot.kintsugi.cga.d2.products.meet
+import fromcrackpot.kintsugi.cga.d2.operations.products.meet
 import fromcrackpot.kintsugi.scenegraph.SceneBounds
 import fromcrackpot.kintsugi.scenegraph.nodes.primitives.LineNode
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStrokeCap
@@ -32,9 +32,9 @@ internal fun XmlWriter.writeLineElement(shape: LineNode, viewBox: SceneBounds, w
         return
     }
 
-    // `worldBorder ∨ line` (not `line ∨ worldBorder`) so the dipole's start, end land on the
-    // line's a-side, b-side in that order — making the SVG export `(x1,y1) = start, (x2,y2) = end`
-    // reparse to the same oriented Line blade. Same-grade antiwedge is antisymmetric, so swapping
+    // `worldBorder ∨ line`, not `line ∨ worldBorder`, so the dipole's start and end land on the
+    // line's a-side and b-side in that order. The export `(x1,y1) = start, (x2,y2) = end` then
+    // reparses to the same oriented Line blade. Same-grade antiwedge is antisymmetric: swapping
     // the operands swaps start/end.
     val dipole = worldBorder meet line
     if (dipole.isImaginary) {

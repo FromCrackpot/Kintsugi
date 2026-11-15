@@ -9,9 +9,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Trace snapshots for `drawRoundPoint` through the production `drawShape` dispatch — recorded draw
+ * Trace snapshots for `drawRoundPoint` through the production `drawShape` dispatch: recorded draw
  * calls asserted against inline goldens. The DEGENERATE section pins the skip+warn
- * contract — the expected trace is empty, never a throw.
+ * contract: the expected trace is empty, never a throw.
  */
 class RoundPointDrawTest {
 

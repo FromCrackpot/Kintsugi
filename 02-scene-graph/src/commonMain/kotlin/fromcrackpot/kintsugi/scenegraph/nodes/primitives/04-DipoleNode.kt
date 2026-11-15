@@ -4,24 +4,20 @@ import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Dipole
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 
 /**
- * A scene-graph leaf that is a [Dipole]: the dipole's geometry carrying the concrete
- * [style] it renders with, plus optional [tags].
+ * A scene-graph leaf that is a [Dipole]: the dipole's geometry carrying the concrete [style] it
+ * renders with, plus optional [tags].
  *
- * Construction copies [dipole]'s components, so the leaf carries the same geometry at full
- * `Double` precision. Everything a [Dipole] offers is inherited, and every operation typed
- * against [Dipole] accepts the leaf as-is — the shape-preserving operations, [canonical]
- * included, return through [copy] and come back as the leaf, style and tags riding along;
- * everything else returns plain shapes.
+ * - Shape-preserving operations return the leaf, with its style and tags. Others return plain shapes.
  *
  * @constructor Builds the leaf around [dipole]'s geometry.
- * @param dipole The geometry to decorate; its components are copied.
- * @param style The concrete paint; the dipole default when omitted.
- * @param tags Free-form tokens riding the leaf; empty by default.
+ * @param dipole The geometry to decorate.
+ * @param style The concrete paint, the dipole default when omitted.
+ * @param tags Free-form tokens riding the leaf, empty by default.
  */
 public open class DipoleNode(
     dipole: Dipole,
-    override var style: ShapeStyle = ShapeStyle.DIPOLE,
-    override var tags: Set<String> = emptySet(),
+    override val style: ShapeStyle = ShapeStyle.DIPOLE,
+    override val tags: Set<String> = emptySet(),
 ) : Dipole(dipole.gx, dipole.gy, dipole.gz, dipole.px, dipole.py, dipole.pz), PrimitiveNode {
 
     /*
@@ -29,16 +25,12 @@ public open class DipoleNode(
     */
 
     /**
-     * Builds the leaf as a copy of [node]: the same geometry, and [node]'s own style and
-     * tags unless either is overridden.
-     *
-     * Construction copies [node]'s components, so the copy carries the same geometry at
-     * full `Double` precision. Overriding [style] or [tags] swaps that part alone — the
-     * other still comes from [node].
+     * Builds the leaf as a copy of [node], with the same geometry. Style and tags are [node]'s own
+     * unless overridden.
      *
      * @param node The leaf to copy.
-     * @param style The concrete paint; [node]'s own when omitted.
-     * @param tags Free-form tokens riding the leaf; [node]'s own when omitted.
+     * @param style The concrete paint, [node]'s own when omitted.
+     * @param tags Free-form tokens riding the leaf, [node]'s own when omitted.
      */
     public constructor(
         node: DipoleNode,
@@ -51,30 +43,27 @@ public open class DipoleNode(
     */
 
     /**
-     * Returns a [DipoleNode] around [dipole], carrying this leaf's [style] and [tags].
-     *
-     * The leaf's rebuild hook: every shape-preserving operation returns through it, so the
-     * moved leaf keeps its decoration.
+     * Returns a [DipoleNode] around [dipole], carrying this leaf's [style] and [tags]. Every
+     * shape-preserving operation returns through this rebuild hook.
      *
      * @param dipole The replacement geometry.
      * @return The rebuilt leaf.
      */
     override fun copy(dipole: Dipole): DipoleNode = DipoleNode(dipole, style, tags)
 
+    override fun copy(style: ShapeStyle, tags: Set<String>): DipoleNode = DipoleNode(this, style, tags)
+
     /*
     IDENTITY
     */
 
     /**
-     * Rounded, style-inclusive identity: equal when the geometry matches at the `SCALE`
-     * quantum and [style] and [tags] match exactly.
+     * Compares the geometry rounded at the `SCALE` quantum, and [style] and [tags] exactly.
      *
-     * Identity is exact-class: a `DipoleNode` and a plain [Dipole] never compare equal, in
-     * either direction.
+     * - Classes must match exactly. A `DipoleNode` never equals a plain [Dipole], in either direction.
      *
      * @param other The object to compare against.
-     * @return `true` iff [other] is a `DipoleNode` with equal rounded geometry, equal
-     *   [style], and equal [tags].
+     * @return `true` when [other] is a `DipoleNode` with equal rounded geometry, [style], and [tags].
      */
     override fun equals(other: Any?): Boolean =
         super.equals(other) && other is DipoleNode && style == other.style && tags == other.tags
@@ -82,6 +71,6 @@ public open class DipoleNode(
     /** Returns the geometry hash combined with [style]'s and [tags]', consistent with [equals]. */
     override fun hashCode(): Int = 31 * (31 * super.hashCode() + style.hashCode()) + tags.hashCode()
 
-    /** Returns the raw geometry with the style and tags — full stored precision, no rounding. */
+    /** Returns the raw geometry at full stored precision, with the style and tags. */
     override fun toString(): String = "DipoleNode(${super.toString()}, style=$style, tags=$tags)"
 }

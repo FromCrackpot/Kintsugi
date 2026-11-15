@@ -1,0 +1,20 @@
+{
+  "synth_type": "Signlr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.7972654020413756,
+    "encoding": 4,
+    "duration": 0.6929389609955251,
+    "carrier": 0.8193972997483797,
+    "deviation": 0.18871182929724456,
+    "symbols": 0.4,
+    "packets": 2,
+    "gap": 0.6675139235868119,
+    "drift": 0.48790693320333955,
+    "corruption": 0,
+    "interference": 0,
+    "echo": 0.07546813419321552
+  },
+  "renderSeed": 0.36905342526733875
+}

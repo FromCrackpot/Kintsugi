@@ -30,17 +30,18 @@ internal fun DrawScope.cgaToCanvas(cgaX: Double, cgaY: Double): Offset =
     cgaToCanvas(cgaX, cgaY, size)
 
 /**
- * The one draw pass: dispatches every shape through [drawShape] against the caller-supplied
- * [worldBorder] (bounds-derived — see `worldBorder` in `CoordinateMapping.kt`; built once per
- * pass, never per shape). Both `Kanvas` and `canvasToTrace` route through here, so the trace
- * tests exercise exactly what the composable draws — the two can't drift by construction.
+ * The one draw pass. It dispatches every shape through [drawShape] against the caller's
+ * [worldBorder], built once per pass from the bounds (see `worldBorder` in `CoordinateMapping.kt`).
+ *
+ * - `Scene` and `canvasToTrace` both route through here, so the trace tests exercise exactly what
+ *   the composable draws. The two can't drift.
  */
 internal fun DrawScope.drawShapes(nodes: List<ShapeNode>, worldBorder: Circle) {
     nodes.forEach { drawShape(it, worldBorder) }
 }
 
-// Every paint layer draws unconditionally, transparent included — alpha-0 culling is Skia's
-// job (`nothingToDraw()`), not ours. One policy for all eight shapes; traces show `#00000000`
+// Every paint layer draws unconditionally, transparent included. Alpha-0 culling is Skia's job
+// (`nothingToDraw()`), not ours. One policy for all eight shapes, so traces show `#00000000`
 // entries for unset layers by design.
 internal fun DrawScope.drawShape(node: ShapeNode, worldBorder: Circle) {
     val style = node.style
@@ -48,8 +49,8 @@ internal fun DrawScope.drawShape(node: ShapeNode, worldBorder: Circle) {
     val stroke = style.stroke.toComposeColor()
     val cap = style.strokeCap.toComposeStrokeCap()
 
-    // ShapeNode is unsealed, the two families are: the nested `when`s stay exhaustive — a new
-    // leaf is a compile error here — and the `else` guards only a foreign ShapeNode family.
+    // ShapeNode is unsealed but its two families are sealed. The nested `when`s stay exhaustive, so
+    // a new leaf is a compile error here, and the `else` guards only a foreign ShapeNode family.
     when (node) {
         is PrimitiveNode -> when (node) {
             is FlatPointNode -> drawFlatPoint(node, fill, style.size.toFloat())

@@ -17,7 +17,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 /**
- * Bare `<polyline>` ↔ [Polyline] codec tests. `<polyline>` has no tagged reading — the bare
+ * Bare `<polyline>` ↔ [Polyline] codec tests. `<polyline>` has no tagged reading: the bare
  * element is the untagged default, mirroring bare `<polygon>` → Polygon; an unknown `k:type`
  * warns and falls back. Unlike polygon, the open chain honors `stroke-linecap` (segment's rule).
  */
@@ -69,7 +69,7 @@ class PolylineTest {
         )
     }
 
-    @Test fun `unstyled polyline materialises SVG defaults - fill black, stroke none, width 1`() {
+    @Test fun `unstyled polyline materialises SVG defaults - fill black - stroke none - width 1`() {
         val shape = parseSvg(BARE_POLYLINE_SVG).children.single() as ShapeNode
         assertEquals(
             ShapeStyle(fill = ShapeColor.BLACK, stroke = ShapeColor.NONE, strokeWidth = 1.0),

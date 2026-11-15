@@ -116,21 +116,21 @@ class RoundDirectionTest {
     }
 
     @Test
-    fun `a rotation turns a round direction, as a round direction`() {
+    fun `a rotation turns a round direction - as a round direction`() {
         val moved = RoundDirection(1.0, 0.0) * R(FlatPoint(0.0, 0.0), 90.deg)
         assertIs<RoundDirection>(moved)
         assertEquals(RoundDirection(0.0, 1.0), moved)
     }
 
     @Test
-    fun `a flector reflects a round direction, as a round direction`() {
+    fun `a flector reflects a round direction - as a round direction`() {
         val moved = RoundDirection(3.0, 4.0) * F(Line(0.0, 1.0, 0.0))
         assertIs<RoundDirection>(moved)
         assertEquals(RoundDirection(3.0, -4.0), moved)
     }
 
     @Test
-    fun `negation reverses the heading and the conformal component, as a round direction`() {
+    fun `negation reverses the heading and the conformal component - as a round direction`() {
         val negated = -RoundDirection(3.0, 4.0, 5.0)
         assertIs<RoundDirection>(negated)
         assertEquals(RoundDirection(-3.0, -4.0, -5.0), negated)

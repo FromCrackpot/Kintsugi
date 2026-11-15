@@ -1,0 +1,18 @@
+{
+  "synth_type": "Rustlr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.20387949934229255,
+    "material": 2,
+    "gesture": 2,
+    "duration": 0.4281731917383149,
+    "grain": 0.2148406463675201,
+    "density": 0.6788464623782784,
+    "motion": 0.03377896635793143,
+    "pressure": 0.39923839277355,
+    "folds": 3,
+    "brightness": 0.4451394018251449
+  },
+  "renderSeed": 0.36905342526733875
+}

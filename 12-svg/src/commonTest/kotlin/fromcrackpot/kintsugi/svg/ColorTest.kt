@@ -34,12 +34,12 @@ class ColorTest {
     }
 
     @Test
-    fun `parseColor accepts rgb() with int components`() {
+    fun `parseColor accepts rgb with int components`() {
         assertEquals(ShapeColor.rgb(0, 128, 255), parseColor("rgb(0, 128, 255)"))
     }
 
     @Test
-    fun `parseColor accepts rgba() with float alpha`() {
+    fun `parseColor accepts rgba with float alpha`() {
         assertEquals(ShapeColor.rgb(0xFF, 0x00, 0x00, 0x80), parseColor("rgba(255, 0, 0, 0.5)"))
     }
 

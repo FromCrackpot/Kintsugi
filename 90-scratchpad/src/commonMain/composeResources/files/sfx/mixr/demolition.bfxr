@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.4568225324479863,
+    "sources": "[{\"synth\":\"Fractr\",\"name\":\"Ice Wall\",\"params\":{\"masterVolume\":0.5,\"seed\":0.15345948073081672,\"material\":1,\"duration\":1.8546813419321553,\"fragments\":44,\"fragmentSize\":0.5951394018251449,\"spread\":0.631551799736917,\"decay\":0.49139509575907137,\"gravity\":0.3066309582442045,\"bounce\":0.24353452604264023,\"stress\":0.686058077972848,\"shards\":0.35,\"fracture\":0.9159301999025047},\"generator\":\"*\",\"selectedGenerator\":\"generate_ice_wall\",\"renderSeed\":0.12487821746617556},{\"synth\":\"Boomr\",\"name\":\"Gas Tank\",\"params\":{\"masterVolume\":0.5,\"seed\":0.7935991233680397,\"duration\":2.8367426919750867,\"size\":0.49496110499603674,\"pressure\":0.3582360981381498,\"blast\":0.2549423277610913,\"debris\":0.164919601068832,\"gas\":0.9396040967199951,\"aftershock\":0.06872670298442245,\"rubbleSize\":0.22173177791992202,\"spread\":0.5776050426531583,\"tail\":0.5582744104787708,\"muffle\":0.16317438744008542,\"mechanism\":6,\"space\":0.13468289426527918},\"generator\":\"*\",\"selectedGenerator\":\"generate_gas_tank\",\"renderSeed\":0.41275920695625246}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

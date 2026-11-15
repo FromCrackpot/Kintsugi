@@ -23,7 +23,7 @@ internal fun DrawScope.drawCircle(
     }
     val center = cgaToCanvas(circle.center.ax, circle.center.ay)
     val radiusPx = circle.radius.toFloat()
-    // Compose's drawCircle takes a single DrawStyle (Fill OR Stroke), never both — so both
+    // Compose's drawCircle takes a single DrawStyle (Fill OR Stroke), never both. So the two
     // layers are two draw calls, fill first, stroke on top.
     drawCircle(color = fill, radius = radiusPx, center = center)
     drawCircle(

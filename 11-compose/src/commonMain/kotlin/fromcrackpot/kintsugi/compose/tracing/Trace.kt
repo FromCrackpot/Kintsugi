@@ -108,11 +108,12 @@ private fun paintLabel(style: PaintingStyle, argb: Int, strokeWidth: Float): Str
 /* RECORDING CANVAS */
 
 /**
- * Captures draw calls our production `DrawScope.draw<X>` extensions route through. Transform / clip
- * / save / restore are no-ops (CanvasDrawScope uses them around every draw to apply state); draw
- * methods we don't expect (image, arc, vertices, …) throw, so adding a primitive whose
- * extension reaches for an un-recorded API surfaces as a failing test rather than a silent miss.
- * `drawPath` records bounds-only (see [DrawEvent.PathBounds]) — the polygon route.
+ * Captures the draw calls our production `DrawScope.draw<X>` extensions route through.
+ *
+ * - Transform, clip, save and restore are no-ops. CanvasDrawScope uses them around every draw.
+ * - Unexpected draw methods (image, arc, vertices, …) throw. A new primitive reaching for an
+ *   unrecorded API then fails a test instead of passing silently.
+ * - `drawPath`, the polygon route, records bounds only (see [DrawEvent.PathBounds]).
  */
 internal class RecordingCanvas : Canvas {
     val events = mutableListOf<DrawEvent>()
@@ -145,9 +146,9 @@ internal class RecordingCanvas : Canvas {
         )
     }
 
-    // State stack and transforms: no-ops. CanvasDrawScope wraps each draw to apply the inset/
-    // translate/clip from DrawScope.drawContext.transform — we don't need to honor any of it
-    // for the trace; the production draw extensions pass already-resolved canvas-space coords.
+    // State stack and transforms: no-ops. CanvasDrawScope wraps each draw to apply the inset,
+    // translate and clip from DrawScope.drawContext.transform. The trace needs none of it: the
+    // production draw extensions pass already-resolved canvas-space coords.
     override fun save() {}
     override fun restore() {}
     override fun saveLayer(bounds: Rect, paint: Paint) {}

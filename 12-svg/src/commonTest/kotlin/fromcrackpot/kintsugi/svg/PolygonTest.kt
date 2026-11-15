@@ -17,7 +17,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 /**
- * Bare `<polygon>` ↔ [Polygon] codec tests. `<polygon>` has no tagged reading — the bare element
+ * Bare `<polygon>` ↔ [Polygon] codec tests. `<polygon>` has no tagged reading: the bare element
  * is the untagged default, mirroring bare `<rect>` → rectangle Polygon; an unknown `k:type` warns
  * and falls back.
  */
@@ -56,7 +56,7 @@ class PolygonTest {
         )
     }
 
-    @Test fun `unstyled polygon materialises SVG defaults - fill black, stroke none, width 1`() {
+    @Test fun `unstyled polygon materialises SVG defaults - fill black - stroke none - width 1`() {
         val shape = parseSvg(BARE_POLYGON_SVG).children.single() as ShapeNode
         assertEquals(
             ShapeStyle(fill = ShapeColor.BLACK, stroke = ShapeColor.NONE, strokeWidth = 1.0),
@@ -120,7 +120,7 @@ class PolygonTest {
         assertEquals(WALL_TRIANGLE, shape.shape)
     }
 
-    @Test fun `inside-out flag reverses a counter-clockwise walk - flag is intent, winding is truth`() {
+    @Test fun `inside-out flag reverses a counter-clockwise walk - flag is intent - winding is truth`() {
         val shape = parseSvg(MISWOUND_INSIDE_OUT_POLYGON_SVG).children.single() as ShapeNode
         assertEquals(WALL_TRIANGLE, shape.shape)
     }
@@ -161,7 +161,7 @@ class PolygonTest {
             listOf(FlatPoint(-30.0, -30.0), FlatPoint(10.0, -30.0), FlatPoint(-30.0, 0.0))
         )
 
-        /** The same loop inside out — the walk the flagged fixtures decode to. */
+        /** The same loop inside out: the walk the flagged fixtures decode to. */
         private val WALL_TRIANGLE = -TRIANGLE
     }
 }

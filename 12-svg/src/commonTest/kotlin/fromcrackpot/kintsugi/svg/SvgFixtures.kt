@@ -28,7 +28,7 @@ internal const val ONE_ROUND_POINT_SVG = """<?xml version="1.0" encoding="UTF-8"
 </svg>
 """
 
-/** A flat-point rect whose side is 12 (non-default) — proves render size rides in the geometry. */
+/** A flat-point rect whose side is 12 (non-default), proving render size rides in the geometry. */
 internal const val FLAT_POINT_SIZE12_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect k:type="flat-point" x="44" y="44" width="12" height="12"/>
@@ -78,14 +78,14 @@ internal const val NO_VIEWBOX_NO_DIMENSIONS_SVG = """<?xml version="1.0" encodin
 </svg>
 """
 
-/** A bare `<rect>` (no k:type) — the untagged default: a Rectangle. */
+/** A bare `<rect>` (no k:type): the untagged default, a Rectangle. */
 internal const val BARE_RECT_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect x="0" y="0" width="20" height="10"/>
 </svg>
 """
 
-/** A flat-point rect that is not square — malformed (a point has a single render size). */
+/** A flat-point rect that is not square. Malformed: a point has a single render size. */
 internal const val NON_SQUARE_FLAT_POINT_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect k:type="flat-point" x="0" y="0" width="20" height="10"/>
@@ -127,7 +127,7 @@ internal const val CIRCLE_FLAGS_MESSY_SVG = """<?xml version="1.0" encoding="UTF
 </svg>
 """
 
-/** Unknown k:type on a circle — warns and falls back to a circle. */
+/** Unknown k:type on a circle: warns and falls back to a circle. */
 internal const val CIRCLE_UNKNOWN_KTYPE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <circle k:type="hyperbola" cx="50" cy="50" r="10"/>
@@ -146,7 +146,7 @@ internal const val CIRCLE_ZERO_R_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 </svg>
 """
 
-/** Bare `<g>` containing a single flat-point — the GroupNode carrier (no `k:type` on the `<g>`). */
+/** Bare `<g>` containing a single flat-point: the GroupNode carrier (no `k:type` on the `<g>`). */
 internal const val NESTED_GROUP_ONE_FLAT_POINT_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <g>
@@ -155,14 +155,14 @@ internal const val NESTED_GROUP_ONE_FLAT_POINT_SVG = """<?xml version="1.0" enco
 </svg>
 """
 
-/** Empty `<g></g>` — GroupNode with no children. */
+/** Empty `<g></g>`: a GroupNode with no children. */
 internal const val EMPTY_GROUP_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <g></g>
 </svg>
 """
 
-/** Two levels of nesting — `<g><g><circle .../></g></g>`. */
+/** Two levels of nesting: `<g><g><circle .../></g></g>`. */
 internal const val NESTED_GROUPS_DEEP_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <g>
@@ -185,7 +185,7 @@ internal const val MULTIPLE_GROUPS_SVG = """<?xml version="1.0" encoding="UTF-8"
 </svg>
 """
 
-/** `<g>` with an unknown `k:type` — warns and falls back to a plain GroupNode. */
+/** `<g>` with an unknown `k:type`: warns and falls back to a plain GroupNode. */
 internal const val GROUP_UNKNOWN_KTYPE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <g k:type="quadrupole">
@@ -273,7 +273,7 @@ internal const val WITH_COMMENTS_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 </svg>
 """
 
-/* LINE FIXTURES — viewBox 100x100, worldBorder is the circle through the four corners. */
+/* LINE FIXTURES: viewBox 100x100, worldBorder is the circle through the four corners. */
 
 /** Tagged unbounded line (corner to corner). */
 internal const val LINE_DIAGONAL_SVG = """<?xml version="1.0" encoding="UTF-8"?>
@@ -288,49 +288,49 @@ internal const val LINE_DIAGONAL_STYLED_SVG = """<?xml version="1.0" encoding="U
 </svg>
 """
 
-/** Mirror of [LINE_DIAGONAL_SVG] with (x1,y1) ↔ (x2,y2) swapped — the sign-flipped orientation. */
+/** Mirror of [LINE_DIAGONAL_SVG] with (x1,y1) ↔ (x2,y2) swapped: the sign-flipped orientation. */
 internal const val LINE_DIAGONAL_SWAPPED_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <line k:type="line" x1="100" y1="100" x2="0" y2="0"/>
 </svg>
 """
 
-/** A tagged line whose endpoints are NOT on the worldBorder — still a Line in /v1 (recognized by k:type). */
+/** A tagged line whose endpoints are NOT on the worldBorder. Still a Line in /v1 (recognized by k:type). */
 internal const val LINE_TAGGED_OFFBORDER_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <line k:type="line" x1="20" y1="20" x2="80" y2="80"/>
 </svg>
 """
 
-/** Bare `<line>` (no k:type) — the untagged default for segments. */
+/** Bare `<line>` (no k:type): the untagged default for segments. */
 internal const val LINE_SEGMENT_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <line x1="20" y1="20" x2="80" y2="80"/>
 </svg>
 """
 
-/** Bare `<line>` (no k:type) with explicit stroke/stroke-width — styled segment. */
+/** Bare `<line>` (no k:type) with explicit stroke/stroke-width: a styled segment. */
 internal const val LINE_SEGMENT_STYLED_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <line x1="20" y1="20" x2="80" y2="80" stroke="#ff0000" stroke-width="2"/>
 </svg>
 """
 
-/** Unknown k:type on a line — warns and falls back to a segment. */
+/** Unknown k:type on a line: warns and falls back to a segment. */
 internal const val LINE_UNKNOWN_KTYPE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <line k:type="ray" x1="0" y1="0" x2="100" y2="100"/>
 </svg>
 """
 
-/** Bare segment with mirrored endpoints — sign-flipped orientation twin of [LINE_SEGMENT_SVG]. */
+/** Bare segment with mirrored endpoints: the sign-flipped orientation twin of [LINE_SEGMENT_SVG]. */
 internal const val LINE_SEGMENT_SWAPPED_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <line x1="80" y1="80" x2="20" y2="20"/>
 </svg>
 """
 
-/** Bare `<line>` (segment) with a round stroke-linecap — the attribute rides after stroke-width. */
+/** Bare `<line>` (segment) with a round stroke-linecap. The attribute rides after stroke-width. */
 internal const val LINE_SEGMENT_ROUNDCAP_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <line x1="20" y1="20" x2="80" y2="80" stroke="#ff0000" stroke-width="2" stroke-linecap="round"/>
@@ -354,7 +354,7 @@ internal const val GROUP_STROKE_LINECAP_CASCADE_SVG = """<?xml version="1.0" enc
 """
 
 /**
- * A `<line>` with one coordinate attribute dropped — the malformed-attribute matrix for
+ * A `<line>` with one coordinate attribute dropped: the malformed-attribute matrix for
  * [LineTest]/[SegmentTest]. [kType] = `"line"` builds the tagged infinite-line form; `null`
  * builds the bare segment form.
  */
@@ -370,20 +370,34 @@ internal fun lineSvgWithout(missing: String, kType: String?): String {
 """
 }
 
-/** Bare segment with coincident endpoints — collapses underlying Dipole's carrier norm to zero. */
+/** Bare segment with coincident endpoints. It collapses the underlying Dipole's carrier norm to zero. */
 internal const val LINE_SEGMENT_COINCIDENT_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <line x1="50" y1="50" x2="50" y2="50"/>
 </svg>
 """
 
-internal const val LINE_COINCIDENT_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+/** CGA (10, 10) and (10.00004, 10): coincident at the SCALE quantum, off a line through the origin. */
+internal const val LINE_SEGMENT_NEAR_COINCIDENT_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
+  <line x1="60" y1="40" x2="60.00004" y2="40"/>
+</svg>
+"""
+
+/** The real-valued endpoint pair (−1, 1) → (−1, −1) of the radius² = −1 segment on x = −1. */
+internal const val LINE_SEGMENT_IMAGINARY_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
+  <line x1="49" y1="49" x2="49" y2="51" k:flags="imaginary"/>
+</svg>
+"""
+
+internal const val LINE_COINCIDENT_SVG ="""<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <line k:type="line" x1="0" y1="0" x2="0" y2="0"/>
 </svg>
 """
 
-/* COLOR FIXTURES — flat-point rects centered at SVG (50,50) = CGA origin, render size 8. */
+/* COLOR FIXTURES: flat-point rects centered at SVG (50,50) = CGA origin, render size 8. */
 
 internal const val FILL_HEX6_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
@@ -403,7 +417,7 @@ internal const val FILL_HEX8_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 </svg>
 """
 
-/** Zero-alpha color — should canonicalize to ShapeColor.NONE on parse and "none" on serialize. */
+/** Zero-alpha color. It should canonicalize to ShapeColor.NONE on parse and "none" on serialize. */
 internal const val FILL_HEX8_ZERO_ALPHA_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect k:type="flat-point" x="46" y="46" width="8" height="8" fill="#12345600"/>
@@ -448,9 +462,9 @@ internal const val ROUND_BEFORE_FLAT_SVG = """<?xml version="1.0" encoding="UTF-
 </svg>
 """
 
-/* FULL-BLEED RECT FIXTURES — no background concept: a full-bleed rect is an ordinary Rectangle */
+/* FULL-BLEED RECT FIXTURES: no background concept; a full-bleed rect is an ordinary Rectangle */
 
-/** Leading full-bleed fill-only rect with the same dims as the viewBox — an ordinary Rectangle (backdrop by z-order). */
+/** Leading full-bleed fill-only rect with the same dims as the viewBox: an ordinary Rectangle (backdrop by z-order). */
 internal const val BACKGROUND_BLACK_THEN_POINT_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect x="0" y="0" width="100" height="100" fill="#000000"/>
@@ -465,21 +479,21 @@ internal const val BACKGROUND_OFFSET_VIEWBOX_SVG = """<?xml version="1.0" encodi
 </svg>
 """
 
-/** Full-bleed rect with `rx`/`ry` — the untagged Rectangle default applies; the codec rejects rounded corners — malformed. */
+/** Full-bleed rect with `rx`/`ry`. The untagged Rectangle default applies, and the codec rejects rounded corners as malformed. */
 internal const val LEADING_RECT_FULL_BLEED_WITH_RX_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect x="0" y="0" width="100" height="100" rx="0.5" ry="0.5" fill="#000000"/>
 </svg>
 """
 
-/** Full-bleed rect with no fill — a Rectangle with the SVG-default fill (black). */
+/** Full-bleed rect with no fill: a Rectangle with the SVG-default fill (black). */
 internal const val LEADING_FULL_BLEED_RECT_NO_FILL_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect x="0" y="0" width="100" height="100"/>
 </svg>
 """
 
-/** Full-bleed rect carrying a stroke — a stroked Rectangle. */
+/** Full-bleed rect carrying a stroke: a stroked Rectangle. */
 internal const val LEADING_FULL_BLEED_RECT_WITH_STROKE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect x="0" y="0" width="100" height="100" fill="#000000" stroke="#ffffff"/>
@@ -493,7 +507,7 @@ internal const val ROUND_POINT_MISSING_R_SVG = """<?xml version="1.0" encoding="
 </svg>
 """
 
-/* ROOT-CASCADE FIXTURES — presentation attrs on <svg> fall back to each child whose own attr is absent. */
+/* ROOT-CASCADE FIXTURES: presentation attrs on <svg> fall back to each child whose own attr is absent. */
 
 /** Root fill applies to a bare circle (no own fill). */
 internal const val ROOT_FILL_BARE_CIRCLE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
@@ -537,14 +551,14 @@ internal const val ROOT_FILL_SHAPE_OVERRIDE_SVG = """<?xml version="1.0" encodin
 </svg>
 """
 
-/** Root fill is set and a leading bare full-bleed rect has no fill of its own — a Rectangle whose fill cascades from the root. */
+/** Root fill is set and a leading bare full-bleed rect has no fill of its own: a Rectangle whose fill cascades from the root. */
 internal const val ROOT_FILL_LEADING_BARE_RECT_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100" fill="#ff0000">
   <rect x="0" y="0" width="100" height="100"/>
 </svg>
 """
 
-/* DIPOLE FIXTURES — viewBox 100x100, SVG (50,50) = CGA origin, render size 8 → r=4 on each child. */
+/* DIPOLE FIXTURES: viewBox 100x100, SVG (50,50) = CGA origin, render size 8 → r=4 on each child. */
 
 /** Horizontal dipole through SVG (40,50) and (60,50) = CGA (-10,0) and (10,0); with dashed chrome. */
 internal const val ONE_DIPOLE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
@@ -557,7 +571,7 @@ internal const val ONE_DIPOLE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 </svg>
 """
 
-/** Same dipole but the chrome `<line>` is omitted — designer-authored case must still parse. */
+/** Same dipole but the chrome `<line>` is omitted. The designer-authored case must still parse. */
 internal const val DIPOLE_NO_CHROME_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <g k:type="dipole">
@@ -567,7 +581,7 @@ internal const val DIPOLE_NO_CHROME_SVG = """<?xml version="1.0" encoding="UTF-8
 </svg>
 """
 
-/** Child order swapped — orientation contract says this is the sign-flipped dipole. */
+/** Child order swapped. The orientation contract says this is the sign-flipped dipole. */
 internal const val DIPOLE_REVERSED_ORDER_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <g k:type="dipole">
@@ -577,7 +591,7 @@ internal const val DIPOLE_REVERSED_ORDER_SVG = """<?xml version="1.0" encoding="
 </svg>
 """
 
-/** Dipole with only one round-point child — malformed. */
+/** Dipole with only one round-point child: malformed. */
 internal const val DIPOLE_ONE_CHILD_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <g k:type="dipole">
@@ -586,7 +600,7 @@ internal const val DIPOLE_ONE_CHILD_SVG = """<?xml version="1.0" encoding="UTF-8
 </svg>
 """
 
-/** Dipole with three round-point children — malformed (more than two). */
+/** Dipole with three round-point children: malformed (more than two). */
 internal const val DIPOLE_THREE_CHILDREN_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <g k:type="dipole">
@@ -597,7 +611,7 @@ internal const val DIPOLE_THREE_CHILDREN_SVG = """<?xml version="1.0" encoding="
 </svg>
 """
 
-/** Dipole containing a non-circle, non-line child — malformed. */
+/** Dipole containing a non-circle, non-line child: malformed. */
 internal const val DIPOLE_REJECT_RECT_CHILD_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <g k:type="dipole">
@@ -607,7 +621,7 @@ internal const val DIPOLE_REJECT_RECT_CHILD_SVG = """<?xml version="1.0" encodin
 </svg>
 """
 
-/** Dipole with a child <circle> that isn't tagged round-point — malformed. */
+/** Dipole with a child <circle> that isn't tagged round-point: malformed. */
 internal const val DIPOLE_NON_ROUND_POINT_CHILD_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <g k:type="dipole">
@@ -627,7 +641,17 @@ internal const val DIPOLE_COINCIDENT_SVG = """<?xml version="1.0" encoding="UTF-
 </svg>
 """
 
-/** <g> with an unknown k:type — UnsupportedSvgElementException (only k:type="dipole" is recognized). */
+/** Round points at CGA (10, 10) and (10.00004, 10): coincident at the SCALE quantum, off a line through the origin. */
+internal const val DIPOLE_NEAR_COINCIDENT_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
+  <g k:type="dipole">
+    <circle k:type="round-point" cx="60" cy="40" r="4"/>
+    <circle k:type="round-point" cx="60.00004" cy="40" r="4"/>
+  </g>
+</svg>
+"""
+
+/** <g> with an unknown k:type: UnsupportedSvgElementException (only k:type="dipole" is recognized). */
 internal const val DIPOLE_UNKNOWN_GROUP_KTYPE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <g k:type="quadrupole">
@@ -637,7 +661,7 @@ internal const val DIPOLE_UNKNOWN_GROUP_KTYPE_SVG = """<?xml version="1.0" encod
 </svg>
 """
 
-/** Dipole carrier with its own `fill` — cascades into the round-point children (same posture as bare `<g fill=...>`). */
+/** Dipole carrier with its own `fill`, which cascades into the round-point children (same posture as bare `<g fill=...>`). */
 internal const val DIPOLE_GROUP_FILL_CASCADE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <g k:type="dipole" fill="#ff0000">
@@ -647,14 +671,14 @@ internal const val DIPOLE_GROUP_FILL_CASCADE_SVG = """<?xml version="1.0" encodi
 </svg>
 """
 
-/** Full-bleed rect with explicit `stroke="none"` — a strokeless Rectangle (`none` canonicalizes to ShapeColor.NONE). */
+/** Full-bleed rect with explicit `stroke="none"`: a strokeless Rectangle (`none` canonicalizes to ShapeColor.NONE). */
 internal const val LEADING_FULL_BLEED_RECT_STROKE_NONE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect x="0" y="0" width="100" height="100" fill="#000000" stroke="none"/>
 </svg>
 """
 
-/** Untagged `<rect>` inside a nested `<g>` — a Rectangle, same as at root. */
+/** Untagged `<rect>` inside a nested `<g>`: a Rectangle, same as at root. */
 internal const val NESTED_BARE_RECT_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <g>
@@ -663,7 +687,7 @@ internal const val NESTED_BARE_RECT_SVG = """<?xml version="1.0" encoding="UTF-8
 </svg>
 """
 
-/* RECTANGLE FIXTURES — viewBox 100x100; svgToCga(x, y) = (x − 50, 50 − y); CGA anchor = bottom-left. */
+/* RECTANGLE FIXTURES: viewBox 100x100; svgToCga(x, y) = (x − 50, 50 − y); CGA anchor = bottom-left. */
 
 /** Styled rectangle: SVG top-left (20, 30), 40×20 → CGA anchor (−30, 0), width 40, height 20. */
 internal const val ONE_RECTANGLE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
@@ -672,7 +696,7 @@ internal const val ONE_RECTANGLE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 </svg>
 """
 
-/** Rectangle with an unknown k:type — warns and falls back to the untagged Rectangle default. */
+/** Rectangle with an unknown k:type: warns and falls back to the untagged Rectangle default. */
 internal const val RECTANGLE_UNKNOWN_KTYPE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect k:type="squircle" x="20" y="30" width="40" height="20"/>
@@ -688,7 +712,7 @@ internal const val GROUP_FILL_CASCADE_RECT_SVG = """<?xml version="1.0" encoding
 </svg>
 """
 
-/** Builds a rect fixture with one required geometry attribute omitted — MalformedRectException per attr. */
+/** Builds a rect fixture with one required geometry attribute omitted: MalformedRectException per attr. */
 internal fun rectSvgWithout(missing: String): String {
     val attrs = listOf("x" to "20", "y" to "30", "width" to "40", "height" to "20")
         .filter { (name, _) -> name != missing }
@@ -700,42 +724,42 @@ internal fun rectSvgWithout(missing: String): String {
 """
 }
 
-/** Non-full-bleed rect with rounded corners (rx only) — unsupported geometry, malformed. */
+/** Non-full-bleed rect with rounded corners (rx only): unsupported geometry, malformed. */
 internal const val RECTANGLE_RX_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect x="20" y="30" width="40" height="20" rx="3"/>
 </svg>
 """
 
-/** Non-full-bleed rect with rounded corners (ry only) — unsupported geometry, malformed. */
+/** Non-full-bleed rect with rounded corners (ry only): unsupported geometry, malformed. */
 internal const val RECTANGLE_RY_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect x="20" y="30" width="40" height="20" ry="3"/>
 </svg>
 """
 
-/** Rect with rx="0" — zero rounding is semantically square corners; parses as a Rectangle. */
+/** Rect with rx="0". Zero rounding is semantically square corners, so it parses as a Rectangle. */
 internal const val RECTANGLE_ZERO_RX_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect x="20" y="30" width="40" height="20" rx="0"/>
 </svg>
 """
 
-/** Zero width — Degenerate→Malformed at the codec boundary. */
+/** Zero width: Degenerate→Malformed at the codec boundary. */
 internal const val RECTANGLE_ZERO_WIDTH_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect x="20" y="30" width="0" height="20"/>
 </svg>
 """
 
-/** Negative height — Degenerate→Malformed at the codec boundary (extents are not re-anchored). */
+/** Negative height: Degenerate→Malformed at the codec boundary (extents are not re-anchored). */
 internal const val RECTANGLE_NEGATIVE_HEIGHT_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect x="20" y="30" width="40" height="-20"/>
 </svg>
 """
 
-/** Full-bleed fill-only rect that is not leading (a shape precedes it) — a Rectangle; position carries no special meaning. */
+/** Full-bleed fill-only rect that is not leading (a shape precedes it): a Rectangle. Position carries no special meaning. */
 internal const val NON_LEADING_FULL_BLEED_RECT_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <circle cx="50" cy="50" r="10"/>
@@ -743,7 +767,7 @@ internal const val NON_LEADING_FULL_BLEED_RECT_SVG = """<?xml version="1.0" enco
 </svg>
 """
 
-/** Two full-bleed fill-only rects — two stacked Rectangles, in source order. */
+/** Two full-bleed fill-only rects: two stacked Rectangles, in source order. */
 internal const val TWO_FULL_BLEED_RECTS_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <rect x="0" y="0" width="100" height="100" fill="#000000"/>
@@ -758,14 +782,14 @@ internal const val ONE_POLYGON_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 </svg>
 """
 
-/** Same triangle, whitespace-only separators and no styling — SVG defaults materialize. */
+/** Same triangle, whitespace-only separators and no styling. SVG defaults materialize. */
 internal const val BARE_POLYGON_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <polygon points="20 80 60 80 20 50"/>
 </svg>
 """
 
-/** Polygon with an unknown k:type — warns and falls back to a polygon. */
+/** Polygon with an unknown k:type: warns and falls back to a polygon. */
 internal const val POLYGON_UNKNOWN_KTYPE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <polygon k:type="mystery" points="20,80 60,80 20,50"/>
@@ -786,7 +810,7 @@ internal const val POLYGON_ODD_POINTS_SVG = """<?xml version="1.0" encoding="UTF
 </svg>
 """
 
-/** Polygon with only two vertices — degenerate in :cga, malformed at the parse boundary. */
+/** Polygon with only two vertices: degenerate in :cga, malformed at the parse boundary. */
 internal const val POLYGON_TWO_VERTICES_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <polygon points="20,80 60,80"/>
@@ -800,21 +824,21 @@ internal const val POLYGON_NON_NUMERIC_SVG = """<?xml version="1.0" encoding="UT
 </svg>
 """
 
-/** Inside-out triangle: flag and model winding agree (the walk maps model-clockwise) — the canonical serialized form. */
+/** Inside-out triangle: flag and model winding agree (the walk maps model-clockwise). The canonical serialized form. */
 internal const val INSIDE_OUT_POLYGON_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <polygon points="20,50 60,80 20,80" k:flags="inside-out"/>
 </svg>
 """
 
-/** Inside-out flag on a walk that maps model-counter-clockwise — the parser reverses it (flag is intent). */
+/** Inside-out flag on a walk that maps model-counter-clockwise. The parser reverses it (flag is intent). */
 internal const val MISWOUND_INSIDE_OUT_POLYGON_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <polygon points="20,80 60,80 20,50" k:flags="inside-out"/>
 </svg>
 """
 
-/** No flag on a walk that maps model-clockwise — the parser reverses it to classic. */
+/** No flag on a walk that maps model-clockwise. The parser reverses it to classic. */
 internal const val MISWOUND_CLASSIC_POLYGON_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <polygon points="20,50 60,80 20,80"/>
@@ -828,7 +852,7 @@ internal const val INSIDE_OUT_RECT_SVG = """<?xml version="1.0" encoding="UTF-8"
 </svg>
 """
 
-/* POLYLINE FIXTURES — bare <polyline> is the untagged (and only) reading: an open Polyline chain */
+/* POLYLINE FIXTURES: bare <polyline> is the untagged (and only) reading, an open Polyline chain */
 
 /** Bare open-chain polyline. viewBox 100×100: SVG (20,80)/(60,80)/(20,50) → CGA (−30,−30)/(10,−30)/(−30,0). */
 internal const val ONE_POLYLINE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
@@ -837,35 +861,35 @@ internal const val ONE_POLYLINE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 </svg>
 """
 
-/** Same chain, whitespace-only separators and no styling — SVG defaults materialize. */
+/** Same chain, whitespace-only separators and no styling. SVG defaults materialize. */
 internal const val BARE_POLYLINE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <polyline points="20 80 60 80 20 50"/>
 </svg>
 """
 
-/** Polyline with an unknown k:type — warns and falls back to a polyline. */
+/** Polyline with an unknown k:type: warns and falls back to a polyline. */
 internal const val POLYLINE_UNKNOWN_KTYPE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <polyline k:type="mystery" points="20,80 60,80 20,50"/>
 </svg>
 """
 
-/** Two-vertex polyline — a single open edge, legal (unlike polygon's 3-vertex floor). */
+/** Two-vertex polyline: a single open edge, legal (unlike polygon's 3-vertex floor). */
 internal const val POLYLINE_TWO_VERTICES_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <polyline points="20,80 60,80"/>
 </svg>
 """
 
-/** Closed-spelling polyline (first == last) — legal for the open chain, preserved as data. */
+/** Closed-spelling polyline (first == last): legal for the open chain, preserved as data. */
 internal const val POLYLINE_CLOSED_SPELLING_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <polyline points="20,80 60,80 20,50 20,80"/>
 </svg>
 """
 
-/** Polyline with a non-butt linecap — the optional-feature attribute round-trips. */
+/** Polyline with a non-butt linecap. The optional-feature attribute round-trips. */
 internal const val POLYLINE_ROUND_CAP_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <polyline points="20,80 60,80 20,50" stroke="#0000ff" stroke-width="4" stroke-linecap="round"/>
@@ -886,7 +910,7 @@ internal const val POLYLINE_ODD_POINTS_SVG = """<?xml version="1.0" encoding="UT
 </svg>
 """
 
-/** Polyline with only one vertex — degenerate in :cga, malformed at the parse boundary. */
+/** Polyline with only one vertex: degenerate in :cga, malformed at the parse boundary. */
 internal const val POLYLINE_ONE_VERTEX_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <polyline points="20,80"/>
@@ -900,7 +924,7 @@ internal const val POLYLINE_NON_NUMERIC_SVG = """<?xml version="1.0" encoding="U
 </svg>
 """
 
-/* K:TAGS — open-vocabulary game-semantic tokens */
+/* K:TAGS: open-vocabulary game-semantic tokens */
 
 /** Polygon carrying k:tags; whitespace-messy value exercises tolerant token splitting. */
 internal const val TAGGED_POLYGON_SVG = """<?xml version="1.0" encoding="UTF-8"?>
@@ -938,7 +962,7 @@ internal const val BRICK_TEMPLATE_SVG = """<?xml version="1.0" encoding="UTF-8"?
 </svg>
 """
 
-/** Template whose shape sets an explicit fill — must win over any use-site fill (SVG cascade rule). */
+/** Template whose shape sets an explicit fill. It must win over any use-site fill (SVG cascade rule). */
 internal const val GREEN_TEMPLATE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" width="40" height="20" viewBox="0 0 40 20">
   <rect x="0" y="0" width="40" height="20" fill="#00ff00"/>

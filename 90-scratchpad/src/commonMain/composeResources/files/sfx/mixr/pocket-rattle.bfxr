@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.2068225324479863,
+    "sources": "[{\"synth\":\"Rustlr\",\"name\":\"Page Turn\",\"params\":{\"masterVolume\":0.5,\"seed\":0.2665773956105113,\"material\":0,\"gesture\":1,\"duration\":0.4912092319689691,\"grain\":0.5875232198927551,\"density\":0.5560298952250742,\"motion\":0.3080857814289629,\"pressure\":0.38154805870726705,\"folds\":2,\"brightness\":0.5841547688096762},\"generator\":\"*\",\"selectedGenerator\":\"generate_page_turn\",\"renderSeed\":0.1451150868088007},{\"synth\":\"Clonkr\",\"name\":\"Glass Ping\",\"params\":{\"masterVolume\":0.5,\"seed\":0.18314109253697097,\"material\":1,\"action\":0,\"size\":0.0724780791439116,\"hollowness\":0.558389174938202,\"hardness\":0.9195346702821553,\"damping\":0.15342802210943773,\"duration\":0.6081527536851354},\"generator\":\"*\",\"selectedGenerator\":\"generate_glass_ping\",\"renderSeed\":0.6980204835999757}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

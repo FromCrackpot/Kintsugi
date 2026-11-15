@@ -1,0 +1,23 @@
+Kintsugi Engine
+Copyright 2026 fromcrackpot
+
+This product includes third-party material. REUSE.toml states the licence of every file; the
+licence texts are in LICENSES/.
+
+bfxr2
+  Copyright (c) 2021 Stephen Lavelle. MIT License (LICENSES/MIT.txt).
+  https://github.com/increpare/bfxr2
+  The :bfxr module (32-bfxr) ports bfxr2's synth schemas and synth DSP to Kotlin, and its tests
+  hold reference renders of bfxr2's own presets; 90-scratchpad's sfx sounds are bfxr2 presets.
+
+SfxrSynth
+  Copyright 2010 Thomas Vian. Apache License 2.0 (LICENSES/Apache-2.0.txt).
+  Modified for Bfxr and bfxr2 by Stephen Lavelle.
+  32-bfxr/src/commonMain/kotlin/fromcrackpot/kintsugi/bfxr/synths/Bfxr.kt is a derivative work:
+  fromcrackpot translated bfxr2's js/audio/Bfxr_DSP.js from JavaScript to Kotlin in 2026.
+
+Adventure Kid Waveforms (AKWF)
+  Public domain, dedicated under CC0 1.0 Universal; converted by Brad Roy, distributed in bfxr2.
+  https://www.adventurekid.se/akrt/waveforms/adventure-kid-waveforms/
+  Three of its wavetables (granular_0044, fmsynth_0012, hvoice_0012) are in
+  32-bfxr/src/commonMain/kotlin/fromcrackpot/kintsugi/bfxr/dsp/Akwf.kt.

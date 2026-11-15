@@ -40,7 +40,7 @@ class ShapeStyleTest {
 
     @Test fun `partial construction silently drops geometry to zero`() {
         // Documented gotcha: overriding only a paint field leaves the ctor defaults
-        // strokeWidth = 0.0 / size = 0.0 — visible color, invisible shape. Callers must
+        // strokeWidth = 0.0 / size = 0.0: visible color, invisible shape. Callers must
         // include geometry or start from a per-shape constant via .copy().
         val partial = ShapeStyle(fill = ShapeColor.BLACK)
         assertEquals(0.0, partial.strokeWidth)
@@ -102,8 +102,8 @@ class ShapeStyleTest {
     /* DipoleChrome */
 
     @Test fun `DipoleChrome constants are the shared compose-svg contract`() {
-        // Single source of truth consumed by both :compose drawDipole and :svg writeDipoleGroup —
-        // pinning the values makes a change a deliberate act, not silent drift.
+        // Single source of truth consumed by both :compose drawDipole and :svg writeDipoleGroup.
+        // Pinning the values makes a change a deliberate act, not silent drift.
         assertEquals(2.0, DipoleChrome.DASH_ON)
         assertEquals(1.0, DipoleChrome.DASH_OFF)
         assertEquals(0.25, DipoleChrome.WIDTH_RATIO)

@@ -17,7 +17,7 @@ import nl.adaptivity.xmlutil.XmlWriter
 /**
  * Flat point → `<rect k:type="flat-point">`. The rect is square, `width = height = size`
  * (the render marker size, `ShapeStyle.size`), centered on the CGA position. A FlatPoint at
- * infinity cannot be encoded (no finite SVG position) — skip+warn at the boundary.
+ * infinity cannot be encoded (no finite SVG position), so it skips with a warning.
  */
 internal fun XmlWriter.writeFlatPointRect(shape: FlatPointNode, viewBox: SceneBounds) {
     val p: FlatPoint = shape

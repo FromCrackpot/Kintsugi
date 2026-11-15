@@ -1,6 +1,6 @@
 package fromcrackpot.kintsugi.cga.d2.transforms
 
-import fromcrackpot.kintsugi.cga.d2.products.join
+import fromcrackpot.kintsugi.cga.d2.operations.products.join
 import fromcrackpot.kintsugi.cga.d2.shapes.Shape
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polygon
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polyline

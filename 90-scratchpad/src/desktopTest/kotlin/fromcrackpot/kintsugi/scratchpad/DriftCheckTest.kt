@@ -2,7 +2,7 @@ package fromcrackpot.kintsugi.scratchpad
 
 import fromcrackpot.kintsugi.compose.tracing.canvasToTrace
 import fromcrackpot.kintsugi.scenegraph.nodes.flattenShapes
-import fromcrackpot.kintsugi.scratchpad.scenes.SMILEY_SVG
+import fromcrackpot.kintsugi.scratchpad.sketches.SMILEY_SVG
 import fromcrackpot.kintsugi.svg.parseSvg
 import fromcrackpot.kintsugi.svg.serializeSvg
 import kotlin.test.Test
@@ -13,7 +13,7 @@ import kotlin.test.Test
  * `./gradlew :scratchpad:desktopTest --info` (the `--info` flag preserves stdout in the gradle log)
  * whenever you suspect drift, then eyeball the two blocks.
  *
- * Add more `@Test` methods here when investigating a specific drift — one method per fixture is the
+ * Add more `@Test` methods here when investigating a specific drift. One method per fixture is the
  * idiom. We deliberately don't pin assertions (no `assertEquals(canvasTrace, svgOutput)`) because
  * the two outputs are intentionally different surfaces (draw-call trace vs XML); the eyeball pass
  * is the gate.

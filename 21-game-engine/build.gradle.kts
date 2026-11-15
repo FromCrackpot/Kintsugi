@@ -1,5 +1,11 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.dokka)
@@ -13,7 +19,7 @@ dokka {
 }
 
 // -PgameDebug bakes the engine's debug facility (loop pause/step) into the build; absent, the
-// generated constant is false and the debug code paths are compiled out — see Game.kt.
+// generated constant is false and the debug code paths are compiled out (see Game.kt).
 val gameDebug = providers.gradleProperty("gameDebug").isPresent
 
 val generateDebugConfig by tasks.registering {
@@ -40,28 +46,39 @@ kotlin {
     explicitApi()
 
     jvm()
+    android {
+        namespace = "fromcrackpot.kintsugi.gameengine"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        compilerOptions { jvmTarget = JvmTarget.JVM_17 }
+    }
     wasmJs {
         browser()
         // Library exception to "binaries.executable() is for apps": CMP 1.12's
         // checkComposeUiTestConfigurationForWasmJs requires it so wasm tests bundle Skiko (CMP-4906).
         binaries.executable()
     }
-    // iosX64()
-    // iosArm64()
-    // iosSimulatorArm64()
+    // -Pios: a compile-only check until the tests run on a simulator. Publishing refuses it (root build).
+    if (providers.gradleProperty("ios").isPresent) {
+        iosArm64()
+        iosSimulatorArm64()
+    }
 
     sourceSets {
         commonMain {
             kotlin.srcDir(generateDebugConfig)
             dependencies {
-                // api: :game-engine is the SDK umbrella — games depend on :game-engine alone and reach
+                // api: :game-engine is the SDK umbrella. Games depend on :game-engine alone and reach
                 // every library type (Shape, ShapeGroup, Versor, …) through it.
                 api(project(":cga"))
                 api(project(":scene-graph"))
                 api(project(":compose"))
                 api(project(":svg"))
+                api(project(":audio"))
+                api(project(":bfxr"))
                 api(compose.runtime)
-                implementation(compose.foundation)
+                api(compose.foundation)
+                implementation(libs.androidx.lifecycle.runtime.compose)
                 api(compose.ui)
             }
         }

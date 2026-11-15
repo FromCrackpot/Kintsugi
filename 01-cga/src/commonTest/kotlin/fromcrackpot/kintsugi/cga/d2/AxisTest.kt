@@ -1,7 +1,7 @@
 package fromcrackpot.kintsugi.cga.d2
 
-import fromcrackpot.kintsugi.cga.d2.queries.measures.angleTo
-import fromcrackpot.kintsugi.cga.d2.queries.predicates.on
+import fromcrackpot.kintsugi.cga.d2.operations.queries.measures.angleTo
+import fromcrackpot.kintsugi.cga.d2.operations.queries.predicates.on
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Direction
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.cga.deg

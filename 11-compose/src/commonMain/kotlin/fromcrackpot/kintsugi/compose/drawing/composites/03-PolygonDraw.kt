@@ -13,8 +13,8 @@ internal fun DrawScope.drawPolygon(polygon: Polygon, fill: Color, stroke: Color,
         warn("skipping inside-out Polygon (signedArea < 0): $polygon")
         return
     }
-    // No other degenerate guard: the Polygon ctor makes < 3 vertices, at-infinity vertices, and
-    // collapsed edges unrepresentable — same by-construction posture as drawSegment.
+    // No other degenerate guard: the Polygon ctor makes < 3 vertices, at-infinity vertices and
+    // collapsed edges unrepresentable, as drawSegment relies on too.
     val path = Path().apply {
         polygon.vertices.forEachIndexed { i, vertex ->
             val p = cgaToCanvas(vertex.px, vertex.py)
@@ -22,7 +22,7 @@ internal fun DrawScope.drawPolygon(polygon: Polygon, fill: Color, stroke: Color,
         }
         close()
     }
-    // Compose's drawPath takes a single DrawStyle (Fill OR Stroke), never both — so both
+    // Compose's drawPath takes a single DrawStyle (Fill OR Stroke), never both. So the two
     // layers are two draw calls, fill first, stroke on top.
     drawPath(path, color = fill)
     drawPath(path, color = stroke, style = Stroke(width = strokeWidth))

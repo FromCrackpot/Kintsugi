@@ -10,8 +10,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Trace snapshots for `drawPolyline` through the production `drawShape` dispatch — recorded draw
- * calls asserted against inline goldens. No degenerate scenes — the Polyline ctor makes
+ * Trace snapshots for `drawPolyline` through the production `drawShape` dispatch: recorded draw
+ * calls asserted against inline goldens. No degenerate scenes: the Polyline ctor makes
  * degenerate chains unrepresentable.
  */
 class PolylineDrawTest {
@@ -21,7 +21,7 @@ class PolylineDrawTest {
     @Test
     fun `stroke-only polyline emits transparent fill plus stroke drawPath calls over the open chain`() {
         // Open chain (0,0)→(40,0)→(0,30) → canvas (100,100)/(140,100)/(100,70); the trace records
-        // the path's control-point bounds — same shape as the polygon golden, but the path has
+        // the path's control-point bounds: the same shape as the polygon golden, but the path has
         // no close() (the trace can't show that; the open-stroke cap threading is what differs).
         val shape = PolylineNode(
             Polyline(listOf(FlatPoint(0.0, 0.0), FlatPoint(40.0, 0.0), FlatPoint(0.0, 30.0))),

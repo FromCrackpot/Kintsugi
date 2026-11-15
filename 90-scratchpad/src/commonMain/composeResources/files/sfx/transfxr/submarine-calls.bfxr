@@ -1,0 +1,40 @@
+{
+  "synth_type": "Transfxr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "waveType": 2,
+    "duration": 0.19844880086615724,
+    "pitch": {
+      "start": 0.1640511901327409,
+      "end": 0.10209637922234832,
+      "curve": "Ease In"
+    },
+    "tone": {
+      "start": 0.5418319078884087,
+      "end": 0.5649443374853581,
+      "curve": "Bounce"
+    },
+    "vibrato": {
+      "start": 0.010988366650417448,
+      "end": 0.010988366650417448,
+      "curve": "Bounce"
+    },
+    "level": {
+      "start": 0.5757032453897409,
+      "end": 0.5195636579347774,
+      "curve": "Bounce"
+    },
+    "attack": 0.004033890468787919,
+    "release": 0.12467513495388548,
+    "resonance": 0.9216617764160037,
+    "echo": 0,
+    "waveTo": 7,
+    "morph": {
+      "start": 0.0731276028882712,
+      "end": 0.026260935328900815,
+      "curve": "Smooth"
+    }
+  },
+  "renderSeed": 0.36905342526733875
+}

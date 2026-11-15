@@ -1,5 +1,6 @@
 package fromcrackpot.kintsugi.svg
 
+import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Dipole
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Segment
 import fromcrackpot.kintsugi.scenegraph.*
@@ -12,12 +13,12 @@ import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 import kotlin.test.*
 
 /**
- * Parser tests for the bare `<line>` SVG element — the untagged default for `Segment` in /v1.
+ * Parser tests for the bare `<line>` SVG element, the untagged default for `Segment` in /v1.
  * The infinite-line counterpart (`<line k:type="line">`) is covered by [LineTest].
  */
 class SegmentTest {
 
-    /* PARSE — bare segment */
+    /* PARSE: bare segment */
 
     @Test fun `bare line becomes a Segment`() {
         // viewBox 100x100 → SVG (20,20) and (80,80) map to CGA (-30, 30) and (30, -30).
@@ -51,7 +52,7 @@ class SegmentTest {
     }
 
     @Test fun `stroke-linecap cascades from an enclosing group`() {
-        // <g stroke-linecap="round"> reaches a bare segment with no cap of its own — same
+        // <g stroke-linecap="round"> reaches a bare segment with no cap of its own, through the same
         // per-attribute fallback chain as stroke/stroke-width.
         val group = parseSvg(GROUP_STROKE_LINECAP_CASCADE_SVG).children.single() as GroupNode
         val shape = group.children.single() as ShapeNode
@@ -78,7 +79,13 @@ class SegmentTest {
         assertEquals(0.0, a.gz + b.gz)
     }
 
-    /* PARSE — malformed */
+    @Test fun `imaginary flag parses to an imaginary Segment`() {
+        val segment = parseSvg(LINE_SEGMENT_IMAGINARY_SVG).children.single() as SegmentNode
+        assertTrue(segment.isImaginary)
+        assertEquals(Dipole(1.0, 0.0, 1.0, 0.0, 0.0, 0.0), segment.toDipole)
+    }
+
+    /* PARSE: malformed */
 
     @Test fun `bare line missing any coordinate attribute throws MalformedSegmentException`() {
         for (missing in listOf("x1", "y1", "x2", "y2")) {
@@ -92,5 +99,10 @@ class SegmentTest {
         // :cga's Dipole ctor throws DegenerateDipoleException when the carrier norm collapses to
         // zero; the SVG codec wraps it so :svg's parse boundary only ever surfaces SvgFormatExceptions.
         assertFailsWith<MalformedSegmentException> { parseSvg(LINE_SEGMENT_COINCIDENT_SVG) }
+    }
+
+    @Test fun `bare line with endpoints coinciding at the SCALE quantum throws MalformedSegmentException`() {
+        // Off a line through the origin, the wedge lands at infinity instead of throwing.
+        assertFailsWith<MalformedSegmentException> { parseSvg(LINE_SEGMENT_NEAR_COINCIDENT_SVG) }
     }
 }

@@ -11,8 +11,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Trace snapshots for `drawPolygon` through the production `drawShape` dispatch — recorded draw
- * calls asserted against inline goldens. The one degenerate scene is the inside-out skip — the
+ * Trace snapshots for `drawPolygon` through the production `drawShape` dispatch: recorded draw
+ * calls asserted against inline goldens. The one degenerate scene is the inside-out skip; the
  * Polygon ctor makes every other degenerate ring unrepresentable.
  */
 class PolygonDrawTest {
@@ -22,7 +22,7 @@ class PolygonDrawTest {
     @Test
     fun `fill-only rectangle polygon emits fill plus transparent stroke drawPath calls`() {
         // Model corners (−40, −20)..(40, 20) → model top-left (−40, 20) → canvas (60, 80).
-        // Rectangles are Polygon quads now — the trace records path bounds, not a rect event.
+        // Rectangles are Polygon quads now, so the trace records path bounds, not a rect event.
         val shape = PolygonNode(
             Polygon.Rectangle(FlatPoint(-40.0, -20.0), FlatPoint(40.0, 20.0)),
             ShapeStyle(fill = ShapeColor.rgb(0xff, 0, 0)),
@@ -79,7 +79,7 @@ class PolygonDrawTest {
     @Test
     fun `inside-out polygon emits no draw calls`() {
         // signedArea < 0 ⇒ inside-out orientation (solid region is everything outside the loop).
-        // The loop itself is drawable geometry, but the fill it declares isn't — skip + warn.
+        // The loop itself is drawable geometry, but the fill it declares isn't: skip + warn.
         val shape = PolygonNode(
             -Polygon.Rectangle(FlatPoint(-40.0, -20.0), FlatPoint(40.0, 20.0)),
             ShapeStyle(fill = ShapeColor.rgb(0xff, 0, 0)),

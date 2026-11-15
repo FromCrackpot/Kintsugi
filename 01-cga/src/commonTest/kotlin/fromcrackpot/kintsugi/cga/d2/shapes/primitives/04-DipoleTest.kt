@@ -1,8 +1,10 @@
 package fromcrackpot.kintsugi.cga.d2.shapes.primitives
 
-import fromcrackpot.kintsugi.cga.d2.products.join
-import fromcrackpot.kintsugi.cga.d2.products.meet
-import fromcrackpot.kintsugi.cga.d2.queries.predicates.on
+import fromcrackpot.kintsugi.cga.assertSameShape
+import fromcrackpot.kintsugi.cga.dipole
+import fromcrackpot.kintsugi.cga.sweep
+import fromcrackpot.kintsugi.cga.d2.operations.products.join
+import fromcrackpot.kintsugi.cga.d2.operations.queries.predicates.on
 import fromcrackpot.kintsugi.cga.d2.exceptions.DegenerateCircleException
 import fromcrackpot.kintsugi.cga.d2.exceptions.DegenerateDipoleException
 import fromcrackpot.kintsugi.cga.d2.exceptions.NonBladeDipoleException
@@ -16,7 +18,7 @@ class DipoleTest {
      */
 
     @Test
-    fun `constructor unitizes by carrier norm sqrt(gx2+gy2)`() {
+    fun `constructor unitizes by carrier norm sqrt of gx2+gy2`() {
         // (gx, gy) = (3, 4), norm = 5 → divide all six components by 5.
         // Components satisfy the Plücker constraint: 3·0 + 4·10 + 10·(-4) = 0.
         val d = Dipole(3.0, 4.0, 10.0, 0.0, 10.0, -4.0)
@@ -37,14 +39,14 @@ class DipoleTest {
 
     @Test
     fun `constructor with zero carrier and non-blade components throws NonBladeDipoleException`() {
-        // At infinity the Plücker residual reduces to gz·pz = 5·3 = 15 ≠ 0 — not a blade.
+        // At infinity the Plücker residual reduces to gz·pz = 5·3 = 15 ≠ 0: not a blade.
         val ex = assertFailsWith<NonBladeDipoleException> { Dipole(0.0, 0.0, 5.0, 1.0, 2.0, 3.0) }
         assertEquals(15.0, ex.residual)
     }
 
     @Test
     fun `constructor with zero carrier keeps an at-infinity blade raw`() {
-        // Plücker: gz·pz = 5·0 = 0 — a valid dipole at infinity; no unitization possible, kept raw.
+        // Plücker: gz·pz = 5·0 = 0, a valid dipole at infinity. No unitization is possible; kept raw.
         val d = Dipole(0.0, 0.0, 5.0, 1.0, 2.0, 0.0)
         assertEquals(0.0, d.gx)
         assertEquals(0.0, d.gy)
@@ -57,7 +59,7 @@ class DipoleTest {
 
     @Test
     fun `constructor with whole g-part zero throws DegenerateDipoleException carrying the FlatPoint it collapsed to`() {
-        // g = 0 leaves only the e41/e42/e43 span — the blade IS FlatPoint(1, 2, 3), not a dipole.
+        // g = 0 leaves only the e41/e42/e43 span: the blade IS FlatPoint(1, 2, 3), not a dipole.
         val ex = assertFailsWith<DegenerateDipoleException> { Dipole(0.0, 0.0, 0.0, 1.0, 2.0, 3.0) }
         assertEquals(FlatPoint(1.0, 2.0, 3.0), ex.point)
     }
@@ -103,7 +105,7 @@ class DipoleTest {
     private val offset = Dipole(1.0, 0.0, -3.0, 6.0, -4.5, 2.0)
 
     @Test
-    fun `norm is the flat bulk magnitude sqrt(px2+py2)`() {
+    fun `norm is the flat bulk magnitude sqrt of px2+py2`() {
         assertEquals(7.5, offset.norm) // sqrt(6² + 4.5²)
         // A dipole whose carrier passes through the origin has zero flat bulk.
         assertEquals(0.0, vertical.norm)
@@ -124,7 +126,7 @@ class DipoleTest {
     }
 
     @Test
-    fun `attitude is the carrier tangent (gy, -gx) as a round point at infinity`() {
+    fun `attitude is the carrier tangent - gy - -gx - as a round point at infinity`() {
         // Attitude: RoundPoint(gy, -gx, 0, -pz) = (0, -1, 0, -2)
         assertEquals(RoundPoint(0.0, -1.0, 0.0, -2.0), vertical.attitude)
     }
@@ -137,23 +139,9 @@ class DipoleTest {
     }
 
     @Test
-    fun `start joined with end reconstructs the dipole (Containers invariant)`() {
-        // Axis-aligned: gy=0, gz=0, px=0, py=0 — the simple case.
-        assertEquals(vertical, vertical.start join vertical.end)
-        // Non-axis-aligned dipole-blade (built via join to guarantee the Plücker constraint
-        // `gx·px + gy·py + gz·pz = 0` that the bare Dipole ctor doesn't enforce).
-        val skew = RoundPoint(1.0, 2.0) join RoundPoint(4.0, -3.0)
-        assertEquals(skew, skew.start join skew.end)
-    }
-
-    @Test
-    fun `Containers invariant holds for imaginary dipoles too`() {
-        // Disjoint circles meet at an imaginary dipole; start/end come out real-valued
-        // (radius = sqrt(|radius²|)) but their wedge reconstructs the imaginary blade exactly.
-        // :svg relies on this for dipole round-trip without an "imaginary" sidecar flag.
-        val imaginary = Circle(0.0, 0.0, 1.0) meet Circle(3.0, 0.0, 1.0)
-        assertTrue(imaginary.isImaginary)
-        assertEquals(imaginary, imaginary.start join imaginary.end)
+    fun `start joined with end reconstructs real and imaginary dipoles - Containers invariant`() = sweep {
+        val d = dipole()
+        assertSameShape(d, d.start join d.end)
     }
 
     @Test

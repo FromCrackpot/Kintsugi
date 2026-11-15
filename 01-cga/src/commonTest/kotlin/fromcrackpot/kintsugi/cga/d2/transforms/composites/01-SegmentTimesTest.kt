@@ -4,6 +4,7 @@ import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Line
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.RoundPoint
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Segment
+import fromcrackpot.kintsugi.cga.d2.transforms.D
 import fromcrackpot.kintsugi.cga.d2.transforms.F
 import fromcrackpot.kintsugi.cga.d2.transforms.G
 import fromcrackpot.kintsugi.cga.d2.transforms.R
@@ -45,5 +46,25 @@ class SegmentTimesTest {
         val s = Segment(FlatPoint(1.0, 1.0), FlatPoint(3.0, 1.0)) * G(Line(0.0, -1.0, 0.0), 2.0)
         assertEquals(RoundPoint(3.0, -1.0), s.start)
         assertEquals(RoundPoint(5.0, -1.0), s.end)
+    }
+
+    /* DILATOR */
+
+    @Test
+    fun `segment dilates via its endpoints`() {
+        // (1, 1) + 3·((0, 0) − (1, 1)) = (−2, −2); (1, 1) + 3·((2, 0) − (1, 1)) = (4, −2).
+        val s = Segment(FlatPoint(0.0, 0.0), FlatPoint(2.0, 0.0)) * D(FlatPoint(1.0, 1.0), 3.0)
+        assertEquals(RoundPoint(-2.0, -2.0), s.start)
+        assertEquals(RoundPoint(4.0, -2.0), s.end)
+    }
+
+    @Test
+    fun `dilation multiplies a segment's length by the scale`() {
+        val s = Segment(FlatPoint(0.0, 0.0), FlatPoint(3.0, 4.0))
+        assertEquals(1.25, (s * D(FlatPoint(-1.0, 2.0), 0.25)).length, EPS)
+    }
+
+    companion object {
+        private const val EPS = 1e-9
     }
 }

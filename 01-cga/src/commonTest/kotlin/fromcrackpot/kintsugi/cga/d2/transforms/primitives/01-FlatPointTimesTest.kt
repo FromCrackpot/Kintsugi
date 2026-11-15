@@ -3,10 +3,12 @@ package fromcrackpot.kintsugi.cga.d2.transforms.primitives
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Direction
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Line
+import fromcrackpot.kintsugi.cga.d2.transforms.D
 import fromcrackpot.kintsugi.cga.d2.transforms.F
 import fromcrackpot.kintsugi.cga.d2.transforms.G
 import fromcrackpot.kintsugi.cga.d2.transforms.R
 import fromcrackpot.kintsugi.cga.d2.transforms.T
+import fromcrackpot.kintsugi.cga.d2.transforms.times
 import fromcrackpot.kintsugi.cga.deg
 import fromcrackpot.kintsugi.cga.rad
 import kotlin.test.Test
@@ -14,7 +16,7 @@ import kotlin.test.assertEquals
 
 class FlatPointTimesTest {
 
-    /* MOTOR — TRANSLATION */
+    /* MOTOR: TRANSLATION */
 
     @Test
     fun `translates the origin by the displacement`() {
@@ -51,7 +53,7 @@ class FlatPointTimesTest {
         assertEquals(v, v * T(10.0, 20.0))
     }
 
-    /* MOTOR — ROTATION */
+    /* MOTOR: ROTATION */
 
     @Test
     fun `rotates CCW about the origin`() {
@@ -83,12 +85,12 @@ class FlatPointTimesTest {
     @Test
     fun `an at-infinity center degrades R to a translator`() {
         // Rotation about a point at infinity is a translation perpendicular to it:
-        // 2·tan(θ/2)·(dy, −dx) — for direction (0, 1) and 90°, a translation by (2, 0).
+        // 2·tan(θ/2)·(dy, −dx): for direction (0, 1) and 90°, a translation by (2, 0).
         val m = R(Direction(0.0, 1.0), 90.deg)
         assertEquals(FlatPoint(1.0, 1.0) * T(2.0, 0.0), FlatPoint(1.0, 1.0) * m)
     }
 
-    /* FLECTOR — REFLECTION */
+    /* FLECTOR: REFLECTION */
 
     @Test
     fun `reflects across the x-axis`() {
@@ -150,7 +152,7 @@ class FlatPointTimesTest {
         assertEquals(FlatPoint(-1.0, 2.0), FlatPoint(1.0, 2.0) * F(Line(2.0, 0.0, 0.0)))
     }
 
-    /* FLECTOR — TRANSFLECTION */
+    /* FLECTOR: TRANSFLECTION */
 
     @Test
     fun `a transflection reflects then glides along the line`() {
@@ -158,5 +160,45 @@ class FlatPointTimesTest {
         // glides by 3 to (5, −5).
         val g = G(Line(0.0, -1.0, 0.0), 3.0)
         assertEquals(FlatPoint(5.0, -5.0), FlatPoint(2.0, 5.0) * g)
+    }
+
+    /* DILATOR */
+
+    @Test
+    fun `dilation moves a point to the center plus the scaled offset`() {
+        // (1, 2) + 3·((3, 1) − (1, 2)) = (7, −1).
+        assertEquals(FlatPoint(7.0, -1.0), FlatPoint(3.0, 1.0) * D(FlatPoint(1.0, 2.0), 3.0))
+    }
+
+    @Test
+    fun `a contraction pulls a point toward the center`() {
+        // (1, 2) + ½·((3, 0) − (1, 2)) = (2, 1).
+        assertEquals(FlatPoint(2.0, 1.0), FlatPoint(3.0, 0.0) * D(FlatPoint(1.0, 2.0), 0.5))
+    }
+
+    @Test
+    fun `dilation fixes its center`() {
+        val c = FlatPoint(1.0, 2.0)
+        assertEquals(c, c * D(c, 0.25))
+    }
+
+    @Test
+    fun `dilates a non-unitized point in euclidean space`() {
+        // FlatPoint(4, 4, 2) is the euclidean point (2, 2); doubling about the origin lands on (4, 4).
+        assertEquals(FlatPoint(4.0, 4.0), FlatPoint(4.0, 4.0, pz = 2.0) * D(FlatPoint(0.0, 0.0), 2.0))
+    }
+
+    @Test
+    fun `dilation scales a direction by the scale`() {
+        // pz = 0 kills the center term: a free vector just stretches.
+        val v: Direction = Direction(3.0, 4.0) * D(FlatPoint(5.0, 7.0), 2.0)
+        assertEquals(Direction(6.0, 8.0), v)
+    }
+
+    @Test
+    fun `an at-infinity center degrades D to a translator`() {
+        // σ = ½ along (3, 0): a translation by 2·(1 − σ)/(1 + σ)·(3, 0) = (2, 0).
+        val p = FlatPoint(1.0, 1.0)
+        assertEquals(p * T(2.0, 0.0), p * D(Direction(3.0, 0.0), 0.5))
     }
 }

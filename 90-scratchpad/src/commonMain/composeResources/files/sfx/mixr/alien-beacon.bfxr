@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.5268225324479863,
+    "sources": "[{\"synth\":\"Signlr\",\"name\":\"Target Lock\",\"params\":{\"masterVolume\":0.5,\"seed\":0.637983652530238,\"encoding\":4,\"duration\":0.5412092319689691,\"carrier\":0.7799418332520872,\"deviation\":0.20093626838643103,\"symbols\":0.4,\"packets\":2,\"gap\":0.7855351183470338,\"drift\":0.3087307449430227,\"corruption\":0,\"interference\":0,\"echo\":0.08058192490134389},\"generator\":\"*\",\"selectedGenerator\":\"generate_target_lock\",\"renderSeed\":0.2665773956105113},{\"synth\":\"Choirr\",\"name\":\"Ominous\",\"params\":{\"masterVolume\":0.5,\"seed\":0.8590837873052806,\"harmony\":2,\"duration\":2.9376108576077966,\"pitch\":0.08622442566789687,\"voices\":8,\"vowel\":0.2556277362257242,\"detune\":0.5405253038858063,\"swell\":0.30823609813814984,\"breath\":0.10930257480591535,\"motion\":0.35940614507999274},\"generator\":\"*\",\"selectedGenerator\":\"generate_ominous\",\"renderSeed\":0.8051088948268443}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

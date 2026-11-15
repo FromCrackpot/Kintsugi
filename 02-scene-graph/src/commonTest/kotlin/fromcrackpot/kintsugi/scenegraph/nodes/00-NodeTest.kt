@@ -1,6 +1,6 @@
 package fromcrackpot.kintsugi.scenegraph.nodes
 
-import fromcrackpot.kintsugi.cga.d2.products.join
+import fromcrackpot.kintsugi.cga.d2.operations.products.join
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polygon
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polyline
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Segment
@@ -33,7 +33,7 @@ import kotlin.test.assertSame
 class NodeTest {
 
     /*
-    LEAF — node * Versor
+    LEAF: node * Versor
      */
 
     @Test
@@ -44,9 +44,9 @@ class NodeTest {
     }
 
     @Test
-    fun `transforms every leaf type, node-preserving`() {
+    fun `transforms every leaf type - node-preserving`() {
         val t = T(3.0, 4.0)
-        // The declared types pin the generic copy-routed returns — each leaf comes back as itself.
+        // The declared types pin the generic copy-routed returns: each leaf comes back as itself.
         val flat: FlatPointNode = FlatPointNode(FlatPoint(1.0, 2.0)) * t
         assertEquals(FlatPointNode(FlatPoint(4.0, 6.0)), flat)
         val round: RoundPointNode = RoundPointNode(RoundPoint(1.0, 2.0)) * t
@@ -98,14 +98,14 @@ class NodeTest {
     }
 
     /*
-    LEAF — node.canonical
+    LEAF: node.canonical
      */
 
     @Test
     fun `canonicalizes node-preserving — style and tags ride along`() {
         val style = ShapeStyle.POINT.copy(size = 12.0)
         val c = LineNode(Line(-1.0, 0.0, 2.0), style, setOf("wall")).canonical
-        // The runtime class pins the copy-routed rebuild — the leaf comes back as itself.
+        // The runtime class pins the copy-routed rebuild: the leaf comes back as itself.
         assertIs<LineNode>(c)
         assertEquals(LineNode(Line(1.0, 0.0, -2.0), style, setOf("wall")), c)
     }
@@ -119,8 +119,8 @@ class NodeTest {
     }
 
     @Test
-    fun `canonicalizes every canonical-bearing leaf type, node-preserving and idempotent`() {
-        // The runtime classes pin the copy-routed rebuild — each leaf comes back as itself.
+    fun `canonicalizes every canonical-bearing leaf type - node-preserving and idempotent`() {
+        // The runtime classes pin the copy-routed rebuild: each leaf comes back as itself.
         val line = LineNode(Line(-1.0, 0.0, 2.0)).canonical
         assertIs<LineNode>(line)
         assertSame(line, line.canonical)
@@ -167,11 +167,11 @@ class NodeTest {
     }
 
     /*
-    TREE — GroupNode * Versor
+    TREE: GroupNode * Versor
      */
 
     @Test
-    fun `transforms every leaf, preserving structure and source order`() {
+    fun `transforms every leaf - preserving structure and source order`() {
         val bounds = SceneBounds(-50.0, -50.0, 100.0, 100.0)
         val root = GroupNode(
             children = listOf(

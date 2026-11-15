@@ -13,12 +13,13 @@ import fromcrackpot.kintsugi.svg.serializing.strokeCapAttr
 import nl.adaptivity.xmlutil.XmlWriter
 
 /**
- * Polyline → bare `<polyline>` (no `k:type`; designer-authored polylines "just work"). One
- * `x,y` pair per vertex in traversal order (order = data); coordinates go through the Y-flip
- * per vertex. Core attributes always emitted (`points fill stroke stroke-width`);
- * `stroke-linecap` is the optional-feature tier — emitted only when non-`butt` (open stroke,
- * segment's rule — unlike the closed polygon, which never emits it). No skip guards — the
- * `:cga` ctor makes degenerate polylines unrepresentable.
+ * Polyline → bare `<polyline>`, with no `k:type`, so designer-authored polylines "just work".
+ *
+ * - One `x,y` pair per vertex in traversal order (order = data), each through the Y-flip.
+ * - Core attributes are always emitted (`points fill stroke stroke-width`). `stroke-linecap` is an
+ *   optional feature, emitted only when non-`butt`: the open stroke follows the segment's rule,
+ *   unlike the closed polygon, which never emits it.
+ * - No skip guards: the `:cga` ctor makes degenerate polylines unrepresentable.
  */
 internal fun XmlWriter.writePolylineElement(shape: PolylineNode, viewBox: SceneBounds) {
     val polyline: Polyline = shape

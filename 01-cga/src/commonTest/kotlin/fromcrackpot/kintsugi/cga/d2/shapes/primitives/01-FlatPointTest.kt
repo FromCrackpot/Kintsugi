@@ -1,5 +1,6 @@
 package fromcrackpot.kintsugi.cga.d2.shapes.primitives
 
+import fromcrackpot.kintsugi.cga.d2.exceptions.AtInfinityException
 import fromcrackpot.kintsugi.cga.d2.transforms.T
 import fromcrackpot.kintsugi.cga.d2.transforms.primitives.times
 import kotlin.test.*
@@ -48,7 +49,7 @@ class FlatPointTest {
     }
 
     @Test
-    fun `Direction preserves magnitude (not unitized)`() {
+    fun `Direction preserves magnitude - not unitized`() {
         assertEquals(5.0, Direction(3.0, 4.0).norm)
     }
 
@@ -142,7 +143,7 @@ class FlatPointTest {
     }
 
     @Test
-    fun `point difference is the displacement from the other point, as a direction`() {
+    fun `point difference is the displacement from the other point - as a direction`() {
         val diff = FlatPoint(3.0, 4.0) - FlatPoint(1.0, 1.0)
         assertIs<Direction>(diff)
         assertEquals(Direction(2.0, 3.0), diff)
@@ -161,10 +162,19 @@ class FlatPointTest {
     }
 
     @Test
-    fun `a direction operand differences through the same form, as a direction`() {
+    fun `two points at infinity difference as free vectors through the same form`() {
         val a: FlatPoint = Direction(3.0, 4.0)
-        assertIs<Direction>(a - FlatPoint(1.0, 2.0))
+        val b: FlatPoint = FlatPoint(1.0, 2.0, pz = 0.0)
+        assertEquals(Direction(2.0, 2.0), a - b)
         assertEquals(Direction(2.0, 2.0), Direction(3.0, 4.0) - Direction(1.0, 2.0))
+    }
+
+    @Test
+    fun `a position and a point at infinity have no difference`() {
+        val position = FlatPoint(1.0, 2.0)
+        val direction: FlatPoint = Direction(3.0, 4.0)
+        assertFailsWith<AtInfinityException> { direction - position }
+        assertFailsWith<AtInfinityException> { position - direction }
     }
 
     /*

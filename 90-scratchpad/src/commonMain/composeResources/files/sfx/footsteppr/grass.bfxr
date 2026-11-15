@@ -1,0 +1,13 @@
+{
+  "synth_type": "Footsteppr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "terrain": 1,
+    "heel": 0.12903943099081516,
+    "roll": 0.10302307992242277,
+    "ball": 0.7197673330083489,
+    "swiftness": 0.16978756128810346
+  },
+  "renderSeed": 0.36905342526733875
+}

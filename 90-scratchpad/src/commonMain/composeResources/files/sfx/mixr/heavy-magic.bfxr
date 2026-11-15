@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.34682253244798633,
+    "sources": "[{\"synth\":\"Boomr\",\"name\":\"Barrel\",\"params\":{\"masterVolume\":0.5,\"seed\":0.7317822342738509,\"duration\":1.2718268623575568,\"size\":0.46116384980268776,\"pressure\":0.7232942783855834,\"blast\":0.7799732186831534,\"debris\":0.7007902803830802,\"gas\":0.686058077972848,\"aftershock\":0.24395346660166978,\"rubbleSize\":0.30093626838643106,\"spread\":0.21138379229232668,\"tail\":0.49370737611316146,\"muffle\":0.29274323433637617,\"mechanism\":1,\"space\":0.4891796206124127},\"generator\":\"*\",\"selectedGenerator\":\"generate_barrel\",\"renderSeed\":0.5443580111023039},{\"synth\":\"Zappr\",\"name\":\"Tesla Coil\",\"params\":{\"masterVolume\":0.5,\"seed\":0.7935991233680397,\"duration\":1.5747116388054565,\"voltage\":0.9094061450799927,\"arcs\":23,\"branching\":0.9317881131893955,\"crackle\":0.5504244890878909,\"hum\":0.773872549762018,\"spark\":0.38849010916892435,\"spread\":0.9447615811601281,\"decay\":0.3981950649642385},\"generator\":\"*\",\"selectedGenerator\":\"generate_tesla_coil\",\"renderSeed\":0.41275920695625246}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

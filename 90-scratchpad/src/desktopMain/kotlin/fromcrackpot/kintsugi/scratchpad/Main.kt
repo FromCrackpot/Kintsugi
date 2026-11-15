@@ -7,29 +7,29 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 
 fun main(args: Array<String>) {
-    val sceneName = args.firstOrNull()
-    val scene = sceneFor(sceneName)
-    writeSceneSvg(scene)
+    val sketchName = args.firstOrNull()
+    val sketch = sketchFor(sketchName)
+    writeSketchSvg(sketch)
 
     application {
         Window(
             onCloseRequest = ::exitApplication,
             title = "Kintsugi Scratchpad",
         ) {
-            App(sceneName)
+            App(sketchName)
         }
     }
 }
 
 /**
- * Round-trip demo: snapshot the selected scene's GroupNode, then serialize and write it back out.
- * Confirms the full :svg pipeline (sceneFor + snapshot + writeTo) works end-to-end on desktop
- * for whichever scene was selected.
+ * Round-trip demo: snapshot the selected sketch's GroupNode, then serialize and write it back out.
+ * Confirms the full :svg pipeline (sketchFor + snapshot + writeTo) works end-to-end on desktop
+ * for whichever sketch was selected.
  */
-private fun writeSceneSvg(scene: Scene) {
-    val outFile = File("build/scratchpad-out/${scene.name}.svg")
+private fun writeSketchSvg(sketch: Sketch) {
+    val outFile = File("build/scratchpad-out/${sketch.name}.svg")
     outFile.parentFile?.mkdirs()
     // snapshot is suspend (wasmJs resource loading); at a JVM entry point runBlocking is idiomatic.
-    runBlocking { scene.snapshot() }.writeTo(outFile)
+    runBlocking { sketch.snapshot() }.writeTo(outFile)
     println("scratchpad: wrote ${outFile.absolutePath}")
 }

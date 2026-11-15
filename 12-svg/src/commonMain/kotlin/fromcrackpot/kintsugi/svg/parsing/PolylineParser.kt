@@ -18,16 +18,15 @@ import nl.adaptivity.xmlutil.XmlReader
 private val POINTS_SEPARATORS = Regex("[\\s,]+")
 
 /**
- * Parses a `<polyline>` element (cursor on its START_ELEMENT) into a `PolylineNode` —
- * the untagged (and only) reading, mirroring `<polygon>`; an unknown `k:type` warns and falls
- * back. `points` shares the polygon grammar but with the open chain's looser floor (≥ 2 pairs;
- * first == last legal — an open chain may revisit points). Traversal order is preserved as data.
+ * Parses a `<polyline>` element (cursor on its START_ELEMENT) into a `PolylineNode`, the untagged
+ * and only reading, mirroring `<polygon>`. An unknown `k:type` warns and falls back.
  *
- * Unlike polygon, a polyline is an open stroke, so `stroke-linecap` applies (segment's rule)
- * and cascades through the inherited-style chain.
- *
- * Degenerate vertex lists collapse in `:cga` — [DegeneratePolylineException] wraps into
- * [MalformedPolylineException] at this boundary, per the exception-wrapping contract.
+ * - `points` shares the polygon grammar with the open chain's looser floor: ≥ 2 pairs, and
+ *   first == last is legal (an open chain may revisit points). Traversal order is data.
+ * - Unlike a polygon, a polyline is an open stroke, so `stroke-linecap` applies (segment's rule)
+ *   and cascades through the inherited-style chain.
+ * - Degenerate vertex lists collapse in `:cga`. [DegeneratePolylineException] wraps into
+ *   [MalformedPolylineException] here, per the exception-wrapping contract.
  */
 internal fun XmlReader.parsePolylineElement(viewBox: SceneBounds, inherited: InheritedStyle): PolylineNode {
     val loc = extLocationInfo?.toString()

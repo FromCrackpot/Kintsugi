@@ -6,7 +6,7 @@ import kotlin.test.assertFailsWith
 
 class SvgFailureTest {
 
-    // Bare-rect cases moved to RectangleTest — an untagged <rect> is now the Rectangle default.
+    // Bare-rect cases moved to RectangleTest: an untagged <rect> is now the Rectangle default.
 
     @Test fun `non-square flat-point rect throws MalformedRectException`() {
         assertFailsWith<MalformedRectException> { parseSvg(NON_SQUARE_FLAT_POINT_SVG) }
@@ -70,5 +70,9 @@ class SvgFailureTest {
 
     @Test fun `dipole with coincident endpoints throws MalformedDipoleException`() {
         assertFailsWith<MalformedDipoleException> { parseSvg(DIPOLE_COINCIDENT_SVG) }
+    }
+
+    @Test fun `dipole with endpoints coinciding at the SCALE quantum throws MalformedDipoleException`() {
+        assertFailsWith<MalformedDipoleException> { parseSvg(DIPOLE_NEAR_COINCIDENT_SVG) }
     }
 }

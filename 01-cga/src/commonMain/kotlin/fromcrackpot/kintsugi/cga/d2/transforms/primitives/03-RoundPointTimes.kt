@@ -1,28 +1,25 @@
 package fromcrackpot.kintsugi.cga.d2.transforms.primitives
 
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.RoundPoint
+import fromcrackpot.kintsugi.cga.d2.transforms.Dilator
 import fromcrackpot.kintsugi.cga.d2.transforms.Flector
 import fromcrackpot.kintsugi.cga.d2.transforms.Motor
 import fromcrackpot.kintsugi.cga.d2.transforms.Versor
 import fromcrackpot.kintsugi.cga.narrowed
 
+// Dilator action: D ⟇ u ⟇ D̰, rescaled by a power of the scale so the weight passes through.
+// At scale = 1 it reduces to the Motor form with cos = 1, sin = 0.
+
 /**
  * `RoundPoint * Motor => RoundPoint`<br>
  * Returns this round point moved by [motor]'s rigid motion.
  *
- * The antiproduct sandwich `M ⟇ a ⟇ M̰` in expanded form, raw at full `Double` precision. The
- * position moves, the weight [RoundPoint.az] is untouched, and the round bulk follows so the
- * squared radius [RoundPoint.radius2] is preserved, imaginary values included: the null lift
- * of a position moves to the lift of the moved position, and a semantic [RoundPoint.aw] — a
- * center, an attitude — keeps its radius reading. A point at infinity — zero weight — keeps
- * that weight, its direction turned by the rotation. The result is the receiver's own class:
- * the moved geometry returns through [RoundPoint.copy], preserving a subclass that overrides
- * the hook.
+ * - [RoundPoint.radius2] is preserved, so a sized point keeps its size.
  *
- * @receiver The [RoundPoint] to move.
+ * @receiver The round point to move.
  * @param T The receiver's type, preserved in the result.
  * @param motor The rigid motion to apply.
- * @return The moved point, as the receiver's class.
+ * @return The moved point.
  */
 public operator fun <T : RoundPoint> T.times(motor: Motor): T {
     val tx = motor.tx
@@ -46,19 +43,12 @@ public operator fun <T : RoundPoint> T.times(motor: Motor): T {
  * `RoundPoint * Flector => RoundPoint`<br>
  * Returns this round point reflected by [flector]'s mirror motion.
  *
- * The antiproduct sandwich `−F ⟇ a ⟇ F̰` in expanded form, raw at full `Double` precision. The
- * position reflects across the mirror line and glides along it, the weight [RoundPoint.az] is
- * untouched, and the round bulk follows so the squared radius [RoundPoint.radius2] is
- * preserved, imaginary values included: the null lift of a position moves to the lift of the
- * reflected position, and a semantic [RoundPoint.aw] — a center, an attitude — keeps its
- * radius reading. A point at infinity — zero weight — keeps that weight, its direction
- * mirrored. The result is the receiver's own class: the moved geometry returns through
- * [RoundPoint.copy], preserving a subclass that overrides the hook.
+ * - [RoundPoint.radius2] is preserved, so a sized point keeps its size.
  *
- * @receiver The [RoundPoint] to reflect.
+ * @receiver The round point to reflect.
  * @param T The receiver's type, preserved in the result.
  * @param flector The mirror motion to apply.
- * @return The reflected point, as the receiver's class.
+ * @return The reflected point.
  */
 public operator fun <T : RoundPoint> T.times(flector: Flector): T {
     val fx = flector.fx
@@ -82,18 +72,42 @@ public operator fun <T : RoundPoint> T.times(flector: Flector): T {
 
 /**
  * `RoundPoint * Versor => RoundPoint`<br>
- * Returns this round point moved by [versor].
+ * Returns this round point moved by [versor], for a versor typed only as [Versor].
  *
- * The action for a versor typed only as [Versor]: it dispatches to the `RoundPoint * Motor`
- * and `RoundPoint * Flector` forms; a versor with a concrete static type resolves to those
- * directly.
- *
- * @receiver The [RoundPoint] to move.
+ * @receiver The round point to move.
  * @param T The receiver's type, preserved in the result.
  * @param versor The motion to apply.
- * @return The moved point, as the receiver's class.
+ * @return The moved point.
  */
 public operator fun <T : RoundPoint> T.times(versor: Versor): T = when (versor) {
     is Motor -> this * versor
     is Flector -> this * versor
+}
+
+/**
+ * `RoundPoint * Dilator => RoundPoint`<br>
+ * Returns this round point dilated by [dilator].
+ *
+ * - A sized point's radius is multiplied by [dilator]'s scale.
+ *
+ * @receiver The round point to dilate.
+ * @param T The receiver's type, preserved in the result.
+ * @param dilator The dilation to apply.
+ * @return The dilated point.
+ */
+public operator fun <T : RoundPoint> T.times(dilator: Dilator): T {
+    val s = dilator.scale
+    val tx = dilator.tx
+    val ty = dilator.ty
+    return narrowed(
+        copy(
+            RoundPoint(
+                ax = s * this.ax + tx * this.az,                                      // e1
+                ay = s * this.ay + ty * this.az,                                      // e2
+                az = this.az,                                                         // e3
+                aw = s * s * this.aw + s * (tx * this.ax + ty * this.ay)
+                        + ((tx * tx + ty * ty) / 2.0) * this.az,                      // e4
+            )
+        )
+    )
 }

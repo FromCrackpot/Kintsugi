@@ -1,7 +1,7 @@
 package fromcrackpot.kintsugi.compose.drawing.primitives
 
 import fromcrackpot.kintsugi.compose.tracing.canvasToTrace
-import fromcrackpot.kintsugi.cga.d2.products.join
+import fromcrackpot.kintsugi.cga.d2.operations.products.join
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Line
 import fromcrackpot.kintsugi.scenegraph.nodes.primitives.LineNode
@@ -11,9 +11,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Trace snapshots for `drawLine` through the production `drawShape` dispatch — recorded draw
+ * Trace snapshots for `drawLine` through the production `drawShape` dispatch: recorded draw
  * calls asserted against inline goldens. The DEGENERATE section pins the skip+warn
- * contract — the expected trace is empty, never a throw.
+ * contract: the expected trace is empty, never a throw.
  */
 class LineDrawTest {
 
@@ -35,9 +35,9 @@ class LineDrawTest {
     /* DEGENERATE */
 
     @Test
-    fun `line outside viewport (imaginary meet with worldBorder) emits no draw calls`() {
+    fun `line outside viewport - imaginary meet with worldBorder - emits no draw calls`() {
         // Line x = 1000: gx·x + gy·y + gz = 0 ⇒ Line(1, 0, −1000). On a 100×100 canvas the
-        // worldBorder has radius sqrt(2)·50 ≈ 70.71 — the line is 1000 away from origin, so the
+        // worldBorder has radius sqrt(2)·50 ≈ 70.71. The line is 1000 away from origin, so the
         // `line meet worldBorder` Dipole is imaginary and `drawLine` returns without drawing.
         val shape = LineNode(Line(1.0, 0.0, -1000.0), ShapeStyle.LINE)
         assertEquals("", canvasToTrace(listOf(shape), 100f, 100f))

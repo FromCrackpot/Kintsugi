@@ -21,8 +21,8 @@ import fromcrackpot.kintsugi.scenegraph.nodes.primitives.PrimitiveNode
 import fromcrackpot.kintsugi.scenegraph.nodes.primitives.RoundPointNode
 
 // Test-side decoration shedding: mint a fresh plain shape so equality crosses the
-// exact-class divide (`node.shape == shape`). Casts don't cross it — equals reads the
-// runtime class — hence the mint. One base-typed extension only: a leaf-typed sibling
+// exact-class divide (`node.shape == shape`). Casts don't cross it, since equals reads the
+// runtime class; hence the mint. One base-typed extension only: a leaf-typed sibling
 // would be ambiguous at leaf-typed sites (properties don't disambiguate by receiver).
 val ShapeNode.shape: Shape
     get() = when (this) {

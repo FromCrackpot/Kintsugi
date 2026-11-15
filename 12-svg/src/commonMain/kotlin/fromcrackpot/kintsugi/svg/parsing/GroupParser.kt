@@ -15,9 +15,9 @@ import nl.adaptivity.xmlutil.XmlReader
  *
  * - `k:type="dipole"` → a [fromcrackpot.kintsugi.scenegraph.nodes.primitives.DipoleNode] (the tagged
  *   carrier reading, via [parseDipoleGroup]). The carrier honors its own `fill` the same way a
- *   bare `<g>` does for its children — own attr → inherited chain. Stroke isn't load-bearing
+ *   bare `<g>` does for its children: own attr → inherited chain. Stroke isn't load-bearing
  *   here (the chrome line takes its color from `style.fill`, not stroke).
- * - untagged (or unknown `k:type`, which warns) → [GroupNode] — the bare-element-is-default
+ * - untagged (or unknown `k:type`, which warns) → [GroupNode], the bare-element-is-default
  *   pattern, mirroring bare `<circle>`/`<line>`. This `<g>`'s own presentation attrs overlay
  *   the inherited chain; children see them as their nearest fallback. Nested groups parse with
  *   `bounds = null` (only the root bounds round-trips, as `<svg viewBox>`).

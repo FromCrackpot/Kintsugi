@@ -1,0 +1,23 @@
+{
+  "synth_type": "Jinglr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.6379863798637987,
+    "instrumentSeed": 69389,
+    "phrase": "[{\"degree\":1,\"beats\":0.5},{\"degree\":8,\"beats\":0.5},{\"degree\":1,\"beats\":1}]",
+    "instrument": 3,
+    "key": 0,
+    "scale": 2,
+    "contour": 2,
+    "rhythm": 0,
+    "noteCount": 3,
+    "octave": 4,
+    "tempo": 148.79069332033396,
+    "swing": 0,
+    "brightness": 0.5790428907144816,
+    "decay": 0.43154805870726703,
+    "echo": 0.08058192490134389
+  },
+  "renderSeed": 0.36905342526733875
+}

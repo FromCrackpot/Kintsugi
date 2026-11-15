@@ -11,24 +11,18 @@ import fromcrackpot.kintsugi.scenegraph.style.ShapeColor
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 
 /**
- * A sub-tree of the scene graph: an ordered list of child nodes, with an optional [bounds]
- * rectangle. A whole scene is just a `GroupNode` — the root's [bounds] is the viewport
- * renderers paint into.
+ * A sub-tree of the scene graph: an ordered list of child nodes with an optional [bounds]
+ * rectangle. A whole scene is a `GroupNode`.
  *
- * Groups are purely structural, with no style of their own: every [ShapeNode] leaf carries
- * its own concrete style. There is no background field either — a scene backdrop is an
- * ordinary full-bleed rectangle as the first child, prebuilt by [backdrop].
- *
- * The class is open, and every group-preserving operation returns through the [copy] hook —
- * a subclass that overrides it comes back as its own class from each of them. Identity is
- * exact-class and structural across [children] and [bounds]; see [equals].
+ * - Purely structural, with no style of its own. For a scene background, put a [backdrop] first.
+ * - Group-preserving operations return through [copy], so a subclass comes back as its own class.
  *
  * @constructor Builds the group over its children and optional bounds.
  */
 public open class GroupNode(
-    /** The child nodes in source order — the order renderers paint them; open so a subclass may narrow the element type. */
+    /** The child nodes in paint order. Open, so a subclass may narrow the element type. */
     public open val children: List<Node> = emptyList(),
-    /** The rectangle this sub-tree occupies — on a scene root, the viewport; `null` when unspecified. */
+    /** The rectangle this sub-tree occupies, or `null` when unspecified. On a scene root, it is the viewport. */
     public val bounds: SceneBounds? = null,
 ) : Node {
 
@@ -40,16 +34,13 @@ public open class GroupNode(
     public constructor(vararg children: Node) : this(children.toList())
 
     /**
-     * Returns a group with [children] and [bounds] in place of this group's own — the rebuild
-     * hook every group-preserving operation returns through.
+     * Returns a group with [children] and [bounds] in place of this group's own. Every
+     * group-preserving operation returns through this rebuild hook.
      *
-     * The base implementation builds a plain [GroupNode]. A subclass overrides the hook to
-     * rebuild its own class around the replacement children, and then comes back as itself
-     * from every group-preserving operation. The result's runtime class must equal the
-     * receiver's — the operations check it and fail with a named error otherwise.
+     * - Override it to rebuild your subclass. The result's runtime class must equal the receiver's.
      *
-     * @param children The replacement children; this group's own when omitted.
-     * @param bounds The replacement bounds; this group's own when omitted.
+     * @param children The replacement children, this group's own when omitted.
+     * @param bounds The replacement bounds, this group's own when omitted.
      * @return The rebuilt group.
      */
     public open fun copy(
@@ -58,11 +49,9 @@ public open class GroupNode(
     ): GroupNode = GroupNode(children, bounds)
 
     /**
-     * Returns whether [other] is a group of the same class with equal [children] and [bounds].
+     * Returns whether [other] is a group of the same exact class with equal [children] and [bounds].
      *
-     * Structural: the children lists compare pairwise, each leaf by its own style-inclusive
-     * identity, nested groups recursively. Identity is exact-class: a subclass instance and a
-     * plain [GroupNode] never compare equal, in either direction.
+     * - Structural: children compare pairwise, leaves by their style-inclusive identity, groups recursively.
      *
      * @param other The object to compare against.
      * @return Whether the two groups are structurally equal.
@@ -74,13 +63,13 @@ public open class GroupNode(
     /** Returns the hash of [children] combined with [bounds]', consistent with [equals]. */
     override fun hashCode(): Int = 31 * children.hashCode() + (bounds?.hashCode() ?: 0)
 
-    /** Returns the children and bounds — the structural content [equals] compares. */
+    /** Returns the children and bounds, the structural content [equals] compares. */
     override fun toString(): String = "GroupNode(children=$children, bounds=$bounds)"
 }
 
 /**
- * Returns every [ShapeNode] in the tree — a depth-first, source-order traversal, so the
- * resulting order is the paint order.
+ * Returns every [ShapeNode] in the tree, depth-first in source order. The result is in paint
+ * order.
  *
  * @receiver The tree to traverse.
  * @return The tree's leaves, each carrying its own style and tags.
@@ -104,20 +93,16 @@ public fun GroupNode.flattenShapes(): List<ShapeNode> {
  * `GroupNode * Versor => GroupNode`<br>
  * Returns this group with [versor]'s motion applied to every leaf in the sub-tree.
  *
- * The rebuild recurses into nested groups, preserving structure, source order, and each
- * leaf's style and tags; [GroupNode.bounds] passes through unchanged, so the content moves
- * within the same viewport. The result is the receiver's own class: the moved children
- * return through [GroupNode.copy], preserving a subclass that overrides the hook — and a
- * nested subclassed group is preserved the same way, through its own hook.
+ * - Structure, order, styles and tags are kept. [GroupNode.bounds] does not move.
  *
  * @receiver The group to move.
  * @param G The receiver's type, preserved in the result.
  * @param versor The motion to apply.
- * @return The rebuilt group, as the receiver's class — every leaf moved.
- * @throws DegeneratePolylineException when a polyline leaf's move lands two consecutive
- *   vertices rounded-coincident at the `SCALE` quantum.
- * @throws DegeneratePolygonException when a polygon leaf's move lands two consecutive
- *   vertices rounded-coincident at the `SCALE` quantum.
+ * @return The rebuilt group, every leaf moved.
+ * @throws DegeneratePolylineException when a polyline leaf's move makes two consecutive
+ *   vertices round equal at the `SCALE` quantum.
+ * @throws DegeneratePolygonException when a polygon leaf's move makes two consecutive
+ *   vertices round equal at the `SCALE` quantum.
  */
 public operator fun <G : GroupNode> G.times(versor: Versor): G =
     narrowed(
@@ -132,17 +117,14 @@ public operator fun <G : GroupNode> G.times(versor: Versor): G =
     )
 
 /**
- * Builds a group holding one full-bleed [color]-filled rectangle over [bounds] — a
- * prebuilt scene backdrop, usable directly as a placeholder scene or nested as a scene's
- * first child.
+ * Builds a group holding one full-bleed [color]-filled rectangle over [bounds]. Use it as a
+ * placeholder scene, or as a scene's first child for a backdrop.
  *
- * The rectangle is an origin-centered `width × height` quad, ignoring [SceneBounds.minX]
- * and [SceneBounds.minY] — the renderers' offset-ignoring clip convention — so it exactly
- * covers what renders. It is fill-only: [color] fills, no stroke.
+ * - The rectangle is origin-centered and ignores the bounds' offset. It covers exactly what renders.
  *
- * @param bounds The viewport to cover; also set as the group's own [GroupNode.bounds].
+ * @param bounds The viewport to cover; also the group's own bounds.
  * @param color The fill, opaque black by default.
- * @return The one-child [GroupNode].
+ * @return The one-child group.
  */
 public fun backdrop(bounds: SceneBounds, color: ShapeColor = ShapeColor.BLACK): GroupNode =
     GroupNode(
@@ -159,19 +141,15 @@ public fun backdrop(bounds: SceneBounds, color: ShapeColor = ShapeColor.BLACK): 
     )
 
 /**
- * Returns the tree's single leaf narrowed to its concrete node type [N].
+ * Returns the tree's single leaf narrowed to its concrete node type [N]. It is the one runtime
+ * assertion at an asset's load site.
  *
- * The load-boundary idiom: what an externally loaded asset tree contains is unknowable at
- * compile time, so this places the one unavoidable runtime assertion at the load site —
- * everything downstream works on the typed leaf cast-free, style and tags riding along.
- *
- * @param N The expected concrete [ShapeNode] type.
+ * @param N The expected concrete leaf type.
  * @receiver The single-leaf tree to narrow.
  * @return The leaf as [N].
  * @throws NoSuchElementException when the tree holds no leaf at all.
  * @throws IllegalArgumentException when the tree holds more than one leaf.
- * @throws IllegalStateException when the single leaf is not an [N] — the message names the
- *   found and expected types.
+ * @throws IllegalStateException when the single leaf is not an [N].
  */
 public inline fun <reified N : ShapeNode> GroupNode.single(): N {
     val leaf = flattenShapes().single()
@@ -179,10 +157,10 @@ public inline fun <reified N : ShapeNode> GroupNode.single(): N {
         ?: error("asset contains ${leaf::class.simpleName}, expected ${N::class.simpleName}")
 }
 
-/** Converts a wrong-class `copy` result into an immediate named error — the single unchecked-cast site of the group ops. */
+/** Converts a wrong-class `copy` result into an immediate named error. The group ops' only unchecked cast. */
 internal fun <G : GroupNode> G.narrowed(copied: GroupNode): G {
     check(copied::class == this::class) {
-        "${this::class.simpleName}.copy returned ${copied::class.simpleName} — override copy in ${this::class.simpleName}"
+        "${this::class.simpleName}.copy returned ${copied::class.simpleName}, not its own class"
     }
     @Suppress("UNCHECKED_CAST")
     return copied as G

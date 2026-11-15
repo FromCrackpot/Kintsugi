@@ -5,9 +5,9 @@ import fromcrackpot.kintsugi.scenegraph.style.ShapeStrokeCap
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 
 /**
- * SVG 1.1 spec defaults for omitted style attributes. Used by the parser to materialize
- * a fully explicit [ShapeStyle] — after parse, no field in the resulting style is left
- * "implicit," which means downstream renderers never need to re-derive SVG semantics.
+ * SVG 1.1 spec defaults for omitted style attributes. The parser uses them to materialize
+ * a fully explicit [ShapeStyle]. After parse no style field is "implicit," so downstream
+ * renderers never re-derive SVG semantics.
  * Compare with `:scene-graph`'s `ShapeStyle.defaultFor`, which fills in the sensible-for-CGA
  * defaults at the shape level when no style was specified at all.
  */
@@ -38,7 +38,7 @@ internal object SvgDefaults {
 
     /**
      * Materialize a concrete [ShapeStyle] for a `<line>`-family element, which ignores `fill`
-     * per SVG semantics — fill stays [ShapeColor.NONE].
+     * per SVG semantics. Fill stays [ShapeColor.NONE].
      */
     fun strokedStyle(
         stroke: ShapeColor?,

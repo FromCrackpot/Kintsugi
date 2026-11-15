@@ -1,6 +1,6 @@
 package fromcrackpot.kintsugi.svg
 
-import fromcrackpot.kintsugi.cga.d2.products.join
+import fromcrackpot.kintsugi.cga.d2.operations.products.join
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Line
 import fromcrackpot.kintsugi.scenegraph.nodes.primitives.LineNode
@@ -12,11 +12,11 @@ import kotlin.test.*
 
 /**
  * Parser tests for SVG `<line k:type="line">` (infinite CGA `Line`). The bare/untagged form
- * decodes as a `Segment` — those tests live in [SegmentTest].
+ * decodes as a `Segment`. Those tests live in [SegmentTest].
  */
 class LineTest {
 
-    /* PARSE — tagged line */
+    /* PARSE: tagged line */
 
     @Test fun `tagged line becomes a Line`() {
         // viewBox 100x100 → corners (0,0) and (100,100) map to CGA (-50, 50) and (50, -50).
@@ -45,7 +45,7 @@ class LineTest {
     }
 
     @Test fun `tagged line with endpoints off the worldBorder is still a Line`() {
-        // /v1 recognizes Lines by k:type, not geometry — this would have been skipped under the old heuristic.
+        // /v1 recognizes Lines by k:type, not geometry. The old heuristic would have skipped this one.
         val root = parseSvg(LINE_TAGGED_OFFBORDER_SVG)
         assertTrue((root.children.single() as ShapeNode).shape is Line)
     }
@@ -66,7 +66,7 @@ class LineTest {
         assertEquals(0.0, a.gz + b.gz)
     }
 
-    /* PARSE — malformed (a tagged line must still validate) */
+    /* PARSE: malformed (a tagged line must still validate) */
 
     @Test fun `tagged line missing any coordinate attribute throws MalformedLineException`() {
         for (missing in listOf("x1", "y1", "x2", "y2")) {
@@ -78,7 +78,7 @@ class LineTest {
 
     @Test fun `tagged line with coincident endpoints parses as a degenerate Line`() {
         // Letting the math speak: FlatPoint.join(self) yields a degenerate Line; downstream serialize
-        // skips it via Line.isAtInfinity. No throw at the parse boundary — a CGA concern, not an SVG one.
+        // skips it via Line.isAtInfinity. No throw at the parse boundary: a CGA concern, not an SVG one.
         val root = parseSvg(LINE_COINCIDENT_SVG)
         assertEquals(1, root.children.size)
         val line = (root.children.single() as ShapeNode).shape as Line

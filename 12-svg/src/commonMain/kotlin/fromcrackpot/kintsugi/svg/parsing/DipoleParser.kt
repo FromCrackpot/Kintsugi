@@ -1,8 +1,6 @@
 package fromcrackpot.kintsugi.svg.parsing
 
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.RoundPoint
-import fromcrackpot.kintsugi.cga.d2.products.join
-import fromcrackpot.kintsugi.cga.d2.exceptions.DegenerateDipoleException
 import fromcrackpot.kintsugi.scenegraph.SceneBounds
 import fromcrackpot.kintsugi.scenegraph.nodes.primitives.DipoleNode
 import fromcrackpot.kintsugi.scenegraph.nodes.primitives.RoundPointNode
@@ -11,20 +9,21 @@ import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 import fromcrackpot.kintsugi.svg.KATTR_TYPE
 import fromcrackpot.kintsugi.svg.KTYPE_ROUND_POINT
 import fromcrackpot.kintsugi.svg.MalformedDipoleException
+import fromcrackpot.kintsugi.svg.decodeDipole
 import fromcrackpot.kintsugi.svg.kAttr
 import nl.adaptivity.xmlutil.EventType
 import nl.adaptivity.xmlutil.XmlReader
 
 /**
- * Reads the children of a `<g k:type="dipole">` (already entered via START_ELEMENT) until the
- * matching END_ELEMENT, collecting exactly two `<circle k:type="round-point">` children and
- * silently ignoring the dashed `<line>` visual chrome. Child order is the orientation contract:
- * the first round-point becomes the left operand of `start ∧ end`. The two children are then
- * wedged via [dipoleFrom], which canonicalizes coincident endpoints into [MalformedDipoleException].
+ * Reads the children of a `<g k:type="dipole">` (already entered via START_ELEMENT) up to the
+ * matching END_ELEMENT.
  *
- * Style for the resulting `DipoleNode` is taken from the first child (a designer authoring matched
- * fill/size on both children gets a consistent result; mismatched silently take the first's). The
- * `ShapeStyle.size` rides on the child `<circle>`'s `r` attribute, matching the round-point convention.
+ * - Collects exactly two `<circle k:type="round-point">` children and silently ignores the dashed
+ *   `<line>` chrome.
+ * - Child order is the orientation contract: the first round point is the left operand of
+ *   `start ∧ end`. [dipoleFrom] wedges them and turns coincident endpoints into [MalformedDipoleException].
+ * - The `DipoleNode`'s style comes from the first child. Mismatched children silently take the
+ *   first's. `ShapeStyle.size` rides on the child `<circle>`'s `r`, as for round points.
  */
 internal fun XmlReader.parseDipoleGroup(
     viewBox: SceneBounds,
@@ -51,7 +50,7 @@ internal fun XmlReader.parseDipoleGroup(
                         }
                         rps += parseRoundPointCircle(viewBox, fill)
                     }
-                    // Visual chrome — parser ignores the dashed <line> entirely per spec.
+                    // Visual chrome: the parser ignores the dashed <line> entirely, per spec.
                     "line" -> Unit
                     else -> throw MalformedDipoleException(
                         "unsupported child element <$localName>", loc,
@@ -76,17 +75,16 @@ internal fun XmlReader.parseDipoleGroup(
 }
 
 /**
- * Reconstructs a `Dipole` from the two `RoundPoint` children of a `<g k:type="dipole">` via
- * `start join end`. Child order is the orientation contract: swapping the operands produces the
- * sign-flipped blade. The Containers invariant `start ∧ end = D` makes the encoding canonical —
- * emitting `dipole.start` / `dipole.end` (the lazy round-point properties) and re-wedging them
- * reconstructs the original blade, including for imaginary dipoles (`sqrt(|radius²|)` preserves
- * the sign of `gz²` through the wedge).
+ * Rebuilds a `Dipole` from the two `RoundPoint` children of a `<g k:type="dipole">` as
+ * `start join end`.
  *
- * Coincident endpoints collapse the carrier norm to zero — `:cga`'s `join` raises
- * `DegenerateDipoleException`, which we wrap as `MalformedDipoleException` at this boundary.
- * Plücker-violation is impossible here: the wedge of two factorizable round-points is a
- * factorizable blade by construction.
+ * - Child order is the orientation contract: swapping the operands flips the blade's sign.
+ * - The Containers invariant `start ∧ end = D` makes the encoding canonical. Re-wedging the emitted
+ *   `dipole.start` / `dipole.end` rebuilds the original blade, imaginary dipoles included
+ *   (`sqrt(|radius²|)` preserves the sign of `gz²` through the wedge).
+ * - Round points coinciding at the `SCALE` quantum ([decodeDipole] returns `null`) throw
+ *   `MalformedDipoleException` here. A Plücker violation is impossible: the wedge of two
+ *   factorizable round points is a factorizable blade.
  */
 internal fun dipoleFrom(
     start: RoundPoint,
@@ -95,10 +93,7 @@ internal fun dipoleFrom(
     tags: Set<String> = emptySet(),
     location: String? = null,
 ): DipoleNode {
-    val dipole = try {
-        start join end
-    } catch (_: DegenerateDipoleException) {
-        throw MalformedDipoleException("coincident round-point children", location)
-    }
+    val dipole = decodeDipole(start, end)
+        ?: throw MalformedDipoleException("coincident round-point children", location)
     return DipoleNode(dipole, style, tags)
 }

@@ -17,7 +17,7 @@ import nl.adaptivity.xmlutil.XmlWriter
 /**
  * Circle → plain `<circle>` (no `k:type`; designer-authored circles "just work"). `cx`/`cy` are the
  * geometric center, `r = √|radius²|`. Imaginary (`radius² < 0`) and inside-out (`cw > 0`) circles are
- * **persisted** (not skipped) via `k:flags` — faithful CGA storage even though no renderer draws them.
+ * **persisted** (not skipped) via `k:flags`: faithful CGA storage, even though no renderer draws them.
  */
 internal fun XmlWriter.writeCircleElement(shape: CircleNode, viewBox: SceneBounds) {
     val circle: Circle = shape

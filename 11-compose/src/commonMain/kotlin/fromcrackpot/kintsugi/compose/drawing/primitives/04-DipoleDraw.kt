@@ -18,7 +18,7 @@ internal fun DrawScope.drawDipole(dipole: Dipole, color: Color, sizePx: Float) {
     val dotRadius = sizePx / 2
     drawCircle(color = color, radius = dotRadius, center = start)
     drawCircle(color = color, radius = dotRadius, center = end)
-    // Chrome line conventions live in :scene-graph's DipoleChrome — :svg's DipoleEncoding consumes them
+    // Chrome line conventions live in :scene-graph's DipoleChrome. :svg's DipoleEncoding consumes them
     // identically, so the same dipole reads the same way in both renderers.
     drawLine(
         color = color,

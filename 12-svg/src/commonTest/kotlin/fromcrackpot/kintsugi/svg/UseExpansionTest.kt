@@ -17,7 +17,7 @@ class UseExpansionTest {
 
     private val wallTemplates = mapOf("steel.svg" to BRICK_TEMPLATE_SVG)
 
-    /* EXPANSION GEOMETRY — origin anchoring (template viewport top-left at use x,y) */
+    /* EXPANSION GEOMETRY: origin anchoring (template viewport top-left at use x,y) */
 
     @Test fun `use expands the template translated to its placement`() {
         val root = parseSvg(WALL_LAYOUT_SVG, wallTemplates)
@@ -37,7 +37,7 @@ class UseExpansionTest {
     }
 
     @Test fun `href fragment is tolerated and ignored`() {
-        // Use 2 references "steel.svg#brick" — same document, fragment dropped.
+        // Use 2 references "steel.svg#brick": the same document, fragment dropped.
         val root = parseSvg(WALL_LAYOUT_SVG, wallTemplates)
         assertEquals(2, root.flattenShapes().size)
     }
@@ -65,7 +65,7 @@ class UseExpansionTest {
 
     /* TRANSITIVE TEMPLATES */
 
-    @Test fun `templates may use other templates, translations composing`() {
+    @Test fun `templates may use other templates - translations composing`() {
         val root = parseSvg(
             TRANSITIVE_LAYOUT_SVG,
             mapOf("composite.svg" to COMPOSITE_TEMPLATE_SVG, "gem.svg" to GEM_TEMPLATE_SVG),
@@ -135,7 +135,7 @@ class UseExpansionTest {
         assertEquals(once, parseSvg(emitted))
     }
 
-    /* SCAN — the fetch pass for :game-engine */
+    /* SCAN: the fetch pass for :game-engine */
 
     @Test fun `scanSvgRefs collects referenced documents pre-fragment`() {
         assertEquals(setOf("steel.svg"), scanSvgRefs(WALL_LAYOUT_SVG))

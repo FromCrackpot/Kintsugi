@@ -1,6 +1,6 @@
 # kintsugi-scratchpad
 
-Scratch scenes for demos and experiments with Kintsugi. Not a library.
+Scratch sketches for demos and experiments with Kintsugi. Not a library.
 
 ```bash
 ./gradlew :scratchpad:run                          # Desktop (JVM)

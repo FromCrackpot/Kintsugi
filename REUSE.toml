@@ -11,6 +11,22 @@ SPDX-FileCopyrightText = "2026 fromcrackpot"
 SPDX-License-Identifier = "CC-BY-4.0"
 
 [[annotations]]
+path = [
+    "32-bfxr/src/commonMain/kotlin/fromcrackpot/kintsugi/bfxr/BfxrSynth.kt",
+    "32-bfxr/src/commonMain/kotlin/fromcrackpot/kintsugi/bfxr/dsp/**",
+    "32-bfxr/src/commonMain/kotlin/fromcrackpot/kintsugi/bfxr/synths/**",
+    "32-bfxr/src/commonTest/kotlin/fromcrackpot/kintsugi/bfxr/goldens/*Goldens.kt",
+    "90-scratchpad/src/commonMain/composeResources/files/sfx/**",
+]
+SPDX-FileCopyrightText = ["2021 Stephen Lavelle", "2026 fromcrackpot"]
+SPDX-License-Identifier = "LicenseRef-Kintsugi-Engine-Community-License-1.0 AND MIT"
+
+[[annotations]]
+path = "32-bfxr/src/commonMain/kotlin/fromcrackpot/kintsugi/bfxr/synths/Bfxr.kt"
+SPDX-FileCopyrightText = ["2010 Thomas Vian", "2021 Stephen Lavelle", "2026 fromcrackpot"]
+SPDX-License-Identifier = "LicenseRef-Kintsugi-Engine-Community-License-1.0 AND MIT AND Apache-2.0"
+
+[[annotations]]
 path = ["gradlew", "gradlew.bat", "gradle/wrapper/**"]
 SPDX-FileCopyrightText = "2015 the original author or authors"
 SPDX-License-Identifier = "Apache-2.0"

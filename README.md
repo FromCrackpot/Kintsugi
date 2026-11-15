@@ -22,7 +22,9 @@ SVG  ─┘                  └─ SVG
 | [`11-compose`](./11-compose) | `:compose` | Compose Canvas renderer |
 | [`12-svg`](./12-svg) | `:svg` | SVG ↔ scene-graph codec |
 | [`21-game-engine`](./21-game-engine) | `:game-engine` | Game engine — loop, input, assets |
-| [`90-scratchpad`](./90-scratchpad) | `:scratchpad` | Scratch scenes for demos and experiments |
+| [`31-audio`](./31-audio) | `:audio` | Sound output — PCM clips on each platform's player |
+| [`32-bfxr`](./32-bfxr) | `:bfxr` | bfxr2 `.bfxr` sound format — parser and synths |
+| [`90-scratchpad`](./90-scratchpad) | `:scratchpad` | Scratch sketches for demos and experiments |
 | [`91-brickit`](./91-brickit) | `:brickit` | Brick'It, a breakout-like game |
 
 ## Getting Started
@@ -35,10 +37,11 @@ cd Kintsugi
 ```
 
 ```bash
-./gradlew :brickit:run                             # Brick'It, desktop (JVM)
-./gradlew :brickit:wasmJsBrowserDevelopmentRun     # Brick'It, web (WASM)
-./gradlew :scratchpad:run                          # Scratchpad, desktop (JVM)
-./gradlew :scratchpad:wasmJsBrowserDevelopmentRun  # Scratchpad, web (WASM)
+./gradlew :brickit:desktop:run                      # Brick'It, desktop (JVM)
+./gradlew :brickit:web:wasmJsBrowserDevelopmentRun  # Brick'It, web (WASM)
+./gradlew :brickit:android:installDebug             # Brick'It, Android (needs the Android SDK and a device)
+./gradlew :scratchpad:run                           # Scratchpad, desktop (JVM)
+./gradlew :scratchpad:wasmJsBrowserDevelopmentRun   # Scratchpad, web (WASM)
 ```
 
 To build your own game on the engine, see [Usage](#usage).
@@ -57,7 +60,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.fromcrackpot:kintsugi-game-engine:0.1.2")
+    implementation("com.fromcrackpot:kintsugi-game-engine:0.2.0")
 }
 ```
 

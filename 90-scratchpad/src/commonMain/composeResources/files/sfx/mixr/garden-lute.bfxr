@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.1968225324479863,
+    "sources": "[{\"synth\":\"Pluckr\",\"name\":\"Kalimba\",\"params\":{\"masterVolume\":0.5,\"seed\":0.12487821746617556,\"material\":1,\"duration\":1.3477905997075141,\"pitch\":0.5509362683864311,\"strings\":2,\"damping\":0.3179567155893892,\"brightness\":0.6213578247698024,\"pluck\":0.2913950957590714,\"coupling\":0.0899866093415767,\"strum\":0.07176726302132011,\"tremolo\":0,\"vibrato\":0,\"tremoloRate\":4,\"inharmonic\":0.03841513768769801},\"generator\":\"*\",\"selectedGenerator\":\"generate_kalimba\",\"renderSeed\":0.7709729373455048},{\"synth\":\"Crittr\",\"name\":\"Clockwork Pet\",\"params\":{\"masterVolume\":0.5,\"seed\":0.42341447132639587,\"voice\":5,\"duration\":0.8627043094369583,\"pitch\":0.494924989992287,\"size\":0.18043656053720042,\"morph\":0.5490102417999878,\"calls\":5,\"gap\":0.3512772237067111,\"contour\":0.3721562670078129,\"growl\":0.16880252132657914,\"breath\":0.035611742357723415,\"flutter\":0.3892377392761409},\"generator\":\"*\",\"selectedGenerator\":\"generate_clockwork_pet\",\"renderSeed\":0.7935991233680397}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

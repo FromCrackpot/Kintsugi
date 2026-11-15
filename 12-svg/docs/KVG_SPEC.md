@@ -67,8 +67,9 @@ elements; any other raises `UnsupportedSvgElementException`. On every element, a
   recognition depends only on the tag). A tagged line with missing attributes throws
   `MalformedLineException`; a bare line, `MalformedSegmentException`. Coincident endpoints: on a
   tagged line, allowed at parse (degenerate `Line`; the serializer's `isAtInfinity` skip+warn
-  handles it downstream); on a bare line, `MalformedSegmentException`. `fill` is ignored per SVG
-  `<line>` semantics.
+  handles it downstream); on a bare line, `MalformedSegmentException` — coincident at the `SCALE`
+  quantum, i.e. the wedge throws or lands at infinity. `k:flags="imaginary"` on a bare line marks
+  an imaginary segment (see `k:*` semantics). `fill` is ignored per SVG `<line>` semantics.
 - **`<polygon>`** — `Polygon` (untagged only). Requires `points` (whitespace/comma pairs; an odd
   coordinate count throws `MalformedPolygonException` rather than dropping the trailing number as
   browsers do); per-vertex Y-flip, then the walk is **canonicalized against `k:flags`** — see
@@ -80,8 +81,9 @@ elements; any other raises `UnsupportedSvgElementException`. On every element, a
   two `<circle k:type="round-point">` children (child order = orientation: first child is the left
   operand of `start ∧ end`) plus an inline dashed `<line>` visual chrome the parser **ignores
   entirely**. The Containers invariant `start ∧ end = D` makes the encoding canonical **including
-  imaginary dipoles** — no flags needed. Coincident endpoints raise `MalformedDipoleException`;
-  at-infinity endpoints skip+warn at serialize (can't encode as `<circle>`). Designer `<g>`
+  imaginary dipoles** — no flags needed. Coincident endpoints (at the `SCALE` quantum, as for
+  `<line>`) raise `MalformedDipoleException`, so a zero-radius dipole (a tangent meet) skip+warns
+  at serialize; so do at-infinity endpoints (can't encode as `<circle>`). Designer `<g>`
   attributes (`id`, `inkscape:*`) are silently dropped and never emitted.
 - **`<use href="doc.svg" x=".." y=".."/>`** — **parse-only template expansion** (the `<rect>`
   precedent: lossy at the element level, lossless at the CGA level — a save writes the expanded
@@ -125,6 +127,13 @@ elements; any other raises `UnsupportedSvgElementException`. On every element, a
   `imaginary` derives from the *rounded* `isImaginary` — a sub-quantum imaginary circle saves
   flagless and re-parses identity-equivalent; don't "fix" by deriving from the raw sign.
   (`:compose` still skips these at the draw site — persist ≠ draw.)
+- **Imaginary segments persist via `k:flags="imaginary"`** (the only token on a bare `<line>`),
+  the endpoints being the segment's real-valued pair (`center ∓ |radius|·attitude`). Parse decodes
+  the real segment between them and takes its imaginary twin — same carrier and center, radius²
+  negated. Like the circle's, the flag derives from the rounded `isImaginary`. A segment at
+  infinity (no finite endpoints) or of zero length (coincident endpoints would not reload)
+  skip+warns at serialize; the writer's zero-length gate is the parser's own coincidence test.
+  (`:compose` skips all three at the draw site — persist ≠ draw.)
 - **Polygon orientation: `k:flags="inside-out"` is intent, model winding is truth.** On parse
   the model-space walk (post Y-flip) is reversed when its winding contradicts the flag: flagged
   loops come out clockwise (`Polygon.isInsideOut`, the wall reading — solid region is the closed
@@ -183,7 +192,8 @@ elements; any other raises `UnsupportedSvgElementException`. On every element, a
   `parseSvg(serializeSvg(scene)) == scene` holds. Fixed attribute order (`k:type` first;
   xmlutil's `KtXmlWriter` preserves call order): flat-point `k:type x y width height fill`;
   round-point `k:type cx cy r k:aw fill`; circle `cx cy r fill stroke stroke-width [k:flags]`;
-  line `k:type x1 y1 x2 y2 stroke stroke-width [stroke-linecap]` (segment: same minus `k:type`);
+  line `k:type x1 y1 x2 y2 stroke stroke-width [stroke-linecap]` (segment: same minus `k:type`,
+  plus a trailing `[k:flags]`);
   rectangle-polygon `points fill stroke stroke-width [k:flags]`; polyline adds
   `[stroke-linecap]`. Writer config: no trailing space before `/>`, `XmlVersion.XML10`,
   `XmlDeclMode.Minimal`.

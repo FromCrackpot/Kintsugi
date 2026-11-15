@@ -9,10 +9,12 @@ import fromcrackpot.kintsugi.svg.serializing.formatSvgNumber
 import nl.adaptivity.xmlutil.XmlWriter
 
 /**
- * Round point → `<circle k:type="round-point">`. The element `r` is the render marker size
- * (`size/2`), NOT the algebraic radius. `k:aw` is **always emitted** — a core attribute under the
- * module's two-tier emission rule (core always emitted, optional-feature only when active); the parser tolerates
- * its absence on hand-authored input. A RoundPoint at infinity cannot be encoded — skip+warn.
+ * Round point → `<circle k:type="round-point">`.
+ *
+ * - The element `r` is the render marker size (`size/2`), NOT the algebraic radius.
+ * - `k:aw` is **always emitted**, a core attribute under the module's two-tier emission rule (core
+ *   always, optional features only when active). The parser tolerates its absence on hand-authored input.
+ * - A RoundPoint at infinity cannot be encoded, so it skips with a warning.
  */
 internal fun XmlWriter.writeRoundPointCircle(shape: RoundPointNode, viewBox: SceneBounds) {
     val p: RoundPoint = shape

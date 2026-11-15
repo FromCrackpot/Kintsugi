@@ -1,0 +1,11 @@
+{
+  "synth_type": "Mixr",
+  "version": "1.0.0",
+  "params": {
+    "masterVolume": 0.5,
+    "seed": 0.877589198993519,
+    "balance": 0.4568225324479863,
+    "sources": "[{\"synth\":\"Riftr\",\"name\":\"Time Rewind\",\"params\":{\"masterVolume\":0.5,\"seed\":0.15345948073081672,\"excitation\":0,\"duration\":1.1648369278758763,\"pitch\":0.7019185665529222,\"bend\":-0.48870181677630176,\"space\":0.6689061608165503,\"feedback\":0.7825201783422381,\"dispersion\":0.681551799736917,\"motion\":0.35519346101209526,\"field\":0.7799732186831534,\"reverse\":0.9401580560766161},\"generator\":\"*\",\"selectedGenerator\":\"generate_time_rewind\",\"renderSeed\":0.12487821746617556},{\"synth\":\"Glitchr\",\"name\":\"Tape Scrub\",\"params\":{\"masterVolume\":0.5,\"seed\":0.9253501421771944,\"duration\":1.231782234273851,\"pitch\":0.4905253038858064,\"fragment\":0.14151386850280687,\"repeat\":0.3415705462684855,\"chaos\":0.8188122901599855,\"dropout\":0.12886256809579208,\"crush\":0.16102177896536887,\"rate\":0.02869271116796881,\"mode\":2},\"generator\":\"*\",\"selectedGenerator\":\"generate_rewind_burst\",\"renderSeed\":0.39568602619692683}]"
+  },
+  "renderSeed": 0.36905342526733875
+}

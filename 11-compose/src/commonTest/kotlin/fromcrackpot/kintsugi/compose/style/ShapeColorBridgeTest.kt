@@ -30,8 +30,8 @@ class ShapeColorBridgeTest {
     }
 
     @Test
-    fun `fractional float channels convert via toArgb rounding, not truncation`() {
-        // 0.5f · 255 = 127.5 must round to 128 — the "simplified" (f * 255).toInt() bridge
+    fun `fractional float channels convert via toArgb rounding - not truncation`() {
+        // 0.5f · 255 = 127.5 must round to 128. The "simplified" (f * 255).toInt() bridge
         // would truncate to 127. Pins the toArgb() path the module gotcha warns about.
         val c = Color(red = 0.5f, green = 0.25f, blue = 0.75f, alpha = 0.5f)
         assertEquals(ShapeColor.rgb(128, 64, 191, a = 128), c.toShapeColor())

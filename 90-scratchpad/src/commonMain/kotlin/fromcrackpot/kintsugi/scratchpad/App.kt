@@ -6,7 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 
 @Composable
-fun App(sceneName: String? = null) {
-    val scene = remember(sceneName) { sceneFor(sceneName) }
-    scene.content(Modifier.fillMaxSize())
+fun App(sketchName: String? = null) {
+    val sketch = remember(sketchName) { sketchFor(sketchName) }
+    sketch.content(Modifier.fillMaxSize())
 }

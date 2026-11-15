@@ -4,12 +4,10 @@ import fromcrackpot.kintsugi.cga.d2.shapes.composites.Composite
 import fromcrackpot.kintsugi.scenegraph.nodes.ShapeNode
 
 /**
- * Marker for a leaf decorating a shape built from primitives.
+ * Marker for a leaf decorating a shape built from blades by composition: [SegmentNode],
+ * [PolylineNode], and [PolygonNode].
  *
- * Implemented by [SegmentNode], [PolylineNode], and [PolygonNode]. Sealed, so a `when` over
- * a `CompositeNode` is exhaustive without an `else` — a new composite leaf is a compile
- * error at every dispatch site. The marker parallels the shapes' own [Composite] without
- * being related to it — the two hierarchies can't share a supertype, but every
- * `CompositeNode` instance already is a [Composite] through the shape it subclasses.
+ * - Sealed, so a `when` over a `CompositeNode` is exhaustive without an `else`.
+ * - Parallel to [Composite], not a subtype. Yet every instance is a [Composite] through its shape.
  */
 public sealed interface CompositeNode : ShapeNode

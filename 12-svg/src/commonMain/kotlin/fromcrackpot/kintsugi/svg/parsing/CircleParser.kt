@@ -18,6 +18,7 @@ import fromcrackpot.kintsugi.svg.KTYPE_ROUND_POINT
 import fromcrackpot.kintsugi.svg.MalformedCircleException
 import fromcrackpot.kintsugi.svg.MalformedRoundPointException
 import fromcrackpot.kintsugi.svg.attrAsDouble
+import fromcrackpot.kintsugi.svg.decodeRoundPoint
 import fromcrackpot.kintsugi.svg.kAttr
 import fromcrackpot.kintsugi.svg.kAttrAsDouble
 import fromcrackpot.kintsugi.svg.kTags
@@ -32,7 +33,7 @@ private val KNOWN_CIRCLE_FLAGS = setOf(KFLAG_IMAGINARY, KFLAG_INSIDE_OUT)
  * Parses a `<circle>` element (cursor on its START_ELEMENT). The `k:type` fork:
  *
  * - `k:type="round-point"` → [RoundPoint] (the tagged reading, via [parseRoundPointCircle]).
- * - untagged (or unknown `k:type`, which warns) → [Circle] — the untagged default, so
+ * - untagged (or unknown `k:type`, which warns) → [Circle], the untagged default, so
  *   designer-authored circles "just work." Discrimination is strictly by `k:type`, never by `r`.
  */
 internal fun XmlReader.parseCircleElement(viewBox: SceneBounds, inherited: InheritedStyle): ShapeNode {
@@ -59,20 +60,17 @@ internal fun XmlReader.parseCircleElement(viewBox: SceneBounds, inherited: Inher
 }
 
 /**
- * Parses a `<circle k:type="round-point">` (cursor on its START_ELEMENT) into a
- * `RoundPointNode`. Also invoked by `DipoleParser` for the dipole carrier's two
- * round-point children — the caller has already checked the `k:type` discriminator.
+ * Parses a `<circle k:type="round-point">` (cursor on its START_ELEMENT) into a `RoundPointNode`.
+ * `DipoleParser` also calls it for the dipole carrier's two round-point children, after checking
+ * the `k:type` discriminator itself.
  *
- * The element `r` is the render marker size (`size = 2·r`), NOT the algebraic radius. The point's
- * raw `aw` (e4 blade weight) rides in `k:aw`; the serializer always emits it, but the parser
- * remains tolerant of its absence for hand-authored input — falling back to the 2-arg conformal
- * lift (`RoundPoint(cgaX, cgaY)`), which by construction lands on the null cone
- * (`aw = (ax² + ay²) / 2 ⇒ radius² ≡ 0`). When `k:aw` is present, it is fed straight into the
- * 4-arg ctor — no recombination — so an imaginary round point (`radius² < 0`, encoded as a small
- * `k:aw`) round-trips at the `Double` level.
- *
- * `aw` is a CGA-space blade weight, consistent with the CGA-space position the parser reconstructs
- * from `cx`/`cy`; it is independent of the SVG render marker `r`.
+ * - The element `r` is the render marker size (`size = 2·r`), NOT the algebraic radius.
+ * - The raw `aw` (e4 blade weight) rides in `k:aw`. It is CGA-space, like the position read from
+ *   `cx`/`cy`, and independent of `r`.
+ * - The serializer always emits `k:aw`. When present, it feeds the 4-arg ctor as is, so an
+ *   imaginary round point (`radius² < 0`, a small `k:aw`) round-trips at the `Double` level.
+ * - Hand-authored input may omit it. The parser then falls back to the 2-arg lift
+ *   `RoundPoint(cgaX, cgaY)`, on the null cone by construction (`aw = (ax² + ay²) / 2 ⇒ radius² ≡ 0`).
  */
 internal fun XmlReader.parseRoundPointCircle(
     viewBox: SceneBounds,
@@ -90,9 +88,7 @@ internal fun XmlReader.parseRoundPointCircle(
     if (rv <= 0.0) {
         throw MalformedRoundPointException("r must be > 0, was $rv", loc)
     }
-    val (cgaX, cgaY) = svgToCga(cx ?: 0.0, cy ?: 0.0, viewBox)
-
-    val point = if (aw != null) RoundPoint(cgaX, cgaY, az = 1.0, aw = aw) else RoundPoint(cgaX, cgaY)
+    val point = decodeRoundPoint(cx ?: 0.0, cy ?: 0.0, aw, viewBox)
     val style = ShapeStyle(
         fill = fill ?: SvgDefaults.FILL,
         size = 2.0 * rv,
@@ -132,8 +128,8 @@ private fun circleFrom(
     val imaginary = KFLAG_IMAGINARY in tokens
     val insideOut = KFLAG_INSIDE_OUT in tokens
 
-    // Build the classic (cw = -1) circle at the geometric center with the signed radius², then take
-    // its inside-out twin (negate every component — same point set, opposite orientation) if flagged.
+    // Build the classic (cw = -1) circle at the geometric center with the signed radius². If flagged,
+    // take its inside-out twin: every component negated, same point set, opposite orientation.
     // Classic circle: cz = -½(cx² + cy² - radius²); center.ax = -cx·cw recovers the geometric center.
     val radius2 = if (imaginary) -(rv * rv) else (rv * rv)
     var ccx = cgaX

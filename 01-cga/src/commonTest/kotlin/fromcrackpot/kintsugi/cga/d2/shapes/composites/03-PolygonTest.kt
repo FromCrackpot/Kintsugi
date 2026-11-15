@@ -13,7 +13,20 @@ import fromcrackpot.kintsugi.cga.d2.transforms.R
 import fromcrackpot.kintsugi.cga.d2.transforms.T
 import fromcrackpot.kintsugi.cga.d2.transforms.composites.times
 import fromcrackpot.kintsugi.cga.d2.exceptions.DegeneratePolygonException
+import fromcrackpot.kintsugi.cga.d2.exceptions.InsideOutPolygonException
+import fromcrackpot.kintsugi.cga.d2.exceptions.NonConvexPolygonException
+import fromcrackpot.kintsugi.cga.d2.operations.queries.measures.distanceTo
+import fromcrackpot.kintsugi.cga.assertNear
+import fromcrackpot.kintsugi.cga.convexPolygon
 import fromcrackpot.kintsugi.cga.deg
+import fromcrackpot.kintsugi.cga.dilator
+import fromcrackpot.kintsugi.cga.flatPoint
+import fromcrackpot.kintsugi.cga.motor
+import fromcrackpot.kintsugi.cga.sweep
+import fromcrackpot.kintsugi.cga.versor
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.test.*
 
 class PolygonTest {
@@ -101,6 +114,157 @@ class PolygonTest {
         assertEquals(FlatPoint(1.0, 1.0), bowtie.centroid)
     }
 
+    /* CONVEXITY */
+
+    @Test
+    fun `rectangles and triangles are convex in either winding`() {
+        val rect = Polygon.Rectangle(FlatPoint(0.0, 0.0), FlatPoint(4.0, 2.0))
+        val tri = Polygon.Triangle(FlatPoint(0.0, 0.0), FlatPoint(4.0, 0.0), FlatPoint(0.0, 3.0))
+        assertTrue(rect.isConvex)
+        assertTrue((-rect).isConvex)
+        assertTrue(tri.isConvex)
+        assertTrue((-tri).isConvex)
+    }
+
+    @Test
+    fun `a collinear vertex keeps a polygon convex`() {
+        val square = Polygon(listOf(FlatPoint(0.0, 0.0), FlatPoint(2.0, 0.0), FlatPoint(4.0, 0.0), FlatPoint(4.0, 4.0), FlatPoint(0.0, 4.0)))
+        assertTrue(square.isConvex)
+    }
+
+    @Test
+    fun `a sliver whose sharpest turn rounds to straight stays convex`() {
+        val sliver = Polygon.Triangle(FlatPoint(0.0, 0.0), FlatPoint(1000.0, 0.0), FlatPoint(0.0, 0.01))
+        assertTrue(sliver.isConvex)
+    }
+
+    @Test
+    fun `a reflex vertex breaks convexity`() {
+        val notch = Polygon(listOf(FlatPoint(0.0, 0.0), FlatPoint(10.0, 0.0), FlatPoint(10.0, 10.0), FlatPoint(5.0, 5.0), FlatPoint(0.0, 10.0)))
+        assertFalse(notch.isConvex)
+        assertFalse((-notch).isConvex)
+    }
+
+    @Test
+    fun `a pentagram turns the same way at every vertex but winds twice - not convex`() {
+        val pentagram = Polygon(List(5) { k ->
+            val theta = PI / 2 + k * 4 * PI / 5
+            FlatPoint(10.0 * cos(theta), 10.0 * sin(theta))
+        })
+        assertFalse(pentagram.isConvex)
+    }
+
+    @Test
+    fun `a self-crossing loop is not convex`() {
+        val bowtie = Polygon(listOf(FlatPoint(0.0, 0.0), FlatPoint(2.0, 2.0), FlatPoint(2.0, 0.0), FlatPoint(0.0, 2.0)))
+        assertFalse(bowtie.isConvex)
+    }
+
+    @Test
+    fun `a flat loop is not convex`() {
+        val flat = Polygon.Triangle(FlatPoint(0.0, 0.0), FlatPoint(2.0, 0.0), FlatPoint(1.0, 0.0))
+        assertFalse(flat.isConvex)
+    }
+
+    @Test
+    fun `convexity survives negation - every versor and every dilator`() = sweep {
+        val polygon = convexPolygon(flatPoint(), nextDouble(1.0, 300.0))
+        assertTrue(polygon.isConvex, "$polygon")
+        assertTrue((-polygon).isConvex, "negated $polygon")
+        assertTrue((polygon * versor()).isConvex, "moved $polygon")
+        assertTrue((polygon * dilator()).isConvex, "dilated $polygon")
+    }
+
+    /* SPLIT */
+
+    private fun List<Polygon>.regions(): Set<Set<FlatPoint>> = map { it.vertices.toSet() }.toSet()
+
+    private fun square(x: Double, y: Double, side: Double): Set<FlatPoint> =
+        Polygon.Rectangle(FlatPoint(x, y), FlatPoint(x + side, y + side)).vertices.toSet()
+
+    @Test
+    fun `splitting in one answers the outline as a plain polygon`() {
+        class Tri(polygon: Polygon) : Polygon(polygon.vertices) {
+            override fun copy(polygon: Polygon): Polygon = Tri(polygon)
+        }
+
+        val tri = Tri(Polygon.Triangle(FlatPoint(0.0, 0.0), FlatPoint(4.0, 0.0), FlatPoint(0.0, 3.0)))
+        val pieces = tri.split(1)
+        assertEquals(listOf(Polygon(tri.vertices)), pieces)
+        assertEquals(Polygon::class, pieces.single()::class)
+    }
+
+    @Test
+    fun `the default split halves a rectangle across its longest edge`() {
+        val pieces = Polygon.Rectangle(FlatPoint(0.0, 0.0), FlatPoint(60.0, 30.0)).split()
+        assertEquals(setOf(square(0.0, 0.0, 30.0), square(30.0, 0.0, 30.0)), pieces.regions())
+    }
+
+    @Test
+    fun `a 2-by-1 rectangle splits into eight as a 4-by-2 grid of squares`() {
+        val pieces = Polygon.Rectangle(FlatPoint(0.0, 0.0), FlatPoint(60.0, 30.0)).split(8)
+        val grid = (0 until 4).flatMap { i -> (0 until 2).map { j -> square(15.0 * i, 15.0 * j, 15.0) } }.toSet()
+        assertEquals(grid, pieces.regions())
+    }
+
+    @Test
+    fun `an isosceles triangle splits through its apex without a duplicate vertex`() {
+        val pieces = Polygon.Triangle(FlatPoint(0.0, 0.0), FlatPoint(10.0, 0.0), FlatPoint(5.0, 8.0)).split()
+        val left = setOf(FlatPoint(0.0, 0.0), FlatPoint(5.0, 0.0), FlatPoint(5.0, 8.0))
+        val right = setOf(FlatPoint(5.0, 0.0), FlatPoint(10.0, 0.0), FlatPoint(5.0, 8.0))
+        assertEquals(setOf(left, right), pieces.regions())
+        assertTrue(pieces.all { it.vertices.size == 3 })
+    }
+
+    @Test
+    fun `an odd count splits into equal areas`() {
+        val rect = Polygon.Rectangle(FlatPoint(0.0, 0.0), FlatPoint(9.0, 4.0))
+        val pieces = rect.split(3)
+        assertEquals(3, pieces.size)
+        pieces.forEach { assertEquals(12.0, it.signedArea, 1e-9) }
+    }
+
+    @Test
+    fun `split rejects a count below one - an inside-out polygon and a non-convex one`() {
+        val rect = Polygon.Rectangle(FlatPoint(0.0, 0.0), FlatPoint(4.0, 2.0))
+        val notch = Polygon(listOf(FlatPoint(0.0, 0.0), FlatPoint(10.0, 0.0), FlatPoint(10.0, 10.0), FlatPoint(5.0, 5.0), FlatPoint(0.0, 10.0)))
+        assertFailsWith<IllegalArgumentException> { rect.split(0) }
+        assertFailsWith<InsideOutPolygonException> { (-rect).split() }
+        assertFailsWith<NonConvexPolygonException> { notch.split() }
+    }
+
+    @Test
+    fun `a polygon too small for its pieces collapses`() {
+        val speck = Polygon.Rectangle(FlatPoint(0.0, 0.0), FlatPoint(1e-4, 1e-4))
+        assertFailsWith<DegeneratePolygonException> { speck.split(8) }
+    }
+
+    @Test
+    fun `split tiles a convex polygon with n convex counter-clockwise pieces of equal area`() = sweep {
+        val polygon = convexPolygon(flatPoint(), nextDouble(10.0, 300.0))
+        val n = nextInt(1, 17)
+        val pieces = polygon.split(n)
+        assertEquals(n, pieces.size, "piece count of $polygon")
+        for (piece in pieces) {
+            assertTrue(piece.isConvex && !piece.isInsideOut, "convex classic piece $piece of $polygon")
+            assertNear(polygon.signedArea / n, piece.signedArea, "area of $piece of $polygon")
+        }
+        assertNear(polygon.signedArea, pieces.sumOf { it.signedArea }, "total area of $polygon")
+    }
+
+    @Test
+    fun `split commutes with rigid motion`() = sweep {
+        val polygon = convexPolygon(flatPoint(), nextDouble(10.0, 300.0))
+        val n = nextInt(1, 17)
+        val motion = motor()
+        val moved = polygon.split(n).map { it * motion }
+        for (piece in (polygon * motion).split(n)) {
+            val twin = moved.minBy { it.centroid distanceTo piece.centroid }
+            assertNear(0.0, twin.centroid distanceTo piece.centroid, "centroid of $piece")
+            assertNear(twin.signedArea, piece.signedArea, "area of $piece")
+        }
+    }
+
     /* IDENTITY */
 
     @Test
@@ -109,7 +273,7 @@ class PolygonTest {
         val b = Polygon(listOf(FlatPoint(0.0, 0.0), FlatPoint(4.0, 0.0), FlatPoint(0.0, 3.0)))
         assertEquals(a, b)
         assertEquals(a.hashCode(), b.hashCode())
-        // Starting vertex and traversal direction are data — a rotated list is a different value.
+        // Starting vertex and traversal direction are data: a rotated list is a different value.
         val shifted = Polygon(listOf(FlatPoint(4.0, 0.0), FlatPoint(0.0, 3.0), FlatPoint(0.0, 0.0)))
         assertNotEquals(a, shifted)
     }
@@ -143,7 +307,7 @@ class PolygonTest {
     @Test
     fun `RectSide follows the visual sides through negation`() {
         // The reversed walk shuffles the indices (side i lands at (2 − i) mod 4) and reverses
-        // each edge — the visual lookup is unmoved.
+        // each edge. The visual lookup is unmoved.
         val wall = -Polygon.Rectangle(FlatPoint(1.0, 2.0), FlatPoint(5.0, 5.0))
         assertEquals(Segment(FlatPoint(5.0, 2.0), FlatPoint(1.0, 2.0)), wall.edges[BOTTOM])
         assertEquals(Segment(FlatPoint(5.0, 5.0), FlatPoint(5.0, 2.0)), wall.edges[RIGHT])
@@ -154,7 +318,7 @@ class PolygonTest {
     @Test
     fun `RectSide follows the visual sides through a mirror`() {
         // Reflecting across x = 0 keeps the list order but swaps the visually left and right
-        // sides — a case no index arithmetic can recover, since the mirror flips the winding
+        // sides. No index arithmetic can recover this case, since the mirror flips the winding
         // without reversing the list.
         val rect = Polygon.Rectangle(FlatPoint(1.0, 2.0), FlatPoint(5.0, 5.0))
         val mirrored = rect * F(Line(1.0, 0.0, 0.0))

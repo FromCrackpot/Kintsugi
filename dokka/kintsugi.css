@@ -30,3 +30,51 @@
 .toc--part[data-active] > .toc--row .toc--link::after {
     filter: invert(1);
 }
+
+.navigation-controls--btn_homepage {
+    width: auto;
+    padding: 0 12px;
+    background-image: none;
+    font: var(--font-text-m);
+    color: var(--color-key-blue);
+    white-space: nowrap;
+}
+
+.navigation-controls--btn_homepage::after {
+    content: "kintsugi-engine.com";
+}
+
+.navigation-controls--btn_homepage:hover {
+    color: var(--color-key-blue-hover);
+    text-decoration: underline;
+}
+
+@media (min-width: 900px) {
+    .navigation {
+        position: relative;
+    }
+
+    .navigation-controls--btn_homepage {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}
+
+@media (max-width: 899px) {
+    .library-version {
+        flex-grow: 0;
+        padding-left: 12px;
+    }
+
+    .navigation-controls--btn_homepage {
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 439px) {
+    .navigation-controls--btn_homepage {
+        padding: 0 6px;
+        font-size: 14px;
+    }
+}

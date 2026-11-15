@@ -2,7 +2,7 @@ package fromcrackpot.kintsugi.scenegraph
 
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polygon
-import fromcrackpot.kintsugi.cga.d2.queries.predicates.on
+import fromcrackpot.kintsugi.cga.d2.operations.queries.predicates.on
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -39,7 +39,7 @@ class SceneBoundsTest {
      */
 
     @Test
-    fun `Polygon factory takes the vertex bounding box, no axis flip`() {
+    fun `Polygon factory takes the vertex bounding box - no axis flip`() {
         val arena = Polygon.Rectangle(FlatPoint(-400.0, -300.0), FlatPoint(400.0, 300.0))
         assertEquals(SceneBounds(-400.0, -300.0, 800.0, 600.0), SceneBounds(arena))
     }
@@ -68,8 +68,8 @@ class SceneBoundsTest {
     }
 
     @Test
-    fun `SceneBounds extension delegates to width and height, ignoring minX and minY`() {
-        // The border is always centered at CGA origin — offset bounds don't move it.
+    fun `SceneBounds extension delegates to width and height - ignoring minX and minY`() {
+        // The border is always centered at the CGA origin. Offset bounds don't move it.
         val offset = SceneBounds(15.0, -7.0, 60.0, 80.0).worldBorder()
         assertEquals(worldBorder(60.0, 80.0), offset)
         assertEquals(sqrt(30.0 * 30.0 + 40.0 * 40.0), offset.radius)

@@ -6,9 +6,9 @@ import nl.adaptivity.xmlutil.XmlReader
 
 /**
  * Recognized: `butt`, `round`, `square` (SVG 1.1 `stroke-linecap` keywords, case-insensitive).
- * Anything else — including SVG 2's `inherit` — returns `null`, letting the caller fall back to the
- * inherited cascade / [SvgDefaults.STROKE_CAP]. Cosmetic property, so an unknown value is a
- * warn-and-fall-back (see [readStrokeCapAttr]), not a hard `Malformed…` failure.
+ * Anything else, SVG 2's `inherit` included, returns `null`, letting the caller fall back to the
+ * inherited cascade / [SvgDefaults.STROKE_CAP]. The property is cosmetic, so an unknown value
+ * warns and falls back (see [readStrokeCapAttr]) instead of a hard `Malformed…` failure.
  */
 internal fun parseStrokeCap(raw: String): ShapeStrokeCap? = when (raw.trim().lowercase()) {
     "butt" -> ShapeStrokeCap.BUTT
@@ -20,7 +20,7 @@ internal fun parseStrokeCap(raw: String): ShapeStrokeCap? = when (raw.trim().low
 /**
  * Read a `stroke-linecap` attribute and decode it via [parseStrokeCap]. A present-but-unrecognized
  * value warns and yields `null` (tolerant fall-through to the cascade), unlike `readColorAttr`'s
- * throw-on-unknown posture — cap is cosmetic and a bad keyword shouldn't fail the whole parse.
+ * throw-on-unknown posture. The cap is cosmetic, and a bad keyword shouldn't fail the whole parse.
  */
 internal fun XmlReader.readStrokeCapAttr(name: String, location: String?): ShapeStrokeCap? =
     getAttributeValue(null, name)?.let { raw ->

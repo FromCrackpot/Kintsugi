@@ -5,10 +5,7 @@ import androidx.compose.ui.graphics.toArgb
 import fromcrackpot.kintsugi.scenegraph.style.ShapeColor
 
 /**
- * Returns this color as the equivalent Compose `Color`, in sRGB.
- *
- * The conversion is channel-exact: the packed `0..255` channels feed Compose's integer
- * constructor unchanged.
+ * Returns this color as the equivalent sRGB Compose `Color`, channel-exact.
  *
  * @receiver The renderer-neutral color to bridge.
  * @return The matching sRGB Compose `Color`.
@@ -18,12 +15,10 @@ public fun ShapeColor.toComposeColor(): Color = Color(red = r, green = g, blue =
 /**
  * Returns this Compose `Color` as the equivalent [ShapeColor].
  *
- * The conversion goes through the color's packed ARGB form: a color in a non-sRGB working
- * space converts to sRGB, and each channel rounds to the nearest 8-bit value. For sRGB colors
- * built from integer channels the round-trip with [toComposeColor] is exact.
+ * - Non-sRGB colors convert to sRGB and each channel rounds to 8 bits; sRGB integer colors round-trip.
  *
  * @receiver The Compose color to bridge.
- * @return The matching packed [ShapeColor].
+ * @return The matching packed color.
  */
 public fun Color.toShapeColor(): ShapeColor {
     val argb = toArgb()

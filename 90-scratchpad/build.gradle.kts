@@ -23,6 +23,9 @@ kotlin {
             implementation(project(":scene-graph"))
             implementation(project(":compose"))
             implementation(project(":svg"))
+            implementation(project(":game-engine"))
+            implementation(project(":audio"))
+            implementation(project(":bfxr"))
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.ui)
@@ -53,16 +56,16 @@ compose.desktop {
     application {
         mainClass = "fromcrackpot.kintsugi.scratchpad.MainKt"
         jvmArgs += listOf("--enable-native-access=ALL-UNNAMED")
-        // Scene selection: `./gradlew :scratchpad:run -Pscene=logo`. Absent → default scene.
-        (project.findProperty("scene") as? String)?.let { args += listOf(it) }
+        // Sketch selection: `./gradlew :scratchpad:run -Psketch=logo`. Absent → default sketch.
+        (project.findProperty("sketch") as? String)?.let { args += listOf(it) }
     }
 }
 
 // `compose.desktop.application.args` only configures the `run` task. The Compose Hot Reload
 // plugin's hot-run tasks (hotRunDesktop / hotDevDesktop) are separate JavaExec tasks that take
-// no args from that DSL, so mirror the scene arg onto them here. Absent `-Pscene=` → default.
-(project.findProperty("scene") as? String)?.let { scene ->
+// no args from that DSL, so mirror the sketch arg onto them here. Absent `-Psketch=` → default.
+(project.findProperty("sketch") as? String)?.let { sketch ->
     tasks.withType<JavaExec>()
         .matching { it.name == "hotRunDesktop" || it.name == "hotDevDesktop" }
-        .configureEach { args(scene) }
+        .configureEach { args(sketch) }
 }

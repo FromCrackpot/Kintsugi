@@ -1,32 +1,32 @@
 package fromcrackpot.kintsugi.cga.d2.transforms.primitives
 
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Circle
+import fromcrackpot.kintsugi.cga.d2.transforms.Dilator
 import fromcrackpot.kintsugi.cga.d2.transforms.Flector
 import fromcrackpot.kintsugi.cga.d2.transforms.Motor
 import fromcrackpot.kintsugi.cga.d2.transforms.Versor
 import fromcrackpot.kintsugi.cga.narrowed
 
-// Versor action on Circle — all-components forms (not center+radius reconstruction), so
-// inside-out and imaginary circles transform faithfully; |cw| is preserved, making the
-// unitizing ctor a no-op pass. Derived by composing the trusted translation form with the pure
-// rotation/reflection of the (cx, cy) pair — the residual translation applies *after* the
-// rotation/reflection, exactly as the FlatPoint forms do. Sign convention pinned by the
-// CircleTimesTest join rebuild (d * V) join (a * V) == (d join a) * V.
+// Versor action on Circle, in all-components forms rather than a center+radius rebuild, so
+// inside-out and imaginary circles transform faithfully. |cw| is preserved, so the unitizing ctor
+// is a no-op pass. Derived as the trusted translation form composed with the pure
+// rotation/reflection of the (cx, cy) pair. As in the FlatPoint forms, the residual translation
+// applies *after* the rotation/reflection. Sign convention pinned by CircleTimesTest's join
+// rebuild (d * V) join (a * V) == (d join a) * V.
+
+// Dilator action: D ⟇ u ⟇ D̰, rescaled by a power of the scale so the weight passes through.
+// At scale = 1 it reduces to the Motor form with cos = 1, sin = 0.
 
 /**
  * `Circle * Motor => Circle`<br>
  * Returns this circle moved by [motor]'s rigid motion.
  *
- * The antiproduct sandwich `M ⟇ c ⟇ M̰` in expanded form, raw at full `Double` precision. The
- * center moves with the motion, the squared radius [Circle.radius2] is preserved — imaginary
- * values included — and the weight [Circle.cw] is untouched, so a classic circle stays classic
- * and an inside-out one stays inside-out. The result is the receiver's own class: the moved
- * geometry returns through [Circle.copy], preserving a subclass that overrides the hook.
+ * - Radius and orientation are preserved.
  *
- * @receiver The [Circle] to move.
+ * @receiver The circle to move.
  * @param T The receiver's type, preserved in the result.
  * @param motor The rigid motion to apply.
- * @return The moved circle, as the receiver's class.
+ * @return The moved circle.
  */
 public operator fun <T : Circle> T.times(motor: Motor): T {
     val tx = motor.tx
@@ -48,21 +48,14 @@ public operator fun <T : Circle> T.times(motor: Motor): T {
 
 /**
  * `Circle * Flector => Circle`<br>
- * Returns this circle reflected by [flector]'s mirror motion — same radius, opposite
- * orientation.
+ * Returns this circle reflected by [flector]'s mirror motion. The radius stays, the orientation flips.
  *
- * The antiproduct sandwich `−F ⟇ c ⟇ F̰` in expanded form, raw at full `Double` precision. The
- * center reflects across the mirror line and glides along it, the squared radius
- * [Circle.radius2] is preserved — imaginary values included — and the weight [Circle.cw]
- * negates: a classic circle reflects to an inside-out one and back, the algebra's record that
- * a mirror motion reverses orientation — first-class data, never an error. The result is the
- * receiver's own class: the moved geometry returns through [Circle.copy], preserving a
- * subclass that overrides the hook.
+ * - A classic circle comes back inside-out, and vice versa.
  *
- * @receiver The [Circle] to reflect.
+ * @receiver The circle to reflect.
  * @param T The receiver's type, preserved in the result.
  * @param flector The mirror motion to apply.
- * @return The reflected circle, as the receiver's class.
+ * @return The reflected circle.
  */
 public operator fun <T : Circle> T.times(flector: Flector): T {
     val fx = flector.fx
@@ -86,17 +79,42 @@ public operator fun <T : Circle> T.times(flector: Flector): T {
 
 /**
  * `Circle * Versor => Circle`<br>
- * Returns this circle moved by [versor].
+ * Returns this circle moved by [versor], for a versor typed only as [Versor].
  *
- * The action for a versor typed only as [Versor]: it dispatches to the `Circle * Motor` and
- * `Circle * Flector` forms; a versor with a concrete static type resolves to those directly.
- *
- * @receiver The [Circle] to move.
+ * @receiver The circle to move.
  * @param T The receiver's type, preserved in the result.
  * @param versor The motion to apply.
- * @return The moved circle, as the receiver's class.
+ * @return The moved circle.
  */
 public operator fun <T : Circle> T.times(versor: Versor): T = when (versor) {
     is Motor -> this * versor
     is Flector -> this * versor
+}
+
+/**
+ * `Circle * Dilator => Circle`<br>
+ * Returns this circle dilated by [dilator].
+ *
+ * - Orientation is preserved, and the radius is multiplied by [dilator]'s scale.
+ *
+ * @receiver The circle to dilate.
+ * @param T The receiver's type, preserved in the result.
+ * @param dilator The dilation to apply.
+ * @return The dilated circle.
+ */
+public operator fun <T : Circle> T.times(dilator: Dilator): T {
+    val s = dilator.scale
+    val tx = dilator.tx
+    val ty = dilator.ty
+    return narrowed(
+        copy(
+            Circle(
+                cx = s * this.cx - tx * this.cw,                                      // e423
+                cy = s * this.cy - ty * this.cw,                                      // e431
+                cz = s * s * this.cz - s * (tx * this.cx + ty * this.cy)
+                        + ((tx * tx + ty * ty) / 2.0) * this.cw,                      // e412
+                cw = this.cw,                                                         // e321
+            )
+        )
+    )
 }

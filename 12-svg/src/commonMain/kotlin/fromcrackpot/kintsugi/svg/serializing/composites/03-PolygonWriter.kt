@@ -14,16 +14,16 @@ import fromcrackpot.kintsugi.svg.serializing.formatSvgNumber
 import nl.adaptivity.xmlutil.XmlWriter
 
 /**
- * Polygon → bare `<polygon>` (no `k:type`; designer-authored polygons "just work"). One
- * `x,y` pair per vertex in traversal order (order = winding = data); coordinates go through
- * the Y-flip per vertex. An inside-out polygon additionally emits `k:flags="inside-out"` —
- * flag and stored winding agree by invariant, so a re-parse reverses nothing and the
- * round-trip is idempotent. All other emitted attributes are core (mirroring `<rect>`);
- * `stroke-linecap` is never emitted (closed path, same rule as circle/rectangle). No skip
- * guards — the `:cga` ctor makes degenerate polygons unrepresentable.
+ * Polygon → bare `<polygon>`, with no `k:type`, so designer-authored polygons "just work".
  *
- * Rectangle `Polygon`s also land here — `<rect>` is parse-only in `/v1`; a rectangle
- * re-serializes as `<polygon>` like any other quad.
+ * - One `x,y` pair per vertex in traversal order (order = winding = data), each through the Y-flip.
+ * - An inside-out polygon also emits `k:flags="inside-out"`. Flag and stored winding agree by
+ *   invariant, so a re-parse reverses nothing and the round-trip is idempotent.
+ * - Every other attribute is core (mirroring `<rect>`). `stroke-linecap` is never emitted, since
+ *   the path is closed (like circle and rectangle).
+ * - No skip guards: the `:cga` ctor makes degenerate polygons unrepresentable.
+ * - Rectangle `Polygon`s land here too. `<rect>` is parse-only in `/v1`, so a rectangle
+ *   re-serializes as `<polygon>` like any other quad.
  */
 internal fun XmlWriter.writePolygonElement(shape: PolygonNode, viewBox: SceneBounds) {
     val polygon: Polygon = shape

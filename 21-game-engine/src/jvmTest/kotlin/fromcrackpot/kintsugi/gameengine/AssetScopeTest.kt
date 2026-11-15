@@ -1,5 +1,7 @@
 package fromcrackpot.kintsugi.gameengine
 
+import fromcrackpot.kintsugi.bfxr.BfxrFormatException
+import fromcrackpot.kintsugi.bfxr.parseBfxr
 import fromcrackpot.kintsugi.scenegraph.nodes.composites.PolygonNode
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
@@ -41,7 +43,7 @@ class AssetScopeTest {
 
     /* COMPOSED LOAD */
 
-    @Test fun `resolves templates relative to the layout's directory, transitively`() = runBlocking {
+    @Test fun `resolves templates relative to the layout's directory - transitively`() = runBlocking {
         val scope = scope(
             mapOf(
                 "files/wall.svg" to wallLayout,
@@ -58,7 +60,7 @@ class AssetScopeTest {
 
     @Test fun `documents without refs skip the fetch pass`() = runBlocking {
         val scope = scope(mapOf("steel.svg" to brickTemplate))
-        // Root-level path (no directory) resolves hrefs as bare names — and a ref-free document
+        // Root-level path (no directory) resolves hrefs as bare names. A ref-free document
         // never fetches at all: the fake would throw on any unexpected path.
         val brick = scope.load<PolygonNode>("steel.svg")
         assertEquals(setOf("brick"), brick.tags)
@@ -68,6 +70,20 @@ class AssetScopeTest {
         val scope = scope(mapOf("files/wall.svg" to wallLayout))
         val e = assertFailsWith<IllegalStateException> { scope.loadGroup("files/wall.svg") }
         assertEquals(true, e.message?.contains("files/steel.svg"))
+    }
+
+    /* SOUND */
+
+    @Test fun `loadSound renders the bfxr file`() = runBlocking {
+        val text = """{"synth_type": "Whooshr", "version": "1.0.0", "params": {"masterVolume": 0.4}}"""
+        val sound = scope(mapOf("files/whoosh.bfxr" to text)).loadSound("files/whoosh.bfxr")
+        assertEquals(Sound(parseBfxr(text).render()), sound)
+    }
+
+    @Test fun `loadSound reports a bad file`() = runBlocking {
+        val text = """{"synth_type": "Whooshr", "version": "1.0.0", "params": {"masterVolum": 0.4}}"""
+        val e = assertFailsWith<BfxrFormatException> { scope(mapOf("bad.bfxr" to text)).loadSound("bad.bfxr") }
+        assertEquals(true, e.message?.contains("masterVolume"), "the hint names the parameter")
     }
 
     /* PATH ARITHMETIC */

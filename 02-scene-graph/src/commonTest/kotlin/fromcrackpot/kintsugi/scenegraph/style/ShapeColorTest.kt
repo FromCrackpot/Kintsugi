@@ -29,7 +29,7 @@ class ShapeColorTest {
      */
 
     @Test
-    fun `NONE equals rgb(0,0,0,0)`() {
+    fun `NONE equals transparent black rgba 0 0 0 0`() {
         assertEquals(ShapeColor.NONE, ShapeColor.rgb(0, 0, 0, 0))
     }
 }
