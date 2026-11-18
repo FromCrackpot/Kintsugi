@@ -10,6 +10,7 @@
             aspect-ratio: 4 / 3;   /* matches ARENA_BOUNDS 800×600 */
             width: min(100vw, calc(100vh * 4 / 3));
             position: relative;
+            touch-action: none;    /* the canvas allows pan-x pan-y, and Chrome cancels a drag it pans */
         }
         #game::after {             /* the walls: an overlay, since Compose's canvas paints over an outline */
             content: "";
