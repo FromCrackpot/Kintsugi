@@ -14,7 +14,7 @@ public interface PcmSink : AutoCloseable {
      * @param pcm The samples to upload. They are copied, so the caller may reuse the array.
      * @return The loaded clip, playable until the sink closes.
      * @throws IllegalArgumentException when [pcm]'s rate isn't [SAMPLE_RATE].
-     * @throws IllegalStateException when the sink is closed.
+     * @throws IllegalStateException when the sink is closed or the platform player fails.
      */
     public fun load(pcm: Pcm): Clip
 
@@ -38,7 +38,7 @@ public interface Clip {
      * @param loop Whether the voice repeats until stopped.
      * @return The voice, to stop it early.
      * @throws IllegalArgumentException when [gain] lies outside [0, 1].
-     * @throws IllegalStateException when the sink is closed.
+     * @throws IllegalStateException when the sink is closed or the platform player fails.
      */
     public fun play(gain: Double = 1.0, loop: Boolean = false): Voice
 }
@@ -53,7 +53,9 @@ public fun interface Voice {
  * Returns the platform's [PcmSink], opening its audio output.
  *
  * - In a browser, audio stays suspended until the page's first pointer or key press: earlier plays are silent.
- * - On the JVM, a machine with no audio output fails here with the platform's line exception.
+ * - An output that can't open fails here, never at a later load. The JVM throws its line exception.
+ *
+ * @throws IllegalStateException when the browser's Web Audio is missing or fails to start.
  */
 public expect fun PcmSink(): PcmSink
 

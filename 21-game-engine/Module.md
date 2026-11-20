@@ -39,7 +39,7 @@ steps are done, `Game` plays what they recorded.
 | One start per frame | Equal sounds played within one frame start once. |
 | Voices ring out | A pause, an interruption or a `restart` lets playing sounds finish. Only `Game` leaving the composition stops them. |
 | A restart still sounds | What the restarting step played before `restart` plays too. |
-| No output, no sound | When the platform's audio output can't open, the game runs silently. |
+| No output, no sound | When the platform's audio output can't open or fails, the game runs on silently. |
 | A browser waits for a press | In a browser, sounds played before the page's first pointer or key press are silent. |
 | Headless | `drive` and direct `step` calls play nothing. `played` shows what each step played. |
 

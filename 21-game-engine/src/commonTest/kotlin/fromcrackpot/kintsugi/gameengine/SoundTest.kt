@@ -25,16 +25,18 @@ private class SoundProbe : World(SceneBounds(-1.0, -1.0, 2.0, 2.0)) {
     }
 }
 
-private class FakeSink : PcmSink {
+private class FakeSink(val failingLoad: Boolean = false, val failingPlay: Boolean = false) : PcmSink {
     val loads = mutableListOf<Pcm>()
     val plays = mutableListOf<Pcm>()
     var closed = false
 
     override fun load(pcm: Pcm): Clip {
         loads += pcm
+        check(!failingLoad) { "upload failed" }
         return object : Clip {
             override fun play(gain: Double, loop: Boolean): Voice {
                 plays += pcm
+                check(!failingPlay) { "player failed" }
                 return Voice {}
             }
         }
@@ -123,6 +125,30 @@ class SoundTest {
         val speaker = Speaker { opens++; error("no audio output") }
         speaker.play(listOf(BEEP))
         speaker.play(listOf(BEEP))
+        assertEquals(1, opens)
+    }
+
+    @Test
+    fun `a failing upload closes the sink and leaves the speaker silent for good`() {
+        var opens = 0
+        val sink = FakeSink(failingLoad = true)
+        val speaker = Speaker { opens++; sink }
+        speaker.play(listOf(BEEP))
+        speaker.play(listOf(BOOP))
+        assertTrue(sink.closed)
+        assertEquals(listOf(BEEP.pcm), sink.loads)
+        assertEquals(1, opens)
+    }
+
+    @Test
+    fun `a failing play closes the sink and leaves the speaker silent for good`() {
+        var opens = 0
+        val sink = FakeSink(failingPlay = true)
+        val speaker = Speaker { opens++; sink }
+        speaker.play(listOf(BEEP, BOOP))
+        speaker.play(listOf(BOOP))
+        assertTrue(sink.closed)
+        assertEquals(listOf(BEEP.pcm), sink.plays)
         assertEquals(1, opens)
     }
 

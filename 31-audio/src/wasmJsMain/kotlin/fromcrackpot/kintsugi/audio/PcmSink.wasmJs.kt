@@ -5,46 +5,51 @@ package fromcrackpot.kintsugi.audio
 public actual fun PcmSink(): PcmSink = WebPcmSink()
 
 private class WebPcmSink : PcmSink {
-    private var context: AudioContext? = null
+    private val context: AudioContext = webAudio("open") { AudioContext().also(::resumeOnGesture) }
     private var open = true
-
-    private fun context(): AudioContext =
-        context ?: AudioContext().also {
-            context = it
-            resumeOnGesture(it)
-        }
 
     override fun load(pcm: Pcm): Clip {
         check(open) { "PcmSink is closed" }
         requirePlayable(pcm)
-        val context = context()
-        val samples = Float32Array(pcm.samples.size)
-        pcm.samples.forEachIndexed { i, sample -> setFloat(samples, i, sample) }
-        val buffer = context.createBuffer(1, pcm.samples.size, PcmSink.SAMPLE_RATE.toFloat())
-        buffer.copyToChannel(samples, 0)
+        val buffer = webAudio("load") {
+            val samples = Float32Array(pcm.samples.size)
+            pcm.samples.forEachIndexed { i, sample -> setFloat(samples, i, sample) }
+            context.createBuffer(1, pcm.samples.size, PcmSink.SAMPLE_RATE.toFloat()).also {
+                it.copyToChannel(samples, 0)
+            }
+        }
         return Clip { gain, loop ->
             check(open) { "PcmSink is closed" }
             requireGain(gain)
-            val source = context.createBufferSource()
-            source.buffer = buffer
-            source.loop = loop
-            val level = context.createGain()
-            level.gain.value = gain.toFloat()
-            source.connect(level)
-            level.connect(context.destination)
-            resumeIfSuspended(context)
-            source.start()
-            Voice { stopQuietly(source) }
+            webAudio("play") {
+                val source = context.createBufferSource()
+                source.buffer = buffer
+                source.loop = loop
+                val level = context.createGain()
+                level.gain.value = gain.toFloat()
+                source.connect(level)
+                level.connect(context.destination)
+                resumeIfSuspended(context)
+                source.start()
+                Voice { stopQuietly(source) }
+            }
         }
     }
 
     override fun close() {
         if (!open) return
         open = false
-        context?.let(::closeQuietly)
-        context = null
+        closeQuietly(context)
     }
 }
+
+// Kotlin/Wasm: JsException : Throwable, not Exception.
+private inline fun <T> webAudio(action: String, block: () -> T): T =
+    try {
+        block()
+    } catch (e: JsException) {
+        throw IllegalStateException("Web Audio failed to $action: ${e.message}", e)
+    }
 
 private external class AudioContext : JsAny {
     val destination: AudioNode

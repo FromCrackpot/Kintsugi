@@ -26,12 +26,73 @@
     <div id="game"></div>
     <script>
         if (window.parent !== window) {
-            const mounted = () => [...document.querySelectorAll('#game *')].some((el) => el.shadowRoot?.querySelector('canvas'));
-            const poll = setInterval(() => {
-                if (!mounted()) return;
-                clearInterval(poll);
-                setTimeout(() => window.parent.postMessage('brickit:ready', '*'), 150);
-            }, 100);
+            const stallMs = 10000;
+            const post = (type, message) => window.parent.postMessage({ type, message }, '*');
+            let booting = true;
+            let downloads = 0;
+            let stall;
+
+            const fail = (message) => {
+                if (!booting) return;
+                booting = false;
+                clearTimeout(stall);
+                post('brickit:error', message);
+            };
+            const watch = () => {
+                clearTimeout(stall);
+                if (booting && downloads > 0) {
+                    stall = setTimeout(() => fail(`Download stalled: no data for ${stallMs / 1000} s`), stallMs);
+                }
+            };
+            const settle = () => {
+                downloads--;
+                watch();
+            };
+
+            window.brickitEmbed = (type, message) => {
+                if (type === 'brickit:started') {
+                    booting = false;
+                    clearTimeout(stall);
+                }
+                post(type, message);
+            };
+
+            window.addEventListener('error', (event) => {
+                fail(event.message || `Failed to load ${event.target?.src || event.target?.href || 'a resource'}`);
+            }, true);
+            window.addEventListener('unhandledrejection', (event) => fail(String(event.reason)));
+
+            const fetch = window.fetch.bind(window);
+            window.fetch = async (...args) => {
+                if (!booting) return fetch(...args);
+                downloads++;
+                watch();
+                let response;
+                try {
+                    response = await fetch(...args);
+                } catch (error) {
+                    settle();
+                    throw error;
+                }
+                if (!response.body) {
+                    settle();
+                    return response;
+                }
+                const counted = response.body.pipeThrough(new TransformStream({
+                    transform(chunk, controller) {
+                        watch();
+                        controller.enqueue(chunk);
+                    },
+                    flush: settle,
+                }));
+                // WebAssembly.instantiateStreaming refuses a response without its application/wasm type.
+                const headers = new Headers(response.headers);
+                headers.delete('content-encoding');
+                headers.delete('content-length');
+                return new Response(counted, { status: response.status, statusText: response.statusText, headers });
+            };
+
+            post('brickit:hello');
         }
     </script>
     <script src="brickit.js"></script>

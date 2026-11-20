@@ -69,10 +69,16 @@ class BrickItSounds(
 )
 
 @Composable
-fun App(alignment: Alignment = Alignment.Center) = Game(
+fun App(
+    alignment: Alignment = Alignment.Center,
+    onFirstFrame: () -> Unit = {},
+    onFailure: (Throwable) -> Unit = {},
+) = Game(
     modifier = Modifier.fillMaxSize().background(Color(0xFF2E3440)),
     alignment = alignment,
     preferredFrameRate = 90.0,
+    onFirstFrame = onFirstFrame,
+    onFailure = onFailure,
     paused = {
         Spacer(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.6f)))
         BasicText("Touch to resume", Modifier.align(Alignment.Center), TextStyle(color = Color.White, fontSize = 32.sp))

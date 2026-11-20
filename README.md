@@ -60,7 +60,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.fromcrackpot:kintsugi-game-engine:0.2.3")
+    implementation("com.fromcrackpot:kintsugi-game-engine:0.2.4")
 }
 ```
 

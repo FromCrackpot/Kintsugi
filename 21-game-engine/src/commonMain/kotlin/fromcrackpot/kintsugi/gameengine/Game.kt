@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
@@ -34,8 +35,10 @@ import fromcrackpot.kintsugi.compose.Scene
 import fromcrackpot.kintsugi.compose.canvasToCga
 import fromcrackpot.kintsugi.compose.fitScale
 import fromcrackpot.kintsugi.scenegraph.SceneBounds
+import fromcrackpot.kintsugi.scenegraph.nodes.GroupNode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.roundToInt
 
 /**
@@ -59,6 +62,10 @@ import kotlin.math.roundToInt
  * @param preferredFrameRate The display rate in Hz to ask for while the game is shown, `null` by default, leaving it
  *   to the platform. Android takes its lowest display mode at or above it, else its highest; desktop and web ignore
  *   it. It never paces the loop.
+ * @param onFirstFrame Called once, on the frame after the first world's scene was drawn. A restart doesn't
+ *   call it again.
+ * @param onFailure Called with a throw from [world] or from a step, before it propagates and stops the game.
+ *   Cancellation is not a failure.
  * @param paused Drawn over the scene, letterbox excluded, while the game is paused for losing focus or
  *   going to the background. It stays until the next press (pointer or key), which also plays.
  *   Nothing by default.
@@ -76,6 +83,8 @@ public fun <W : World> Game(
     tickRate: Double = 120.0,
     maxFrameTime: Double = 0.25,
     preferredFrameRate: Double? = null,
+    onFirstFrame: () -> Unit = {},
+    onFailure: (Throwable) -> Unit = {},
     paused: @Composable BoxScope.() -> Unit = {},
     world: suspend () -> W,
 ) {
@@ -96,18 +105,34 @@ public fun <W : World> Game(
     var fpsLabel by remember { mutableStateOf<String?>(null) }
     var interrupted by remember { mutableStateOf(false) }
     val focus = remember { FocusRequester() }
+    val firstDraw = remember { FirstDraw(loop.root) }
 
     // Read inside the pointer handler without restarting it when the bounds or the placement change.
     val bounds = rememberUpdatedState(root.bounds)
     val placement = rememberUpdatedState(alignment)
     val direction = rememberUpdatedState(LocalLayoutDirection.current)
+    val firstFrame = rememberUpdatedState(onFirstFrame)
+    val failure = rememberUpdatedState(onFailure)
 
     LaunchedEffect(Unit) {
-        while (true) {
-            loop.frame(withFrameNanos { it })
-            root = loop.root
-            fpsLabel = loop.fpsLabel
-            interrupted = loop.interrupted
+        try {
+            var reported = false
+            while (true) {
+                val now = withFrameNanos { it }
+                if (firstDraw.done && !reported) {
+                    reported = true
+                    firstFrame.value()
+                }
+                loop.frame(now)
+                root = loop.root
+                fpsLabel = loop.fpsLabel
+                interrupted = loop.interrupted
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            failure.value(e)
+            throw e
         }
     }
 
@@ -158,10 +183,21 @@ public fun <W : World> Game(
             .then(overlay),
     ) {
         Box(Modifier.matchParentSize().fitted(root.bounds, alignment)) {
-            Scene(root, Modifier.matchParentSize())
+            Scene(
+                root,
+                Modifier.matchParentSize().drawWithContent {
+                    drawContent()
+                    if (root !== firstDraw.blank) firstDraw.done = true
+                },
+            )
             if (interrupted) Box(Modifier.matchParentSize(), content = paused)
         }
     }
+}
+
+// Plain fields, not state. The draw phase writes them, and a state write there would recompose.
+private class FirstDraw(val blank: GroupNode) {
+    var done = false
 }
 
 private fun Modifier.fitted(bounds: SceneBounds?, alignment: Alignment): Modifier = layout { measurable, constraints ->

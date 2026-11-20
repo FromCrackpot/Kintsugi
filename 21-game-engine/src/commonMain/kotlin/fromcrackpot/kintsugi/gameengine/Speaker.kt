@@ -4,8 +4,8 @@ import fromcrackpot.kintsugi.audio.Clip
 import fromcrackpot.kintsugi.audio.PcmSink
 
 /**
- * [Game]'s audio output: opens the sink at the first sound, uploads each distinct [Sound] once, and stays silent for
- * good when the sink can't open.
+ * [Game]'s audio output: opens the sink at the first sound, uploads each distinct [Sound] once, and closes the sink
+ * and stays silent for good at the sink's first failure.
  */
 internal class Speaker(private val open: () -> PcmSink = ::PcmSink) : AutoCloseable {
     private var sink: PcmSink? = null
@@ -14,13 +14,12 @@ internal class Speaker(private val open: () -> PcmSink = ::PcmSink) : AutoClosea
 
     fun play(sounds: Collection<Sound>) {
         if (sounds.isEmpty() || silent) return
-        val out = sink ?: try {
-            open().also { sink = it }
+        try {
+            val out = sink ?: open().also { sink = it }
+            for (sound in sounds) clips.getOrPut(sound) { out.load(sound.pcm) }.play()
         } catch (_: Exception) {
-            silent = true
-            return
+            close()
         }
-        for (sound in sounds) clips.getOrPut(sound) { out.load(sound.pcm) }.play()
     }
 
     override fun close() {
