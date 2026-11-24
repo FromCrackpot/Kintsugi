@@ -75,4 +75,24 @@ class SvgFailureTest {
     @Test fun `dipole with endpoints coinciding at the SCALE quantum throws MalformedDipoleException`() {
         assertFailsWith<MalformedDipoleException> { parseSvg(DIPOLE_NEAR_COINCIDENT_SVG) }
     }
+
+    @Test fun `center form with two children throws MalformedDipoleException`() {
+        assertFailsWith<MalformedDipoleException> { parseSvg(DIPOLE_ATTITUDE_TWO_CHILDREN_SVG) }
+    }
+
+    @Test fun `center form with no child throws MalformedDipoleException`() {
+        assertFailsWith<MalformedDipoleException> { parseSvg(DIPOLE_ATTITUDE_NO_CHILD_SVG) }
+    }
+
+    @Test fun `attitude rounding to zero length throws MalformedDipoleException`() {
+        assertFailsWith<MalformedDipoleException> { parseSvg(DIPOLE_ZERO_ATTITUDE_SVG) }
+    }
+
+    @Test fun `attitude with one number throws MalformedDipoleException`() {
+        assertFailsWith<MalformedDipoleException> { parseSvg(DIPOLE_ATTITUDE_ONE_NUMBER_SVG) }
+    }
+
+    @Test fun `attitude with a non-finite number throws MalformedDipoleException`() {
+        assertFailsWith<MalformedDipoleException> { parseSvg(DIPOLE_ATTITUDE_NOT_A_NUMBER_SVG) }
+    }
 }

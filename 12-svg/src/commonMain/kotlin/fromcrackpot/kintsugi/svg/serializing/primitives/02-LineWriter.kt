@@ -11,10 +11,12 @@ import fromcrackpot.kintsugi.svg.KTYPE_LINE
 import fromcrackpot.kintsugi.svg.SVG_NS
 import fromcrackpot.kintsugi.svg.cgaToSvg
 import fromcrackpot.kintsugi.svg.kAttr
+import fromcrackpot.kintsugi.svg.kChromeAttr
 import fromcrackpot.kintsugi.svg.kTagsAttr
 import fromcrackpot.kintsugi.svg.serializing.colorAttr
 import fromcrackpot.kintsugi.svg.serializing.formatSvgNumber
 import fromcrackpot.kintsugi.svg.serializing.strokeCapAttr
+import fromcrackpot.kintsugi.svg.serializing.strokeDashAttrs
 import fromcrackpot.kintsugi.svg.warn
 import nl.adaptivity.xmlutil.XmlWriter
 
@@ -54,6 +56,9 @@ internal fun XmlWriter.writeLineElement(shape: LineNode, viewBox: SceneBounds, w
     attribute(null, "stroke-width", null, style.strokeWidth.formatSvgNumber())
     // Optional feature attribute: `butt` is the SVG default, so it's omitted (like k:flags).
     if (style.strokeCap != ShapeStrokeCap.BUTT) strokeCapAttr("stroke-linecap", style.strokeCap)
+    val chrome = mutableListOf<String>()
+    strokeDashAttrs(style, line, chrome)
+    kChromeAttr(chrome)
     kTagsAttr(shape.tags)
     endTag(SVG_NS, "line", "")
 }

@@ -1,5 +1,7 @@
 # Kintsugi
 
+![Kintsugi Engine](./media/banner.png)
+
 Source-available, free for non-commercial use under the [Kintsugi Engine Community License](./LICENSE).
 
 > **Experimental** — expect breaking changes before 1.0.
@@ -60,7 +62,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.fromcrackpot:kintsugi-game-engine:0.2.4")
+    implementation("com.fromcrackpot:kintsugi-game-engine:0.3.0")
 }
 ```
 

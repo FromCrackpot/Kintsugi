@@ -3,6 +3,7 @@ package fromcrackpot.kintsugi.svg.parsing
 import fromcrackpot.kintsugi.scenegraph.SceneBounds
 import fromcrackpot.kintsugi.scenegraph.nodes.Node
 import fromcrackpot.kintsugi.svg.UnsupportedSvgElementException
+import fromcrackpot.kintsugi.svg.warnUnknownChrome
 import nl.adaptivity.xmlutil.EventType
 import nl.adaptivity.xmlutil.XmlReader
 
@@ -28,6 +29,7 @@ internal fun XmlReader.parseGroupChildren(
     while (hasNext()) {
         when (next()) {
             EventType.START_ELEMENT -> {
+                warnUnknownChrome(extLocationInfo?.toString())
                 children += when (localName) {
                     "rect" -> parseRectElement(viewBox, inherited)
                     "circle" -> parseCircleElement(viewBox, inherited)

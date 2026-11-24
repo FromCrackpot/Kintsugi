@@ -20,7 +20,7 @@ The composable and the conversion boundary.
 
 The Compose bridge for the scene graph's paint vocabulary: `ShapeColor` to Compose `Color` and
 back. The conversion is channel-exact towards Compose, and sRGB-converted and rounded to 8 bits on
-the way back.
+the way back. Stroke caps and dash patterns bridge one way, towards Compose.
 
 # Package fromcrackpot.kintsugi.compose.tracing
 

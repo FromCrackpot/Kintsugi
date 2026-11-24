@@ -1,6 +1,7 @@
 package fromcrackpot.kintsugi.svg.parsing
 
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStrokeCap
+import fromcrackpot.kintsugi.svg.presentationAttr
 import fromcrackpot.kintsugi.svg.warn
 import nl.adaptivity.xmlutil.XmlReader
 
@@ -23,7 +24,7 @@ internal fun parseStrokeCap(raw: String): ShapeStrokeCap? = when (raw.trim().low
  * throw-on-unknown posture. The cap is cosmetic, and a bad keyword shouldn't fail the whole parse.
  */
 internal fun XmlReader.readStrokeCapAttr(name: String, location: String?): ShapeStrokeCap? =
-    getAttributeValue(null, name)?.let { raw ->
+    presentationAttr(name)?.let { raw ->
         parseStrokeCap(raw) ?: run {
             warn("unrecognized $name=\"$raw\"${location?.let { " at $it" } ?: ""}; ignoring")
             null

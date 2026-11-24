@@ -30,7 +30,9 @@ Seven SVG elements carry the eight CGA shapes and the group tree. Element identi
 
 - **Styles arrive concrete.** Root-`<svg>` and `<g>` presentation attributes cascade nearest-wins
   into each shape's unset slots, and `k:tags` union down onto every leaf. No inheritance escapes
-  into the scene.
+  into the scene. The one style slot that can stay unset is the dash.
+- **Derived attributes are dropped.** An attribute an element's `k:chrome` lists reads as absent,
+  so the cascade applies instead.
 - **Templates are fetched first.** `parseSvg` expands an external `<use href="doc.svg">` from its
   `templates` map, keyed by the `href` up to any `#`. The use site's attributes and tags flow into
   the template's unset slots. `scanSvgRefs` lists a document's references: scan the layout, fetch
@@ -42,8 +44,13 @@ Degenerate CGA states persist faithfully:
 
 - imaginary and inside-out circles and imaginary segments ride `k:flags`;
 - an imaginary dipole needs no flag at all, since its round-point children rebuild it exactly;
+- a zero-radius dipole, such as a tangent meet, writes its center and its attitude (`k:attitude`);
 - an infinite line writes display endpoints on the scene's world border.
 
+A saved file draws in any viewer the way the scene renders. An imaginary shape with no dash of its
+own writes the shared imaginary dash, and its point markers write rings. These derived attributes
+are listed in `k:chrome`, so a reload never takes them for authored ones. An authored dash, `none`
+included, persists as is on every element.
+
 Only a shape the format cannot place is skipped, with a warning: a point, line, segment or dipole
-endpoint at infinity, and a zero-length segment or dipole, whose coincident endpoints would not
-load back.
+endpoint at infinity, and a zero-length segment, whose coincident endpoints would not load back.

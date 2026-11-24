@@ -10,7 +10,7 @@ import fromcrackpot.kintsugi.svg.KATTR_FLAGS
 import fromcrackpot.kintsugi.svg.KATTR_TYPE
 import fromcrackpot.kintsugi.svg.KFLAG_INSIDE_OUT
 import fromcrackpot.kintsugi.svg.MalformedPolygonException
-import fromcrackpot.kintsugi.svg.attrAsDouble
+import fromcrackpot.kintsugi.svg.presentationAsDouble
 import fromcrackpot.kintsugi.svg.kAttr
 import fromcrackpot.kintsugi.svg.kTags
 import fromcrackpot.kintsugi.svg.parseKFlags
@@ -79,7 +79,8 @@ internal fun XmlReader.parsePolygonElement(viewBox: SceneBounds, inherited: Inhe
     val style = SvgDefaults.style(
         fill = readColorAttr("fill", loc) ?: inherited.fill,
         stroke = readColorAttr("stroke", loc) ?: inherited.stroke,
-        strokeWidth = attrAsDouble("stroke-width") ?: inherited.strokeWidth,
+        strokeWidth = presentationAsDouble("stroke-width") ?: inherited.strokeWidth,
+        dash = readDash(inherited, loc),
     )
     return PolygonNode(polygon, style, inherited.tags + kTags())
 }

@@ -4,6 +4,7 @@ import fromcrackpot.kintsugi.compose.tracing.canvasToTrace
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.RoundPoint
 import fromcrackpot.kintsugi.scenegraph.nodes.primitives.RoundPointNode
 import fromcrackpot.kintsugi.scenegraph.style.ShapeColor
+import fromcrackpot.kintsugi.scenegraph.style.ShapeDash
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,6 +26,38 @@ class RoundPointDrawTest {
             ShapeStyle(fill = ShapeColor.rgb(0, 0xff, 0), size = 8.0),
         )
         val expected = "circle  c=(120, 110) r=4  fill=#00ff00"
+        assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
+    }
+
+    @Test
+    fun `authored dash is inert on a real round point`() {
+        val shape = RoundPointNode(
+            RoundPoint(20.0, -10.0),
+            ShapeStyle(fill = ShapeColor.rgb(0, 0xff, 0), size = 8.0, dash = ShapeDash(listOf(1.0, 1.0))),
+        )
+        assertEquals("circle  c=(120, 110) r=4  fill=#00ff00", canvasToTrace(listOf(shape), 200f, 200f))
+    }
+
+    /* IMAGINARY */
+
+    @Test
+    fun `imaginary round point draws as a dashed ring in its fill color`() {
+        // aw = (radius² + x² + y²) / 2 = (−4 + 400 + 100) / 2 = 248. Ring: r = size / 2, width = size × 0.25.
+        val shape = RoundPointNode(
+            RoundPoint(20.0, -10.0, 1.0, 248.0),
+            ShapeStyle(fill = ShapeColor.rgb(0, 0xff, 0), size = 8.0),
+        )
+        val expected = "circle  c=(120, 110) r=4  stroke=#00ff00 w=2 dash=on"
+        assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
+    }
+
+    @Test
+    fun `authored dash wins on an imaginary round point ring`() {
+        val shape = RoundPointNode(
+            RoundPoint(20.0, -10.0, 1.0, 248.0),
+            ShapeStyle(fill = ShapeColor.rgb(0, 0xff, 0), size = 8.0, dash = ShapeDash.SOLID),
+        )
+        val expected = "circle  c=(120, 110) r=4  stroke=#00ff00 w=2"
         assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
     }
 

@@ -8,9 +8,11 @@ import fromcrackpot.kintsugi.svg.KFLAG_INSIDE_OUT
 import fromcrackpot.kintsugi.svg.SVG_NS
 import fromcrackpot.kintsugi.svg.cgaToSvg
 import fromcrackpot.kintsugi.svg.kAttr
+import fromcrackpot.kintsugi.svg.kChromeAttr
 import fromcrackpot.kintsugi.svg.kTagsAttr
 import fromcrackpot.kintsugi.svg.serializing.colorAttr
 import fromcrackpot.kintsugi.svg.serializing.formatSvgNumber
+import fromcrackpot.kintsugi.svg.serializing.strokeDashAttrs
 import nl.adaptivity.xmlutil.XmlWriter
 
 /**
@@ -39,7 +41,10 @@ internal fun XmlWriter.writePolygonElement(shape: PolygonNode, viewBox: SceneBou
     colorAttr("fill", style.fill)
     colorAttr("stroke", style.stroke)
     attribute(null, "stroke-width", null, style.strokeWidth.formatSvgNumber())
+    val chrome = mutableListOf<String>()
+    strokeDashAttrs(style, polygon, chrome)
     if (polygon.isInsideOut) kAttr(KATTR_FLAGS, KFLAG_INSIDE_OUT)
+    kChromeAttr(chrome)
     kTagsAttr(shape.tags)
     endTag(SVG_NS, "polygon", "")
 }

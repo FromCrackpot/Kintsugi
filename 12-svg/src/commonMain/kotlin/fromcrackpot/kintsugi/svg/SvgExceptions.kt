@@ -108,9 +108,10 @@ public class MalformedRoundPointException(
 ) : SvgFormatException("Malformed round-point <circle>: $reason" + at(location))
 
 /**
- * The rejection of a dipole carrier `<g k:type="dipole">` that holds no valid endpoint pair.
+ * The rejection of a dipole carrier `<g k:type="dipole">` that encodes no valid dipole.
  *
- * - It needs exactly two distinct round-point `<circle>` children, in orientation order.
+ * - Without `k:attitude`, it needs exactly two distinct round-point `<circle>` children, in orientation order.
+ * - With `k:attitude`, it needs exactly one round-point child. The attitude needs two numbers and a non-zero length.
  * - Only the connector `<line>` may accompany them. The carrier must be closed.
  */
 public class MalformedDipoleException(

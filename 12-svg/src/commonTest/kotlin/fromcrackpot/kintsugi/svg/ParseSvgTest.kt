@@ -4,6 +4,7 @@ import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polygon
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Segment
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Circle
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Dipole
+import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Direction
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.RoundPoint
 import fromcrackpot.kintsugi.scenegraph.*
@@ -401,6 +402,16 @@ class ParseSvgTest {
     @Test fun `dipole with coincident endpoints is malformed`() {
         // RoundPoint join RoundPoint with start == end → DegenerateDipoleException → wrapped at the boundary.
         kotlin.test.assertFailsWith<MalformedDipoleException> { parseSvg(DIPOLE_COINCIDENT_SVG) }
+    }
+
+    @Test fun `center form parses into the dipole of its center and attitude and radius2`() {
+        val expected = Dipole(FlatPoint(10.0, 20.0), Direction(0.0, 1.0), 0.0)
+        assertEquals(expected, (parseSvg(DIPOLE_CENTER_FORM_SVG).children.single() as ShapeNode).shape)
+    }
+
+    @Test fun `center form without k aw is a zero-radius dipole`() {
+        val expected = Dipole(FlatPoint(10.0, 20.0), Direction(0.0, 1.0), 0.0)
+        assertEquals(expected, (parseSvg(DIPOLE_CENTER_FORM_NO_AW_SVG).children.single() as ShapeNode).shape)
     }
 
     @Test fun `g with unknown k type warns and falls back to a plain GroupNode`() {

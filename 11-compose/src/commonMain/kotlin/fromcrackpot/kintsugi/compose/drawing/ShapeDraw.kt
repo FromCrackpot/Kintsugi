@@ -13,6 +13,8 @@ import fromcrackpot.kintsugi.compose.drawing.primitives.drawLine
 import fromcrackpot.kintsugi.compose.drawing.primitives.drawRoundPoint
 import fromcrackpot.kintsugi.compose.style.toComposeColor
 import fromcrackpot.kintsugi.compose.style.toComposeStrokeCap
+import fromcrackpot.kintsugi.compose.style.toPathEffect
+import fromcrackpot.kintsugi.cga.d2.shapes.Shape
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Circle
 import fromcrackpot.kintsugi.scenegraph.nodes.ShapeNode
 import fromcrackpot.kintsugi.scenegraph.nodes.composites.CompositeNode
@@ -48,21 +50,22 @@ internal fun DrawScope.drawShape(node: ShapeNode, worldBorder: Circle) {
     val fill = style.fill.toComposeColor()
     val stroke = style.stroke.toComposeColor()
     val cap = style.strokeCap.toComposeStrokeCap()
+    val dash = (node as? Shape)?.let(style::dashFor)?.toPathEffect()
 
     // ShapeNode is unsealed but its two families are sealed. The nested `when`s stay exhaustive, so
     // a new leaf is a compile error here, and the `else` guards only a foreign ShapeNode family.
     when (node) {
         is PrimitiveNode -> when (node) {
             is FlatPointNode -> drawFlatPoint(node, fill, style.size.toFloat())
-            is LineNode -> drawLine(node, worldBorder, stroke, style.strokeWidth.toFloat(), cap)
-            is RoundPointNode -> drawRoundPoint(node, fill, style.size.toFloat())
-            is DipoleNode -> drawDipole(node, fill, style.size.toFloat())
-            is CircleNode -> drawCircle(node, fill, stroke, style.strokeWidth.toFloat())
+            is LineNode -> drawLine(node, worldBorder, stroke, style.strokeWidth.toFloat(), cap, dash)
+            is RoundPointNode -> drawRoundPoint(node, fill, style.size.toFloat(), dash)
+            is DipoleNode -> drawDipole(node, fill, style.size.toFloat(), dash)
+            is CircleNode -> drawCircle(node, fill, stroke, style.strokeWidth.toFloat(), dash)
         }
         is CompositeNode -> when (node) {
-            is SegmentNode -> drawSegment(node, stroke, style.strokeWidth.toFloat(), cap)
-            is PolylineNode -> drawPolyline(node, fill, stroke, style.strokeWidth.toFloat(), cap)
-            is PolygonNode -> drawPolygon(node, fill, stroke, style.strokeWidth.toFloat())
+            is SegmentNode -> drawSegment(node, stroke, style.strokeWidth.toFloat(), cap, dash)
+            is PolylineNode -> drawPolyline(node, fill, stroke, style.strokeWidth.toFloat(), cap, dash)
+            is PolygonNode -> drawPolygon(node, fill, stroke, style.strokeWidth.toFloat(), dash)
         }
         else -> error("unhandled ShapeNode family: $node")
     }

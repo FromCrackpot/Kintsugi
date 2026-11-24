@@ -24,6 +24,8 @@ internal const val KATTR_TYPE = "type"
 internal const val KATTR_AW = "aw"
 internal const val KATTR_FLAGS = "flags"
 internal const val KATTR_TAGS = "tags"
+internal const val KATTR_CHROME = "chrome"
+internal const val KATTR_ATTITUDE = "attitude"
 
 // k:type discriminator values
 internal const val KTYPE_FLAT_POINT = "flat-point"
@@ -91,4 +93,40 @@ internal fun parseKFlags(raw: String?, known: Set<String>, element: String, loca
  */
 internal fun XmlWriter.kTagsAttr(tags: Set<String>) {
     if (tags.isNotEmpty()) kAttr(KATTR_TAGS, tags.joinToString(" "))
+}
+
+/** The presentation attributes `k:chrome` may list: the ones a writer derives instead of persisting. */
+internal val CHROME_ATTRS: Set<String> = setOf(
+    "fill", "fill-opacity", "stroke", "stroke-width", "stroke-linecap", "stroke-dasharray", "stroke-dashoffset",
+)
+
+private val WHITESPACE = Regex("\\s+")
+
+private fun XmlReader.kChromeTokens(): List<String> =
+    kAttr(KATTR_CHROME)?.trim()?.split(WHITESPACE)?.filter { it.isNotEmpty() } ?: emptyList()
+
+/** Warn about `k:chrome` tokens outside [CHROME_ATTRS]. Call once per element, at its dispatch. */
+internal fun XmlReader.warnUnknownChrome(location: String?) {
+    kChromeTokens().filter { it !in CHROME_ATTRS }.forEach {
+        warn("unknown k:chrome token '$it' on <$localName>" + (location?.let { l -> " at $l" } ?: "") + "; ignoring")
+    }
+}
+
+/**
+ * Read a plain presentation attribute. It reads as **absent** when the element's `k:chrome` lists it,
+ * so the cascade applies. Every presentation read goes through here; geometry reads never do.
+ */
+internal fun XmlReader.presentationAttr(name: String): String? =
+    if (name in kChromeTokens()) null else getAttributeValue(null, name)
+
+/** [presentationAttr] parsed as `Double?`. Blank → null. */
+internal fun XmlReader.presentationAsDouble(name: String): Double? =
+    presentationAttr(name)?.trim()?.takeIf { it.isNotEmpty() }?.toDoubleOrNull()
+
+/**
+ * Write `k:chrome` space-joined, **only when non-empty**: the presentation attributes this element
+ * carries for display only. Emitted after `k:flags`, before `k:tags`.
+ */
+internal fun XmlWriter.kChromeAttr(names: List<String>) {
+    if (names.isNotEmpty()) kAttr(KATTR_CHROME, names.joinToString(" "))
 }

@@ -30,6 +30,7 @@ allprojects {
     plugins.withId("org.jetbrains.dokka") {
         val logo = rootProject.file("dokka/logo-icon.svg")
         val css = rootProject.file("dokka/kintsugi.css")
+        val templates = rootProject.file("dokka/templates")
         extensions.configure<DokkaExtension> {
             dokkaSourceSets.configureEach {
                 documentedVisibilities(VisibilityModifier.Public, VisibilityModifier.Protected)
@@ -37,6 +38,7 @@ allprojects {
             pluginsConfiguration.withType<DokkaHtmlPluginParameters>().configureEach {
                 customAssets.from(logo)
                 customStyleSheets.from(css)
+                templatesDir.set(templates)
                 homepageLink.set("https://kintsugi-engine.com/")
             }
         }

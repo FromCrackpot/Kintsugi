@@ -13,12 +13,14 @@ import fromcrackpot.kintsugi.scenegraph.nodes.GroupNode
  *
  * - A frame with no world builds one. A frame with no anchor only anchors, at launch and restart alike.
  * - [interrupt] pauses stepping until a frame brings a press. The debug pause is separate.
+ * - A loop built with `interruptible = false` ignores [interrupt] and keeps stepping.
  */
 internal class FrameLoop<W : World>(
     private val world: suspend () -> W,
     tickRate: Double,
     private val maxFrameTime: Double,
     private val play: (Collection<Sound>) -> Unit = {},
+    private val interruptible: Boolean = true,
 ) {
     val latch = InputLatch()
 
@@ -79,7 +81,7 @@ internal class FrameLoop<W : World>(
     }
 
     fun interrupt() {
-        interrupted = true
+        if (interruptible) interrupted = true
     }
 
     private fun debugKeys(interval: Long, keys: Keys) {

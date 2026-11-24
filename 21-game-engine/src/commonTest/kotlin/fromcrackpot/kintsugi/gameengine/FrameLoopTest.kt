@@ -47,12 +47,14 @@ class FrameLoopTest {
     private val worlds = mutableListOf<LoopProbe>()
     private val flushes = mutableListOf<List<Sound>>()
     private val worldsAtFlush = mutableListOf<Int>()
-    private val loop = FrameLoop(
+    private fun newLoop(interruptible: Boolean = true) = FrameLoop(
         { LoopProbe().also { worlds += it } },
         tickRate = 120.0,
         maxFrameTime = 0.25,
         play = { flushes += it.toList(); worldsAtFlush += worlds.size },
+        interruptible = interruptible,
     )
+    private var loop = newLoop()
     private val world: LoopProbe get() = worlds.last()
     private val seconds: Double get() = world.steps.sumOf { it.dt }
 
@@ -225,6 +227,16 @@ class FrameLoopTest {
         at(20)
         assertEquals(1, worlds.size)
         assertTrue(world.steps.isEmpty())
+    }
+
+    @Test
+    fun `a loop that is not interruptible steps straight through an interruption`() {
+        loop = newLoop(interruptible = false)
+        launch()
+        loop.interrupt()
+        assertFalse(loop.interrupted)
+        at(30)
+        assertEquals(0.02, seconds, 1e-12, "no press needed")
     }
 
     /* DEBUG KEYS: run with -PgameDebug, skipped without */

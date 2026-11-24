@@ -1,6 +1,7 @@
 package fromcrackpot.kintsugi.svg.parsing
 
 import fromcrackpot.kintsugi.scenegraph.style.ShapeColor
+import fromcrackpot.kintsugi.scenegraph.style.ShapeDash
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStrokeCap
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 
@@ -29,11 +30,13 @@ internal object SvgDefaults {
         stroke: ShapeColor?,
         strokeWidth: Double?,
         strokeCap: ShapeStrokeCap? = null,
+        dash: ShapeDash? = null,
     ): ShapeStyle = ShapeStyle(
         fill = fill ?: FILL,
         stroke = stroke ?: STROKE,
         strokeWidth = strokeWidth ?: STROKE_WIDTH,
         strokeCap = strokeCap ?: STROKE_CAP,
+        dash = dash,
     )
 
     /**
@@ -44,9 +47,11 @@ internal object SvgDefaults {
         stroke: ShapeColor?,
         strokeWidth: Double?,
         strokeCap: ShapeStrokeCap?,
+        dash: ShapeDash?,
     ): ShapeStyle = ShapeStyle(
         stroke = stroke ?: STROKE,
         strokeWidth = strokeWidth ?: STROKE_WIDTH,
         strokeCap = strokeCap ?: STROKE_CAP,
+        dash = dash,
     )
 }

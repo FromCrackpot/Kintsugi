@@ -40,14 +40,14 @@ Declared once on the `<svg>` root:
 | CGA primitive | SVG element | Recognized by | Geometry / data carried |
 |---|---|---|---|
 | **Flat point** | `<rect>` | `k:type="flat-point"` | `width = height = size`, centered on the CGA position; `fill` |
-| **Round point** | `<circle>` | `k:type="round-point"` | `r = size/2` (**render marker size, not radius²**); `cx`/`cy` = position; `az = 1` (unitization); `aw` from `k:aw` (default: `(x² + y²)/2` → null round point); `fill` |
-| **Circle** | `<circle>` | element name (no `k:type`) | `cx`, `cy`, `r` = geometric radius `√\|r²\|`; `fill`/`stroke`/`stroke-width`; `k:flags` tokens `imaginary`, `inside-out` |
+| **Round point** | `<circle>` | `k:type="round-point"` | `r = size/2` (**render marker size, not radius²**); `cx`/`cy` = position; `az = 1` (unitization); `aw` from `k:aw` (default: `(x² + y²)/2` → null round point); `fill`; imaginary → ring chrome in `k:chrome` |
+| **Circle** | `<circle>` | element name (no `k:type`) | `cx`, `cy`, `r` = geometric radius `√\|r²\|`; `fill`/`stroke`/`stroke-width`; `k:flags` tokens `imaginary`, `inside-out`; imaginary → dashed |
 | **Unbounded line** | `<line>` | `k:type="line"` | `(x1,y1) → (x2,y2)`, order = orientation (`Line = FlatPoint(x1,y1) ∧ FlatPoint(x2,y2)`); endpoints recomputed at export from `blade ∩ worldBorder`; `stroke`/`stroke-width`; `stroke-linecap` (only when non-`butt`) |
-| **Segment** | `<line>` | element name (no `k:type`) | `(x1,y1) → (x2,y2)`, order = orientation; `stroke`/`stroke-width`; `stroke-linecap` (only when non-`butt`); `k:flags` token `imaginary` |
+| **Segment** | `<line>` | element name (no `k:type`) | `(x1,y1) → (x2,y2)`, order = orientation; `stroke`/`stroke-width`; `stroke-linecap` (only when non-`butt`); `k:flags` token `imaginary`; imaginary → dashed |
 | **Rectangle (Polygon quad)** | `<rect>` **parse-only** → writes `<polygon>` | element name (no `k:type`) | `x`/`y`/`width`/`height` decode through `Polygon.Rectangle` into the fixed CCW quad bl → br → tr → tl; `k:flags` token `inside-out` reverses the walk (wall reading); `fill`/`stroke`/`stroke-width`; non-zero `rx`/`ry` and negative extents rejected |
 | **Polygon** | `<polygon>` | element name (no `k:type`) | `points` = `x,y` pairs in traversal order (closes implicitly), canonicalized against the `k:flags` token `inside-out` — flagged loops decode clockwise (inside-out), unflagged counter-clockwise; `fill`/`stroke`/`stroke-width` |
 | **Polyline** | `<polyline>` | element name (no `k:type`) | `points` = `x,y` pairs in traversal order (≥ 2 pairs; open chain — no implicit close; first == last legal); `fill`/`stroke`/`stroke-width`; `stroke-linecap` (only when non-`butt`) |
-| **Dipole** | `<g k:type="dipole">` | `k:type` on `<g>` | two `<circle k:type="round-point">` children + an inline dashed `<line>`; child order = orientation; the `<line>` is visual chrome, ignored by the parser |
+| **Dipole** | `<g k:type="dipole">` | `k:type` on `<g>` | two `<circle k:type="round-point">` children + an inline dashed `<line>`; child order = orientation; the `<line>` is visual chrome, ignored by the parser; an authored dash rides the `<g>`; imaginary → ring children; coincident endpoints (zero radius) → **center form**: `k:attitude="dx dy"` (SVG frame) on the `<g>` + one round-point child, the center, whose `k:aw` carries radius²; no `<line>` |
 | **Group (GroupNode)** | `<g>` | element name (no `k:type`) | recursive children of any supported element; nested `bounds` is NOT persisted (only the root bounds round-trips) |
 | **Template reference** | `<use>` **parse-only** → writes expanded shapes | element name | `href` = external template document (fragment tolerated, ignored); `x`/`y` place the template's top-left (origin anchoring); expands at parse via the caller's templates map — never re-serialized |
 
@@ -74,6 +74,17 @@ every shape element, `<g>` (unions into descendant leaves), and `<use>` (unions 
 expanded leaf). Verbatim (no lowercasing), renderer-inert, emitted only when non-empty. Sibling
 of `k:flags`, which stays a closed vocabulary.
 
+**Dashes** — `stroke-dasharray` / `stroke-dashoffset` (user units = model units; `none` is an
+explicit solid) are read and written on every shape element and cascade through `<g>` like
+`stroke-width`. An authored dash wins; an imaginary shape with none draws the shared imaginary
+dash `4 2`; a dipole's connector otherwise draws `2 1`; everything else is solid.
+
+**`k:chrome`** — space-separated names of the presentation attributes an element carries for
+display only (`fill`, `fill-opacity`, `stroke`, `stroke-width`, `stroke-linecap`,
+`stroke-dasharray`, `stroke-dashoffset`). The writer lists what it derived, so any viewer draws the
+shape as Kintsugi does; the parser treats listed attributes as absent, so a derived default never
+reloads as authored. Emitted only when non-empty, after `k:flags`, before `k:tags`.
+
 ## Examples
 
 ### Flat point
@@ -95,8 +106,11 @@ of `k:flags`, which stays a closed vocabulary.
 <!-- Non-null round point, r² = 9: aw = (9 + 100 + 25) / 2 = 67 -->
 <circle k:type="round-point" cx="10" cy="5" r="4" k:aw="67" fill="#00ff00"/>
 
-<!-- Imaginary round point, r² = -4: aw = (-4 + 100 + 25) / 2 = 60.5 -->
-<circle k:type="round-point" cx="10" cy="5" r="4" k:aw="60.5" fill="#00ff00"/>
+<!-- Imaginary round point, r² = -4: aw = (-4 + 100 + 25) / 2 = 60.5. As saved: a dashed ring,
+     its display attributes listed in k:chrome (the parser reads only the fill) -->
+<circle k:type="round-point" cx="10" cy="5" r="4" k:aw="60.5" fill="#00ff00" fill-opacity="0"
+        stroke="#00ff00" stroke-width="2" stroke-dasharray="4 2"
+        k:chrome="fill-opacity stroke stroke-width stroke-dasharray"/>
 ```
 
 ### Circle
@@ -111,6 +125,12 @@ Here `r` *is* the geometric radius (`√|r²|`). Untagged `<circle>` is a CGA ci
 <circle cx="10" cy="5" r="3" k:flags="imaginary"/>
 <circle cx="10" cy="5" r="3" k:flags="inside-out"/>
 <circle cx="10" cy="5" r="3" k:flags="imaginary inside-out"/>
+
+<!-- An imaginary circle as saved: the derived dash is chrome, an authored one is data -->
+<circle cx="10" cy="5" r="3" fill="none" stroke="#000000" stroke-width="1"
+        stroke-dasharray="4 2" k:flags="imaginary" k:chrome="stroke-dasharray"/>
+<circle cx="10" cy="5" r="3" fill="none" stroke="#000000" stroke-width="1"
+        stroke-dasharray="none" k:flags="imaginary"/>
 ```
 
 ### Unbounded line
@@ -132,8 +152,10 @@ zero-length segments (coincident endpoints) are skipped on save.
 ```xml
 <line x1="0" y1="0" x2="10" y2="0" stroke="#00ff00" stroke-width="1"/>
 
-<!-- Imaginary (r² < 0): same carrier and center as the real segment between the endpoints -->
-<line x1="0" y1="0" x2="10" y2="0" stroke="#00ff00" stroke-width="1" k:flags="imaginary"/>
+<!-- Imaginary (r² < 0): same carrier and center as the real segment between the endpoints,
+     drawn with the derived imaginary dash -->
+<line x1="0" y1="0" x2="10" y2="0" stroke="#00ff00" stroke-width="1"
+      stroke-dasharray="4 2" k:flags="imaginary" k:chrome="stroke-dasharray"/>
 ```
 
 ### Rectangle (parse-only `<rect>`)
@@ -194,6 +216,29 @@ is ignored by the parser.
   <circle k:type="round-point" cx="0"  cy="0" r="4" fill="#00ff00"/>
   <circle k:type="round-point" cx="10" cy="0" r="4" fill="#00ff00"/>
   <line x1="0" y1="0" x2="10" y2="0" stroke-dasharray="2 1"/>
+</g>
+
+<!-- An authored dash rides the carrier; the chrome line inherits it in viewers -->
+<g k:type="dipole" stroke-dasharray="3 1">
+  <circle k:type="round-point" cx="0"  cy="0" r="4" fill="#00ff00"/>
+  <circle k:type="round-point" cx="10" cy="0" r="4" fill="#00ff00"/>
+  <line x1="0" y1="0" x2="10" y2="0" stroke="#00ff00" stroke-width="2"/>
+</g>
+```
+
+An imaginary dipole (a line missing a circle) is written on its real-valued endpoints; its
+children are rings like the imaginary round point above, and its chrome line takes `4 2`.
+
+A zero-radius dipole (a tangent meet, touching circles) has coincident endpoints, which would not
+reload as a pair. It writes the **center form**: `k:attitude` on the carrier is the direction from
+`start` toward `end`, in the SVG frame (Y down, like `cx`/`cy`), and the one child is the center.
+Its `k:aw` carries the signed radius², so the parser rebuilds `Dipole(center, attitude, radius²)`.
+There is no chrome line: the connector has zero length.
+
+```xml
+<!-- Tangent at CGA (0, 0) in viewBox 0 0 100 100, attitude pointing up (CGA (0, 1)) -->
+<g k:type="dipole" k:attitude="0 -1">
+  <circle k:type="round-point" cx="50" cy="50" r="4" k:aw="0" fill="#00ff00"/>
 </g>
 ```
 

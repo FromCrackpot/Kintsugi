@@ -9,8 +9,7 @@ import fromcrackpot.kintsugi.scenegraph.SceneBounds
 import fromcrackpot.kintsugi.scenegraph.nodes.primitives.LineNode
 import fromcrackpot.kintsugi.scenegraph.nodes.composites.SegmentNode
 import fromcrackpot.kintsugi.scenegraph.nodes.ShapeNode
-import fromcrackpot.kintsugi.scenegraph.style.ShapeColor
-import fromcrackpot.kintsugi.scenegraph.style.ShapeStrokeCap
+import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 import fromcrackpot.kintsugi.svg.KATTR_FLAGS
 import fromcrackpot.kintsugi.svg.KATTR_TYPE
 import fromcrackpot.kintsugi.svg.KFLAG_IMAGINARY
@@ -22,6 +21,7 @@ import fromcrackpot.kintsugi.svg.decodeSegment
 import fromcrackpot.kintsugi.svg.kAttr
 import fromcrackpot.kintsugi.svg.kTags
 import fromcrackpot.kintsugi.svg.parseKFlags
+import fromcrackpot.kintsugi.svg.presentationAsDouble
 import fromcrackpot.kintsugi.svg.svgToCga
 import fromcrackpot.kintsugi.svg.warn
 import nl.adaptivity.xmlutil.XmlReader
@@ -43,17 +43,18 @@ internal fun XmlReader.parseLineElement(viewBox: SceneBounds, inherited: Inherit
     val x2 = attrAsDouble("x2")
     val y2 = attrAsDouble("y2")
     val stroke = readColorAttr("stroke", loc) ?: inherited.stroke
-    val strokeWidth = attrAsDouble("stroke-width") ?: inherited.strokeWidth
+    val strokeWidth = presentationAsDouble("stroke-width") ?: inherited.strokeWidth
     val strokeCap = readStrokeCapAttr("stroke-linecap", loc) ?: inherited.strokeCap
+    val style = SvgDefaults.strokedStyle(stroke, strokeWidth, strokeCap, readDash(inherited, loc))
     val tags = inherited.tags + kTags()
 
     if (kType == KTYPE_LINE) {
-        return lineFrom(x1, y1, x2, y2, stroke, strokeWidth, strokeCap, tags, viewBox, loc)
+        return lineFrom(x1, y1, x2, y2, style, tags, viewBox, loc)
     }
     if (kType != null) {
         warn("unknown k:type=\"$kType\" on <line>${loc?.let { " at $it" } ?: ""}; treating as a segment")
     }
-    return segmentFrom(x1, y1, x2, y2, kAttr(KATTR_FLAGS), stroke, strokeWidth, strokeCap, tags, viewBox, loc)
+    return segmentFrom(x1, y1, x2, y2, kAttr(KATTR_FLAGS), style, tags, viewBox, loc)
 }
 
 /**
@@ -69,9 +70,7 @@ private fun lineFrom(
     y1: Double?,
     x2: Double?,
     y2: Double?,
-    stroke: ShapeColor?,
-    strokeWidth: Double?,
-    strokeCap: ShapeStrokeCap?,
+    style: ShapeStyle,
     tags: Set<String>,
     viewBox: SceneBounds,
     location: String? = null,
@@ -87,7 +86,7 @@ private fun lineFrom(
     val start = FlatPoint(cx1, cy1)
     val end = FlatPoint(cx2, cy2)
 
-    return LineNode(start join end, SvgDefaults.strokedStyle(stroke, strokeWidth, strokeCap), tags)
+    return LineNode(start join end, style, tags)
 }
 
 /**
@@ -106,9 +105,7 @@ private fun segmentFrom(
     x2: Double?,
     y2: Double?,
     flags: String?,
-    stroke: ShapeColor?,
-    strokeWidth: Double?,
-    strokeCap: ShapeStrokeCap?,
+    style: ShapeStyle,
     tags: Set<String>,
     viewBox: SceneBounds,
     location: String? = null,
@@ -123,7 +120,7 @@ private fun segmentFrom(
     val imaginary = KFLAG_IMAGINARY in parseKFlags(flags, KNOWN_SEGMENT_FLAGS, "line", location)
     val segment = if (imaginary) real.imaginaryTwin() else real
 
-    return SegmentNode(segment, SvgDefaults.strokedStyle(stroke, strokeWidth, strokeCap), tags)
+    return SegmentNode(segment, style, tags)
 }
 
 private val KNOWN_SEGMENT_FLAGS = setOf(KFLAG_IMAGINARY)

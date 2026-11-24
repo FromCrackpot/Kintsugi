@@ -3,7 +3,8 @@
 The renderer-neutral scene graph: a tree of `GroupNode` sub-trees and shape-node leaves. Each
 leaf *is* its CGA shape: it subclasses the shape and carries the concrete `ShapeStyle` it renders
 with. The module also holds the `SceneBounds` viewport rectangle and the shared paint vocabulary
-(`ShapeColor`, `ShapeStrokeCap`, `DipoleChrome`) that every renderer reads identically.
+(`ShapeColor`, `ShapeStrokeCap`, `ShapeDash`, `DipoleChrome`, `ImaginaryChrome`) that every
+renderer reads identically.
 
 A leaf is an immutable value, decoration included. `node * versor` returns a new node through the
 leaf's geometry `copy` override, and `restyled`/`retagged` return one through its decoration
@@ -67,8 +68,20 @@ override, style and tags untouched.
 The paint vocabulary:
 
 - `ShapeStyle`, the concrete style every shape renders with, with its per-shape default constants
-  and `defaultFor`. It has no nullable fields and no cascade: "no paint" is `ShapeColor.NONE`, and
-  "no thickness" is zero.
+  and `defaultFor`. It has no cascade: "no paint" is `ShapeColor.NONE`, and "no thickness" is
+  zero. The dash is its one nullable field, because an unset dash takes a shape-dependent default.
 - `ShapeColor`, the packed-ARGB color carrier.
 - `ShapeStrokeCap`, the open-stroke line cap.
+- `ShapeDash`, the stroke dash pattern, in model units. `ShapeDash.SOLID` is an explicit solid.
 - `DipoleChrome`, the shared convention for a dipole's connector line.
+- `ImaginaryChrome`, the shared convention for imaginary shapes: dashed strokes and ring markers.
+
+## Dash resolution
+
+`ShapeStyle.dashFor` resolves the dash every stroke of a shape draws with. Both renderers call it.
+
+| Style `dash` | Imaginary shape | Real dipole | Any other shape |
+|--------------|-----------------|-------------|-----------------|
+| set | the set pattern | the set pattern | the set pattern |
+| `ShapeDash.SOLID` | solid | solid | solid |
+| unset | `ImaginaryChrome.DASH` | `DipoleChrome.DASH` | solid |

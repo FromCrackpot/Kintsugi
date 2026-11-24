@@ -7,7 +7,7 @@ import fromcrackpot.kintsugi.scenegraph.SceneBounds
 import fromcrackpot.kintsugi.scenegraph.nodes.composites.PolylineNode
 import fromcrackpot.kintsugi.svg.KATTR_TYPE
 import fromcrackpot.kintsugi.svg.MalformedPolylineException
-import fromcrackpot.kintsugi.svg.attrAsDouble
+import fromcrackpot.kintsugi.svg.presentationAsDouble
 import fromcrackpot.kintsugi.svg.kAttr
 import fromcrackpot.kintsugi.svg.kTags
 import fromcrackpot.kintsugi.svg.svgToCga
@@ -59,8 +59,9 @@ internal fun XmlReader.parsePolylineElement(viewBox: SceneBounds, inherited: Inh
     val style = SvgDefaults.style(
         fill = readColorAttr("fill", loc) ?: inherited.fill,
         stroke = readColorAttr("stroke", loc) ?: inherited.stroke,
-        strokeWidth = attrAsDouble("stroke-width") ?: inherited.strokeWidth,
+        strokeWidth = presentationAsDouble("stroke-width") ?: inherited.strokeWidth,
         strokeCap = readStrokeCapAttr("stroke-linecap", loc) ?: inherited.strokeCap,
+        dash = readDash(inherited, loc),
     )
     return PolylineNode(polyline, style, inherited.tags + kTags())
 }

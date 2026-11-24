@@ -79,7 +79,7 @@ fun App(
     preferredFrameRate = 90.0,
     onFirstFrame = onFirstFrame,
     onFailure = onFailure,
-    paused = {
+    pauseOverlay = {
         Spacer(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.6f)))
         BasicText("Touch to resume", Modifier.align(Alignment.Center), TextStyle(color = Color.White, fontSize = 32.sp))
     },

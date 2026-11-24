@@ -10,10 +10,12 @@ import fromcrackpot.kintsugi.svg.SVG_NS
 import fromcrackpot.kintsugi.svg.cgaToSvg
 import fromcrackpot.kintsugi.svg.decodeSegment
 import fromcrackpot.kintsugi.svg.kAttr
+import fromcrackpot.kintsugi.svg.kChromeAttr
 import fromcrackpot.kintsugi.svg.kTagsAttr
 import fromcrackpot.kintsugi.svg.serializing.colorAttr
 import fromcrackpot.kintsugi.svg.serializing.formatSvgNumber
 import fromcrackpot.kintsugi.svg.serializing.strokeCapAttr
+import fromcrackpot.kintsugi.svg.serializing.strokeDashAttrs
 import fromcrackpot.kintsugi.svg.warn
 import nl.adaptivity.xmlutil.XmlWriter
 
@@ -25,7 +27,8 @@ import nl.adaptivity.xmlutil.XmlWriter
  * - No `k:type`: bare `<line>` is the untagged default for segments, and `k:type="line"` is
  *   reserved for infinite CGA lines.
  * - An imaginary segment writes its real-valued endpoint pair plus `k:flags="imaginary"` (the
- *   circle's flag, from the rounded `isImaginary`).
+ *   circle's flag, from the rounded `isImaginary`). With no dash of its own it writes
+ *   `ImaginaryChrome.DASH`, listed in `k:chrome`.
  * - Skip+warn: a segment at infinity (no finite endpoints), and one whose endpoints coincide (it
  *   wouldn't reload, see [decodeSegment]).
  */
@@ -53,7 +56,10 @@ internal fun XmlWriter.writeSegmentElement(shape: SegmentNode, viewBox: SceneBou
     attribute(null, "stroke-width", null, style.strokeWidth.formatSvgNumber())
     // Optional feature attribute: `butt` is the SVG default, so it's omitted (like k:flags).
     if (style.strokeCap != ShapeStrokeCap.BUTT) strokeCapAttr("stroke-linecap", style.strokeCap)
+    val chrome = mutableListOf<String>()
+    strokeDashAttrs(style, segment, chrome)
     if (segment.isImaginary) kAttr(KATTR_FLAGS, KFLAG_IMAGINARY)
+    kChromeAttr(chrome)
     kTagsAttr(shape.tags)
     endTag(SVG_NS, "line", "")
 }

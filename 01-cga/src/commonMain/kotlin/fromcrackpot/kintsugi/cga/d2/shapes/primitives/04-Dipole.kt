@@ -1,6 +1,7 @@
 package fromcrackpot.kintsugi.cga.d2.shapes.primitives
 
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Segment
+import fromcrackpot.kintsugi.cga.d2.exceptions.AtInfinityException
 import fromcrackpot.kintsugi.cga.d2.exceptions.DegenerateCircleException
 import fromcrackpot.kintsugi.cga.d2.exceptions.DegenerateDipoleException
 import fromcrackpot.kintsugi.cga.d2.exceptions.NonBladeDipoleException
@@ -98,6 +99,35 @@ public open class Dipole : Primitive {
 
         val pluckerResidual = this.gx * this.px + this.gy * this.py + this.gz * this.pz
         if (round(pluckerResidual) != 0.0) throw NonBladeDipoleException(pluckerResidual)
+    }
+
+    /**
+     * Builds the dipole with the given center, attitude and signed squared radius.
+     *
+     * @param center The midpoint of the endpoints.
+     * @param attitude The direction from [start][Dipole.start] toward [end][Dipole.end]. Its length is ignored.
+     * @param radius2 The signed squared radius. Zero gives a zero-radius dipole at `center`; negative, an
+     *   imaginary one.
+     * @throws AtInfinityException when `center` lies at infinity.
+     * @throws IllegalArgumentException when `attitude` rounds to zero length at the `SCALE` quantum.
+     */
+    public constructor(center: FlatPoint, attitude: Direction, radius2: Double) {
+        if (center.isAtInfinity) throw AtInfinityException("no dipole around a center at infinity: $center")
+        require(round(attitude.norm) != 0.0) { "attitude must not round to zero: $attitude" }
+        val cx = center.px
+        val cy = center.py
+        val ux = attitude.px / attitude.norm
+        val uy = attitude.py / attitude.norm
+        val offset = cx * ux + cy * uy
+        val lift = (cx * cx + cy * cy + radius2) / 2
+
+        this.gx = -uy + 0.0
+        this.gy = ux + 0.0
+        this.gz = cx * uy - cy * ux + 0.0
+
+        this.px = lift * ux - offset * cx + 0.0
+        this.py = lift * uy - offset * cy + 0.0
+        this.pz = -offset + 0.0
     }
 
     /**

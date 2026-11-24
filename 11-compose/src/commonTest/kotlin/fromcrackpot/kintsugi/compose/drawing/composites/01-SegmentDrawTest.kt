@@ -5,6 +5,7 @@ import fromcrackpot.kintsugi.cga.d2.shapes.composites.Segment
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Dipole
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.scenegraph.nodes.composites.SegmentNode
+import fromcrackpot.kintsugi.scenegraph.style.ShapeDash
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStrokeCap
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 import kotlin.test.Test
@@ -42,18 +43,41 @@ class SegmentDrawTest {
         assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
     }
 
+    @Test
+    fun `authored dash strokes a real segment dashed`() {
+        val shape = SegmentNode(
+            Segment(FlatPoint(-40.0, 0.0), FlatPoint(40.0, 0.0)),
+            ShapeStyle.SEGMENT.copy(dash = ShapeDash(listOf(3.0, 1.0), offset = 1.0)),
+        )
+        val expected = "line    p1=(60, 100) p2=(140, 100)  stroke=#000000 w=1 dash=on"
+        assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
+    }
+
+    /* IMAGINARY */
+
+    @Test
+    fun `imaginary segment draws dashed between its real-valued endpoints`() {
+        // radius² = −1: the endpoints (−1, 1) and (−1, −1) are real-valued, no real chord joins them.
+        val shape = SegmentNode(Dipole(1.0, 0.0, 1.0, 0.0, 0.0, 0.0).toSegment)
+        val expected = "line    p1=(99, 99) p2=(99, 101)  stroke=#000000 w=1 dash=on"
+        assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
+    }
+
+    @Test
+    fun `authored SOLID keeps an imaginary segment solid`() {
+        val shape = SegmentNode(
+            Dipole(1.0, 0.0, 1.0, 0.0, 0.0, 0.0).toSegment,
+            ShapeStyle.SEGMENT.copy(dash = ShapeDash.SOLID),
+        )
+        val expected = "line    p1=(99, 99) p2=(99, 101)  stroke=#000000 w=1"
+        assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
+    }
+
     /* DEGENERATE */
 
     @Test
     fun `segment at infinity emits no draw calls`() {
         val shape = SegmentNode(Dipole(0.0, 0.0, 1.0, 0.0, 0.0, 0.0).toSegment)
-        assertEquals("", canvasToTrace(listOf(shape), 200f, 200f))
-    }
-
-    @Test
-    fun `imaginary segment emits no draw calls`() {
-        // radius² = −1: its endpoints are real-valued, but no real chord joins them.
-        val shape = SegmentNode(Dipole(1.0, 0.0, 1.0, 0.0, 0.0, 0.0).toSegment)
         assertEquals("", canvasToTrace(listOf(shape), 200f, 200f))
     }
 

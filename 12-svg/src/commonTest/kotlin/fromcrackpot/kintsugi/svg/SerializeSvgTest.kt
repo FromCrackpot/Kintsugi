@@ -11,6 +11,7 @@ import fromcrackpot.kintsugi.scenegraph.nodes.GroupNode
 import fromcrackpot.kintsugi.scenegraph.nodes.composites.*
 import fromcrackpot.kintsugi.scenegraph.nodes.primitives.*
 import fromcrackpot.kintsugi.scenegraph.style.ShapeColor
+import fromcrackpot.kintsugi.scenegraph.style.ShapeDash
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStrokeCap
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 import kotlin.test.Test
@@ -228,7 +229,7 @@ class SerializeSvgTest {
         )
     }
 
-    @Test fun `imaginary circle is emitted with k flags imaginary`() {
+    @Test fun `imaginary circle is emitted with k flags imaginary and the derived dash as chrome`() {
         // radius² = cx² + cy² - 2·cz·cw; cz=-2, cw=-1 → -4 (imaginary, radius 2).
         val imaginary = Circle(0.0, 0.0, -2.0, -1.0)
         assertTrue(imaginary.isImaginary)
@@ -239,7 +240,11 @@ class SerializeSvgTest {
             )
         ).normalizeXml()
         assertEquals(
-            svg("0 0 100 100", """<circle cx="50" cy="50" r="2" fill="none" stroke="#000000" stroke-width="1" k:flags="imaginary"/>"""),
+            svg(
+                "0 0 100 100",
+                """<circle cx="50" cy="50" r="2" fill="none" stroke="#000000" stroke-width="1" """ +
+                    """stroke-dasharray="4 2" k:flags="imaginary" k:chrome="stroke-dasharray"/>""",
+            ),
             out,
         )
     }
@@ -372,7 +377,7 @@ class SerializeSvgTest {
         assertTrue(!out.contains("stroke-linecap"), "actual:\n$out")
     }
 
-    @Test fun `imaginary Segment is emitted with k flags imaginary`() {
+    @Test fun `imaginary Segment is emitted with k flags imaginary and the derived dash as chrome`() {
         // radius² = −1 on x = −1: the real-valued endpoints (−1, 1) and (−1, −1) → SVG (49, 49), (49, 51).
         val imaginary = Dipole(1.0, 0.0, 1.0, 0.0, 0.0, 0.0).toSegment
         val out = serializeSvg(
@@ -384,7 +389,8 @@ class SerializeSvgTest {
         assertEquals(
             svg(
                 "0 0 100 100",
-                """<line x1="49" y1="49" x2="49" y2="51" stroke="#000000" stroke-width="1" k:flags="imaginary"/>""",
+                """<line x1="49" y1="49" x2="49" y2="51" stroke="#000000" stroke-width="1" """ +
+                    """stroke-dasharray="4 2" k:flags="imaginary" k:chrome="stroke-dasharray"/>""",
             ),
             out,
         )
@@ -480,15 +486,78 @@ class SerializeSvgTest {
         assertTrue(!out.contains("k:flags"), "imaginary dipole must not emit k:flags; actual:\n$out")
     }
 
-    @Test fun `zero-radius dipole is silently skipped`() {
-        // A tangent meet: both round-point children land on one point, so the <g> would not reload.
+    @Test fun `imaginary dipole writes ring children and the imaginary connector dash`() {
+        // Endpoints (−1, 1), (−1, −1) → SVG (49, 49), (49, 51). The rings stroke the fill color,
+        // size 8 × 0.25 = 2 wide, every ring attribute listed in k:chrome; the ignored chrome line
+        // takes the imaginary dash without k:chrome.
+        val out = serializeSvg(
+            GroupNode(
+                bounds = SceneBounds(0.0, 0.0, 100.0, 100.0),
+                children = listOf(DipoleNode(Dipole(1.0, 0.0, 1.0, 0.0, 0.0, 0.0), ShapeStyle.DIPOLE)),
+            )
+        ).normalizeXml()
+        val ringChrome = """fill="#000000" fill-opacity="0" stroke="#000000" stroke-width="2" """ +
+            """stroke-dasharray="4 2" k:chrome="fill-opacity stroke stroke-width stroke-dasharray"/>"""
+        assertTrue(out.contains(Regex("""<circle k:type="round-point" cx="49" cy="49" r="4" k:aw="[^"]+" """ + Regex.escape(ringChrome))), "actual:\n$out")
+        assertTrue(out.contains(Regex("""<circle k:type="round-point" cx="49" cy="51" r="4" k:aw="[^"]+" """ + Regex.escape(ringChrome))), "actual:\n$out")
+        assertTrue(
+            out.contains("""<line x1="49" y1="49" x2="49" y2="51" stroke="#000000" stroke-width="2" stroke-dasharray="4 2"/>"""),
+            "actual:\n$out",
+        )
+    }
+
+    @Test fun `zero-radius dipole writes the center form`() {
         val out = serializeSvg(
             GroupNode(
                 bounds = SceneBounds(0.0, 0.0, 100.0, 100.0),
                 children = listOf(DipoleNode(Dipole(0.0, 1.0, 0.0, 0.0, 0.0, 0.0))),
             )
         ).normalizeXml()
-        assertEquals(svg("0 0 100 100"), out)
+        assertEquals(
+            svg(
+                "0 0 100 100",
+                """<g k:type="dipole" k:attitude="1 0">""" +
+                    """<circle k:type="round-point" cx="50" cy="50" r="4" k:aw="0" fill="#000000"/></g>""",
+            ),
+            out,
+        )
+    }
+
+    @Test fun `center form writes the attitude in the SVG frame`() {
+        // center CGA (10, 20) → SVG (60, 30); attitude CGA (0, 1) → SVG (0, -1)
+        val out = serializeSvg(
+            GroupNode(
+                bounds = SceneBounds(0.0, 0.0, 100.0, 100.0),
+                children = listOf(DipoleNode(Dipole(FlatPoint(10.0, 20.0), Direction(0.0, 1.0), 0.0))),
+            )
+        ).normalizeXml()
+        assertTrue(
+            out.contains(
+                """<g k:type="dipole" k:attitude="0 -1">""" +
+                    """<circle k:type="round-point" cx="60" cy="30" r="4" k:aw="250" fill="#000000"/></g>""",
+            ),
+            "actual:\n$out",
+        )
+    }
+
+    @Test fun `center form keeps tags and an authored dash on the carrier g`() {
+        val out = serializeSvg(
+            GroupNode(
+                bounds = SceneBounds(0.0, 0.0, 100.0, 100.0),
+                children = listOf(
+                    DipoleNode(
+                        Dipole(FlatPoint(0.0, 0.0), Direction(1.0, 0.0), 0.0),
+                        ShapeStyle.DIPOLE.copy(dash = ShapeDash(listOf(3.0, 1.0))),
+                        tags = setOf("portal"),
+                    ),
+                ),
+            )
+        ).normalizeXml()
+        assertTrue(
+            out.contains("""<g k:type="dipole" k:attitude="1 0" stroke-dasharray="3 1" k:tags="portal"><circle """),
+            "actual:\n$out",
+        )
+        assertTrue(!out.contains("<line"), "the center form writes no chrome line:\n$out")
     }
 
     /* GROUPS (GroupNode → <g>) */

@@ -2,6 +2,7 @@ package fromcrackpot.kintsugi.compose.drawing.composites
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -14,6 +15,7 @@ internal fun DrawScope.drawPolyline(
     stroke: Color,
     strokeWidth: Float,
     cap: StrokeCap,
+    dash: PathEffect?,
 ) {
     // No degenerate guard: the Polyline ctor makes < 2 vertices, at-infinity vertices and
     // collapsed edges unrepresentable, as drawSegment relies on too.
@@ -27,5 +29,5 @@ internal fun DrawScope.drawPolyline(
         }
     }
     drawPath(path, color = fill)
-    drawPath(path, color = stroke, style = Stroke(width = strokeWidth, cap = cap))
+    drawPath(path, color = stroke, style = Stroke(width = strokeWidth, cap = cap, pathEffect = dash))
 }

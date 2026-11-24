@@ -6,10 +6,12 @@ import fromcrackpot.kintsugi.scenegraph.nodes.composites.PolylineNode
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStrokeCap
 import fromcrackpot.kintsugi.svg.SVG_NS
 import fromcrackpot.kintsugi.svg.cgaToSvg
+import fromcrackpot.kintsugi.svg.kChromeAttr
 import fromcrackpot.kintsugi.svg.kTagsAttr
 import fromcrackpot.kintsugi.svg.serializing.colorAttr
 import fromcrackpot.kintsugi.svg.serializing.formatSvgNumber
 import fromcrackpot.kintsugi.svg.serializing.strokeCapAttr
+import fromcrackpot.kintsugi.svg.serializing.strokeDashAttrs
 import nl.adaptivity.xmlutil.XmlWriter
 
 /**
@@ -36,6 +38,9 @@ internal fun XmlWriter.writePolylineElement(shape: PolylineNode, viewBox: SceneB
     colorAttr("stroke", style.stroke)
     attribute(null, "stroke-width", null, style.strokeWidth.formatSvgNumber())
     if (style.strokeCap != ShapeStrokeCap.BUTT) strokeCapAttr("stroke-linecap", style.strokeCap)
+    val chrome = mutableListOf<String>()
+    strokeDashAttrs(style, polyline, chrome)
+    kChromeAttr(chrome)
     kTagsAttr(shape.tags)
     endTag(SVG_NS, "polyline", "")
 }

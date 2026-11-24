@@ -66,9 +66,9 @@ import kotlin.math.roundToInt
  *   call it again.
  * @param onFailure Called with a throw from [world] or from a step, before it propagates and stops the game.
  *   Cancellation is not a failure.
- * @param paused Drawn over the scene, letterbox excluded, while the game is paused for losing focus or
- *   going to the background. It stays until the next press (pointer or key), which also plays.
- *   Nothing by default.
+ * @param pauseOverlay Drawn over the scene, letterbox excluded, while the game is paused for losing focus or
+ *   going to the background. It stays until the next press (pointer or key), which also plays. With `null`,
+ *   the game never pauses. The default pauses and draws nothing.
  * @param world Builds a world: the first at launch, and a replacement on each [restart]. It runs on a
  *   background thread where the platform has one, while the previous picture stays up. It may suspend
  *   freely, so asset loading awaits inside.
@@ -85,7 +85,7 @@ public fun <W : World> Game(
     preferredFrameRate: Double? = null,
     onFirstFrame: () -> Unit = {},
     onFailure: (Throwable) -> Unit = {},
-    paused: @Composable BoxScope.() -> Unit = {},
+    pauseOverlay: (@Composable BoxScope.() -> Unit)? = {},
     world: suspend () -> W,
 ) {
     require(preferredFrameRate == null || preferredFrameRate > 0.0) {
@@ -97,7 +97,13 @@ public fun <W : World> Game(
     val speaker = remember { Speaker() }
     DisposableEffect(speaker) { onDispose { speaker.close() } }
     val loop = remember {
-        FrameLoop({ withContext(Dispatchers.Default) { world() } }, tickRate, maxFrameTime, speaker::play)
+        FrameLoop(
+            { withContext(Dispatchers.Default) { world() } },
+            tickRate,
+            maxFrameTime,
+            speaker::play,
+            interruptible = pauseOverlay != null,
+        )
     }
     val latch = loop.latch
     // The world isn't observable state: the loop publishes its projection after each frame's steps.
@@ -138,7 +144,7 @@ public fun <W : World> Game(
 
     LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
         loop.interrupt()
-        interrupted = true
+        interrupted = loop.interrupted
     }
 
     LaunchedEffect(Unit) { focus.requestFocus() }
@@ -190,7 +196,7 @@ public fun <W : World> Game(
                     if (root !== firstDraw.blank) firstDraw.done = true
                 },
             )
-            if (interrupted) Box(Modifier.matchParentSize(), content = paused)
+            if (interrupted && pauseOverlay != null) Box(Modifier.matchParentSize(), content = pauseOverlay)
         }
     }
 }

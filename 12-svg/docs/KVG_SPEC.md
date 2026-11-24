@@ -32,9 +32,12 @@ carriers plus the parse-only `<use>` reference).
   `GroupNode.bounds` for exact round-trip. Only the root `bounds` round-trips (via `<svg viewBox>`);
   a non-null nested bounds skip+warns on serialize and re-parses as `null`. Serialize throws
   `MissingViewBoxException` when root `bounds` is null.
-- **Persist ≠ draw.** Degenerate CGA states `:compose` can't draw (imaginary radius, inside-out
-  orientation) are persisted faithfully here — imaginary objects are first-class CGA data; the
-  data-loss decision is never the persistence layer's to make.
+- **Persist faithfully, draw identically.** Degenerate CGA states (imaginary radius, inside-out
+  orientation) are persisted faithfully here: imaginary objects are first-class CGA data, and the
+  data-loss decision is never the persistence layer's to make. What `:compose` draws, a saved
+  document draws identically in any viewer: imaginary shapes are dashed, their point markers rings
+  (`ImaginaryChrome` in `:scene-graph`). The attributes that make it so are derived, never data,
+  and `k:chrome` says which (§`k:*` semantics).
 - **Single ordered child list.** Each parsed shape becomes a typed shape-node leaf with a fully concrete
   style; nested bare `<g>` ↔ nested `GroupNode`. Source order across mixed shapes and groups is
   preserved both ways (z-order is stable); the serializer walks the tree (never `flattenShapes`).
@@ -81,9 +84,15 @@ elements; any other raises `UnsupportedSvgElementException`. On every element, a
   two `<circle k:type="round-point">` children (child order = orientation: first child is the left
   operand of `start ∧ end`) plus an inline dashed `<line>` visual chrome the parser **ignores
   entirely**. The Containers invariant `start ∧ end = D` makes the encoding canonical **including
-  imaginary dipoles** — no flags needed. Coincident endpoints (at the `SCALE` quantum, as for
-  `<line>`) raise `MalformedDipoleException`, so a zero-radius dipole (a tangent meet) skip+warns
-  at serialize; so do at-infinity endpoints (can't encode as `<circle>`). Designer `<g>`
+  imaginary dipoles** — no flags needed. An imaginary dipole's children are ring markers (see
+  §Styles, imaginary style). The dipole's own dash rides the carrier `<g>`: its children read
+  `fill` and the dash pair own attr → carrier → inherited chain, and the first child's win. Coincident endpoints (at the `SCALE` quantum, as for
+  `<line>`) raise `MalformedDipoleException`: a coincident pair carries no attitude. A dipole
+  whose endpoints would coincide (zero radius: a tangent meet, touching circles) writes the
+  **center form** instead (`k:attitude`, §`k:*` semantics): exactly one round-point child, the
+  center, and no chrome `<line>`. `k:attitude` on the carrier selects the form, never the child
+  count: with it, exactly one round-point child; without it, exactly two. At-infinity endpoints
+  skip+warn at serialize (can't encode as `<circle>`). Designer `<g>`
   attributes (`id`, `inkscape:*`) are silently dropped and never emitted.
 - **`<use href="doc.svg" x=".." y=".."/>`** — **parse-only template expansion** (the `<rect>`
   precedent: lossy at the element level, lossless at the CGA level — a save writes the expanded
@@ -126,14 +135,29 @@ elements; any other raises `UnsupportedSvgElementException`. On every element, a
   classic circles). Flag parsing is tolerant (trim/lowercase/split; unknown tokens warn).
   `imaginary` derives from the *rounded* `isImaginary` — a sub-quantum imaginary circle saves
   flagless and re-parses identity-equivalent; don't "fix" by deriving from the raw sign.
-  (`:compose` still skips these at the draw site — persist ≠ draw.)
+  An imaginary circle draws dashed at `r = √|radius²|` (§Styles). `:compose` still skips
+  inside-out circles at the draw site.
 - **Imaginary segments persist via `k:flags="imaginary"`** (the only token on a bare `<line>`),
   the endpoints being the segment's real-valued pair (`center ∓ |radius|·attitude`). Parse decodes
   the real segment between them and takes its imaginary twin — same carrier and center, radius²
   negated. Like the circle's, the flag derives from the rounded `isImaginary`. A segment at
   infinity (no finite endpoints) or of zero length (coincident endpoints would not reload)
   skip+warns at serialize; the writer's zero-length gate is the parser's own coincidence test.
-  (`:compose` skips all three at the draw site — persist ≠ draw.)
+  An imaginary segment draws dashed between its real-valued endpoints (§Styles); `:compose` skips
+  the other two at the draw site.
+- **`k:attitude` — the dipole center form.** Two numbers separated by whitespace and/or commas on
+  a `<g k:type="dipole">`: the direction from `start` toward `end`, in the **SVG frame** (Y down,
+  like `cx`/`cy`; the parser flips Y, and a direction has no origin, so the viewBox doesn't enter).
+  Its length is ignored. The carrier's one round-point child is the dipole's center; its `k:aw`
+  carries the signed radius² (`radius² = 2·aw − x² − y²`), so the parser rebuilds
+  `Dipole(center, attitude, radius²)` and center, attitude and radius² cover the dipole's four
+  degrees of freedom, orientation included. Absent `k:aw` gives the null lift: radius² 0. The
+  serializer emits the form exactly when the endpoint pair would not reload (coincident at the
+  `SCALE` quantum: endpoints under `5e-5` apart, `|radius²|` under `6.25e-10`). Such a dipole is
+  never imaginary (that needs radius² under `−5e-5`), so its child is a plain marker. The parser
+  accepts any radius²; a hand-authored center form with a non-zero one draws a single dot in
+  viewers and re-saves in the endpoint form. Not two finite numbers, or a direction rounding to
+  zero length at the `SCALE` quantum, is `MalformedDipoleException`.
 - **Polygon orientation: `k:flags="inside-out"` is intent, model winding is truth.** On parse
   the model-space walk (post Y-flip) is reversed when its winding contradicts the flag: flagged
   loops come out clockwise (`Polygon.isInsideOut`, the wall reading — solid region is the closed
@@ -151,6 +175,17 @@ elements; any other raises `UnsupportedSvgElementException`. On every element, a
   use-site tags **union** into descendant leaves at parse (the style-cascade bake idiom — nothing
   is ever stored on `GroupNode`); on the dipole they ride the carrier `<g>` and `k:tags` on its
   round-point children is ignored (mirrored at serialize).
+- **`k:chrome` — the presentation attributes an element carries for display only.** A
+  space-separated list of attribute names, legal on every element. The writer lists exactly the
+  attributes it derived instead of persisting from the model, so a viewer draws the shape the way
+  `:compose` does; the parser treats every listed attribute as **absent**, and the cascade below
+  it applies (inherited chain → `SvgDefaults`). It is what keeps a derived default from turning
+  into an authored value on reload: an authored value would stick when the shape later turns real,
+  and would freeze the default across versions. Closed vocabulary: `fill`, `fill-opacity`,
+  `stroke`, `stroke-width`, `stroke-linecap`, `stroke-dasharray`, `stroke-dashoffset`; any other
+  token warns and is ignored (geometry and `k:*` attributes are never droppable). Same token
+  grammar as `k:flags`, no lowercasing (attribute names are case-sensitive). The dipole's chrome
+  `<line>` needs no `k:chrome`: the parser ignores the whole element.
 
 ## Styles
 
@@ -165,7 +200,8 @@ elements; any other raises `UnsupportedSvgElementException`. On every element, a
   re-derive SVG semantics.
 - **Root `<svg>` and `<g>` presentation attributes resolve at the parse boundary** into per-shape
   concrete styles: own attr → ancestor-`<g>` chain (nearest-first) → root-`<svg>` → `SvgDefaults`
-  (`parsing/InheritedStyle.kt`), scoped to the attrs each element consumes. Tagged `<g k:type=…>`
+  (`parsing/InheritedStyle.kt`), scoped to the attrs each element consumes. A `k:chrome`-listed
+  attribute is absent at every level, `<g>` and root included. Tagged `<g k:type=…>`
   carriers overlay their own `fill` on the inherited chain like any shape parser. No model-level
   inheritance ever escapes into `:scene-graph`. The root `<svg>` tag itself emits `viewBox` + namespaces
   only — never `fill`/`stroke`/`stroke-width`, even when the input carried them.
@@ -173,6 +209,26 @@ elements; any other raises `UnsupportedSvgElementException`. On every element, a
   (closed paths have no caps; the same "general field, skipped by elements that can't use it"
   precedent as `fill` on `<line>`). Parse is tolerant: unknown keyword warns and falls back to the
   cascade (cosmetic, unlike `fill`'s throw). It cascades like `stroke-width`.
+- **`stroke-dasharray` + `stroke-dashoffset` → `ShapeStyle.dash` (`ShapeDash`), on every shape
+  element.** Lengths are user units = model units. Grammar: `none` (case-insensitive) is an
+  authored solid (`ShapeDash.SOLID`); otherwise plain non-negative numbers separated by commas
+  and/or whitespace. An odd-length list repeats once to even length (SVG semantics; `ShapeDash`
+  canonicalizes, so `2` re-saves as `2 2`), and an all-zero list is solid. `stroke-dashoffset` is
+  one plain number, negatives included. Both cascade like `stroke-width`, each property on its own
+  (an inherited offset applies to an own dasharray). Parse is tolerant like `stroke-linecap`:
+  units, percentages, negatives and keywords warn and fall back to the cascade. Unlike the other
+  presentation attributes there is no `SvgDefaults` value: no dasharray anywhere leaves the dash
+  **unset** (`null`), an offset alone included.
+- **The dash applies to every stroke a shape draws, the dipole connector included.** Precedence
+  (`ShapeStyle.dashFor`): an authored dash (`none` included) > `ImaginaryChrome.DASH` (`4 2`) on
+  an imaginary shape > `DipoleChrome.DASH` (`2 1`) on a dipole's connector > solid. Inert on a
+  real point marker, but persisted all the same (a shape can turn imaginary as it moves).
+- **Imaginary style (`ImaginaryChrome`).** Colors stay the style's own; no opacity is derived (it
+  would composite with the authored alpha). A circle draws at `r = √|radius²|`, a segment between
+  its real-valued endpoints, a dipole on its real-valued endpoints; their strokes take the dash
+  above. A round point, and each child of an imaginary dipole, draws as a **ring**: `r` stays the
+  marker size data (`size/2`), `fill` stays the color data, and the ring is the chrome
+  `fill-opacity="0" stroke=<fill> stroke-width=<size × RING_WIDTH_RATIO>` plus the dash.
 
 ## Serialization
 
@@ -183,20 +239,32 @@ elements; any other raises `UnsupportedSvgElementException`. On every element, a
     where tagged, `k:aw` always on round-point (tolerated-absent on parse yet always written —
     proof the axis isn't has-a-default).
   - **Optional-feature: emitted only when active**: `stroke-linecap` only when non-`butt`,
-    `k:flags` only when set, `k:tags` only when non-empty (space-joined, insertion order,
-    emitted last on every element; on the dipole it sits on the carrier `<g>` after `k:type`).
+    `stroke-dasharray` when the dash is authored or derived (`stroke-dashoffset` only when
+    non-zero), `k:flags` only when set, `k:attitude` only on a dipole's center form, `k:chrome` only when something was derived, `k:tags` only
+    when non-empty (space-joined, insertion order, emitted last on every element; on the dipole it
+    sits on the carrier `<g>` after `k:type`).
+  - **Authored vs derived dash.** An authored dash is written as is on its element, with no
+    `k:chrome` entry; `none` included. An unset dash on an imaginary circle or segment writes
+    `ImaginaryChrome.DASH` plus `k:chrome="stroke-dasharray"`. Dipole: an authored dash rides the
+    carrier `<g>` (the chrome `<line>` and the children inherit it in viewers); unset, the chrome
+    `<line>` carries `DipoleChrome.DASH` (real) or `ImaginaryChrome.DASH` (imaginary), and an
+    imaginary dipole's ring children carry the imaginary dash too, in `k:chrome`. A ring lists
+    `fill-opacity stroke stroke-width` in `k:chrome`, plus the dash attributes when derived.
 - **Canonical output, full-precision numerics.** Numbers are shortest round-trippable
   `Double.toString` (never SCALE-quantized); signed zero collapses to `"0"`; integers omit the
   decimal. Colors are canonical lowercase hex (`#rrggbb` / `#rrggbbaa`; zero-alpha → `"none"`) —
   round-trip is canonical-form, not byte-verbatim (`#F00` → `#ff0000`), and
   `parseSvg(serializeSvg(scene)) == scene` holds. Fixed attribute order (`k:type` first;
-  xmlutil's `KtXmlWriter` preserves call order): flat-point `k:type x y width height fill`;
-  round-point `k:type cx cy r k:aw fill`; circle `cx cy r fill stroke stroke-width [k:flags]`;
-  line `k:type x1 y1 x2 y2 stroke stroke-width [stroke-linecap]` (segment: same minus `k:type`,
-  plus a trailing `[k:flags]`);
-  rectangle-polygon `points fill stroke stroke-width [k:flags]`; polyline adds
-  `[stroke-linecap]`. Writer config: no trailing space before `/>`, `XmlVersion.XML10`,
-  `XmlDeclMode.Minimal`.
+  xmlutil's `KtXmlWriter` preserves call order), with `[dash]` = `[stroke-dasharray]
+  [stroke-dashoffset]`: flat-point `k:type x y width height fill [dash]`; round-point
+  `k:type cx cy r k:aw fill [fill-opacity stroke stroke-width] [dash] [k:chrome]`; circle
+  `cx cy r fill stroke stroke-width [dash] [k:flags] [k:chrome]`; line `k:type x1 y1 x2 y2 stroke
+  stroke-width [stroke-linecap] [dash]` (segment: same minus `k:type`, plus a trailing `[k:flags]
+  [k:chrome]`); rectangle-polygon `points fill stroke stroke-width [dash] [k:flags]`; polyline
+  `points fill stroke stroke-width [stroke-linecap] [dash]`; dipole carrier
+  `k:type [k:attitude] [dash]`.
+  `[k:tags]` closes every element. Writer config: no trailing space before `/>`,
+  `XmlVersion.XML10`, `XmlDeclMode.Minimal`.
 - **Cosmetic FP drift across save cycles is normal** under exact storage (`255.79` →
   `255.78999999999996` after a viewBox flip) — re-parsing is idempotent at the Double level.
   **Canonical output is per-platform**: `Double.toString` diverges between JVM and wasmJs (`1.0E7`

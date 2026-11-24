@@ -10,6 +10,7 @@ import fromcrackpot.kintsugi.svg.cgaToSvg
 import fromcrackpot.kintsugi.svg.kAttr
 import fromcrackpot.kintsugi.svg.kTagsAttr
 import fromcrackpot.kintsugi.svg.serializing.colorAttr
+import fromcrackpot.kintsugi.svg.serializing.dashAttrs
 import fromcrackpot.kintsugi.svg.serializing.formatSvgNumber
 import fromcrackpot.kintsugi.svg.warn
 import nl.adaptivity.xmlutil.XmlWriter
@@ -40,6 +41,7 @@ internal fun XmlWriter.writeFlatPointRect(shape: FlatPointNode, viewBox: SceneBo
     attribute(null, "width", null, s.formatSvgNumber())
     attribute(null, "height", null, s.formatSvgNumber())
     colorAttr("fill", style.fill)
+    style.dash?.let { dashAttrs(it, derived = false, mutableListOf()) }
     kTagsAttr(shape.tags)
     endTag(SVG_NS, "rect", "")
 }

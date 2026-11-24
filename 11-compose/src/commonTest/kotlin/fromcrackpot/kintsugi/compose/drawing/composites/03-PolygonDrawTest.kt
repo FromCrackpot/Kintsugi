@@ -6,6 +6,7 @@ import fromcrackpot.kintsugi.cga.d2.shapes.composites.unaryMinus
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.scenegraph.nodes.composites.PolygonNode
 import fromcrackpot.kintsugi.scenegraph.style.ShapeColor
+import fromcrackpot.kintsugi.scenegraph.style.ShapeDash
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -30,6 +31,19 @@ class PolygonDrawTest {
         val expected = """
             path    tl=(60, 80) size=(80, 40)  fill=#ff0000
             path    tl=(60, 80) size=(80, 40)  stroke=#00000000 w=0
+        """.trimIndent()
+        assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
+    }
+
+    @Test
+    fun `authored dash dashes the outline and leaves the fill alone`() {
+        val shape = PolygonNode(
+            Polygon.Rectangle(FlatPoint(-40.0, -20.0), FlatPoint(40.0, 20.0)),
+            ShapeStyle.POLYGON.copy(fill = ShapeColor.rgb(0xff, 0, 0), dash = ShapeDash(listOf(2.0, 2.0))),
+        )
+        val expected = """
+            path    tl=(60, 80) size=(80, 40)  fill=#ff0000
+            path    tl=(60, 80) size=(80, 40)  stroke=#000000 w=1 dash=on
         """.trimIndent()
         assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
     }

@@ -58,9 +58,10 @@ internal sealed class DrawEvent {
         val argb: Int,
         val style: PaintingStyle,
         val strokeWidth: Float,
+        val dashed: Boolean = false,
     ) : DrawEvent() {
         override fun format(): String =
-            "circle  c=(${fmt(cx)}, ${fmt(cy)}) r=${fmt(radius)}  ${paintLabel(style, argb, strokeWidth)}"
+            "circle  c=(${fmt(cx)}, ${fmt(cy)}) r=${fmt(radius)}  ${paintLabel(style, argb, strokeWidth, dashed)}"
     }
 
     /**
@@ -75,11 +76,12 @@ internal sealed class DrawEvent {
         val argb: Int,
         val style: PaintingStyle,
         val strokeWidth: Float,
+        val dashed: Boolean = false,
     ) : DrawEvent() {
         override fun format(): String {
             val width = right - left
             val height = bottom - top
-            return "path    tl=(${fmt(left)}, ${fmt(top)}) size=(${fmt(width)}, ${fmt(height)})  ${paintLabel(style, argb, strokeWidth)}"
+            return "path    tl=(${fmt(left)}, ${fmt(top)}) size=(${fmt(width)}, ${fmt(height)})  ${paintLabel(style, argb, strokeWidth, dashed)}"
         }
     }
 }
@@ -101,8 +103,8 @@ private fun hex(argb: Int): String {
     else "#${hex2(a)}${hex2(r)}${hex2(g)}${hex2(b)}"
 }
 
-private fun paintLabel(style: PaintingStyle, argb: Int, strokeWidth: Float): String =
-    if (style == PaintingStyle.Stroke) "stroke=${hex(argb)} w=${fmt(strokeWidth)}"
+private fun paintLabel(style: PaintingStyle, argb: Int, strokeWidth: Float, dashed: Boolean = false): String =
+    if (style == PaintingStyle.Stroke) "stroke=${hex(argb)} w=${fmt(strokeWidth)}${if (dashed) " dash=on" else ""}"
     else "fill=${hex(argb)}"
 
 /* RECORDING CANVAS */
@@ -143,6 +145,7 @@ internal class RecordingCanvas : Canvas {
             argb = paint.color.toArgb(),
             style = paint.style,
             strokeWidth = paint.strokeWidth,
+            dashed = paint.pathEffect != null,
         )
     }
 
@@ -174,6 +177,7 @@ internal class RecordingCanvas : Canvas {
             argb = paint.color.toArgb(),
             style = paint.style,
             strokeWidth = paint.strokeWidth,
+            dashed = paint.pathEffect != null,
         )
     }
     override fun drawImage(image: ImageBitmap, topLeftOffset: Offset, paint: Paint): Unit =

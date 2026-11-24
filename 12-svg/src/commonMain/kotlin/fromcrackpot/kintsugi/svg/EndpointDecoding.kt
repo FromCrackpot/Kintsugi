@@ -11,8 +11,8 @@ import fromcrackpot.kintsugi.scenegraph.SceneBounds
 /*
  * What two encoded endpoints decode to. Parsers and writers share it, so the two directions can't
  * disagree on which endpoints coincide.
- * - Parser: a `null` is a malformed document. Writer: a `null` is a shape that would not reload,
- *   so it skips with a warning.
+ * - Parser: a `null` is a malformed document. Writer: a `null` is a shape that would not reload.
+ *   The segment writer skips it with a warning. The dipole writer switches to the center form.
  * Coincident = the wedge throws, or lands at infinity (closer than the quantum, off a line through the origin).
  */
 

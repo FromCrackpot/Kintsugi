@@ -2,29 +2,33 @@ package fromcrackpot.kintsugi.svg.parsing
 
 import fromcrackpot.kintsugi.scenegraph.style.ShapeColor
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStrokeCap
-import fromcrackpot.kintsugi.svg.attrAsDouble
 import fromcrackpot.kintsugi.svg.kTags
+import fromcrackpot.kintsugi.svg.presentationAsDouble
 import nl.adaptivity.xmlutil.XmlReader
 
 /**
- * The presentation attributes (`fill`, `stroke`, `stroke-width`, `stroke-linecap`) inherited from
- * ancestor `<g>`/`<svg>` elements: SVG's attribute-inheritance model, materialized.
+ * The presentation attributes (`fill`, `stroke`, `stroke-width`, `stroke-linecap`,
+ * `stroke-dasharray`, `stroke-dashoffset`) inherited from ancestor `<g>`/`<svg>`/`<use>` elements:
+ * SVG's attribute-inheritance model, materialized.
  *
  * - Per-property resolution at each shape: own attr → this inherited chain (nearest ancestor
- *   first) → [SvgDefaults].
+ *   first) → [SvgDefaults]. Attributes an element's `k:chrome` lists read as absent.
  * - Resolved at parse time into each shape's concrete
  *   [fromcrackpot.kintsugi.scenegraph.style.ShapeStyle]. **NOT** stored on
  *   [fromcrackpot.kintsugi.scenegraph.nodes.GroupNode], which stays purely structural per
  *   `:scene-graph`'s "no style cascade" rule.
  * - Scoped to the attributes each element's parser already consumes (flat-point rect→fill;
  *   rectangle→fill/stroke/stroke-width; round-point→fill; circle→fill/stroke/stroke-width;
- *   line→stroke/stroke-width/stroke-linecap).
+ *   line→stroke/stroke-width/stroke-linecap). The dash pair applies to every shape element.
+ * - [dashArray]: empty = authored `none`; `null` = unset.
  */
 internal data class InheritedStyle(
     val fill: ShapeColor? = null,
     val stroke: ShapeColor? = null,
     val strokeWidth: Double? = null,
     val strokeCap: ShapeStrokeCap? = null,
+    val dashArray: List<Double>? = null,
+    val dashOffset: Double? = null,
     val tags: Set<String> = emptySet(),
 ) {
     /**
@@ -38,20 +42,24 @@ internal data class InheritedStyle(
             stroke = own.stroke ?: stroke,
             strokeWidth = own.strokeWidth ?: strokeWidth,
             strokeCap = own.strokeCap ?: strokeCap,
+            dashArray = own.dashArray ?: dashArray,
+            dashOffset = own.dashOffset ?: dashOffset,
             tags = tags + own.tags,
         )
 }
 
 /**
- * Read the four inheritable presentation attributes off the current element (`<svg>` root or a
- * `<g>`) into an [InheritedStyle] layer. Used to seed the chain at the root and to overlay each
- * nested `<g>`'s own attrs via [InheritedStyle.child].
+ * Read the six inheritable presentation attributes off the current element (`<svg>` root, a `<g>`
+ * or a `<use>`) into an [InheritedStyle] layer. Used to seed the chain at the root and to overlay
+ * each nested element's own attrs via [InheritedStyle.child].
  */
 internal fun XmlReader.readInheritedStyle(location: String?): InheritedStyle =
     InheritedStyle(
         fill = readColorAttr("fill", location),
         stroke = readColorAttr("stroke", location),
-        strokeWidth = attrAsDouble("stroke-width"),
+        strokeWidth = presentationAsDouble("stroke-width"),
         strokeCap = readStrokeCapAttr("stroke-linecap", location),
+        dashArray = readDashArrayAttr(location),
+        dashOffset = readDashOffsetAttr(location),
         tags = kTags(),
     )

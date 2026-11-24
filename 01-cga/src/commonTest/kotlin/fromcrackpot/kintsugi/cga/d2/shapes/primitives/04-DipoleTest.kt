@@ -5,6 +5,7 @@ import fromcrackpot.kintsugi.cga.dipole
 import fromcrackpot.kintsugi.cga.sweep
 import fromcrackpot.kintsugi.cga.d2.operations.products.join
 import fromcrackpot.kintsugi.cga.d2.operations.queries.predicates.on
+import fromcrackpot.kintsugi.cga.d2.exceptions.AtInfinityException
 import fromcrackpot.kintsugi.cga.d2.exceptions.DegenerateCircleException
 import fromcrackpot.kintsugi.cga.d2.exceptions.DegenerateDipoleException
 import fromcrackpot.kintsugi.cga.d2.exceptions.NonBladeDipoleException
@@ -68,6 +69,36 @@ class DipoleTest {
     fun `constructor with all-zero components throws with zero point`() {
         val ex = assertFailsWith<DegenerateDipoleException> { Dipole(0.0, 0.0, 0.0, 0.0, 0.0, 0.0) }
         assertEquals(FlatPoint(0.0, 0.0, 0.0), ex.point)
+    }
+
+    @Test
+    fun `center constructor builds the dipole around its center - attitude length ignored`() {
+        // Center (3, 2), attitude (0, −2) → unit (0, −1), r² = 4: start (3, 4), end (3, 0), the [offset] dipole.
+        assertEquals(offset, Dipole(FlatPoint(3.0, 2.0), Direction(0.0, -2.0), 4.0))
+    }
+
+    @Test
+    fun `center constructor with zero radius2 puts both endpoints on the center`() {
+        val d = Dipole(FlatPoint(3.0, 2.0), Direction(0.0, -1.0), 0.0)
+        assertEquals(RoundPoint(3.0, 2.0), d.start)
+        assertEquals(RoundPoint(3.0, 2.0), d.end)
+    }
+
+    @Test
+    fun `center constructor rebuilds real and imaginary dipoles from their center - attitude and radius2`() = sweep {
+        val d = dipole()
+        assertSameShape(d, Dipole(d.center.toFlat, d.attitude.toFlat.toDirection, d.radius2))
+    }
+
+    @Test
+    fun `center constructor with a center at infinity throws AtInfinityException`() {
+        assertFailsWith<AtInfinityException> { Dipole(Direction(1.0, 0.0), Direction(1.0, 0.0), 1.0) }
+    }
+
+    @Test
+    fun `center constructor with an attitude rounding to zero throws IllegalArgumentException`() {
+        // Direction(1e-6, 0) == Direction(0, 0) at the SCALE quantum, so it fails like the zero direction.
+        assertFailsWith<IllegalArgumentException> { Dipole(FlatPoint(3.0, 2.0), Direction(1e-6, 0.0), 1.0) }
     }
 
     /*

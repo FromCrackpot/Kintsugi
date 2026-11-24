@@ -4,14 +4,15 @@ import fromcrackpot.kintsugi.compose.tracing.canvasToTrace
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Circle
 import fromcrackpot.kintsugi.scenegraph.nodes.primitives.CircleNode
 import fromcrackpot.kintsugi.scenegraph.style.ShapeColor
+import fromcrackpot.kintsugi.scenegraph.style.ShapeDash
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
  * Trace snapshots for `drawCircle` through the production `drawShape` dispatch: recorded draw
- * calls asserted against inline goldens. The DEGENERATE section pins the skip+warn
- * contract: the expected trace is empty, never a throw.
+ * calls asserted against inline goldens. The IMAGINARY section pins the dashed imaginary style;
+ * the DEGENERATE section pins the skip+warn contract: the expected trace is empty, never a throw.
  */
 class CircleDrawTest {
 
@@ -76,17 +77,56 @@ class CircleDrawTest {
         assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
     }
 
+    @Test
+    fun `authored dash strokes a real circle dashed`() {
+        val shape = CircleNode(
+            Circle(0.0, 0.0, 40.0),
+            ShapeStyle.CIRCLE.copy(dash = ShapeDash(listOf(3.0, 1.0))),
+        )
+        val expected = """
+            circle  c=(100, 100) r=40  fill=#00000000
+            circle  c=(100, 100) r=40  stroke=#000000 w=1 dash=on
+        """.trimIndent()
+        assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
+    }
+
+    /* IMAGINARY */
+
+    @Test
+    fun `imaginary circle draws at its radius magnitude with a dashed stroke`() {
+        // Raw 4-arg ctor: classic (cw = −1) circle at origin with cz = −2 ⇒
+        //   radius² = cx² + cy² − 2·cz·cw = 0 + 0 − 2·(−2)·(−1) = −4 (negative ⇒ imaginary), r = 2.
+        // Friendly center/radius ctor can't produce this directly. Fill stays the style's own.
+        val shape = CircleNode(
+            Circle(cx = 0.0, cy = 0.0, cz = -2.0, cw = -1.0),
+            ShapeStyle.CIRCLE.copy(fill = ShapeColor.rgb(0xff, 0, 0)),
+        )
+        val expected = """
+            circle  c=(50, 50) r=2  fill=#ff0000
+            circle  c=(50, 50) r=2  stroke=#000000 w=1 dash=on
+        """.trimIndent()
+        assertEquals(expected, canvasToTrace(listOf(shape), 100f, 100f))
+    }
+
+    @Test
+    fun `authored SOLID keeps an imaginary circle solid`() {
+        val shape = CircleNode(
+            Circle(cx = 0.0, cy = 0.0, cz = -2.0, cw = -1.0),
+            ShapeStyle.CIRCLE.copy(dash = ShapeDash.SOLID),
+        )
+        val expected = """
+            circle  c=(50, 50) r=2  fill=#00000000
+            circle  c=(50, 50) r=2  stroke=#000000 w=1
+        """.trimIndent()
+        assertEquals(expected, canvasToTrace(listOf(shape), 100f, 100f))
+    }
+
     /* DEGENERATE */
 
     @Test
-    fun `imaginary circle emits no draw calls`() {
-        // Raw 4-arg ctor: classic (cw = −1) circle at origin with cz = −2 ⇒
-        //   radius² = cx² + cy² − 2·cz·cw = 0 + 0 − 2·(−2)·(−1) = −4 (negative ⇒ imaginary).
-        // Friendly center/radius ctor can't produce this directly.
-        val shape = CircleNode(
-            Circle(cx = 0.0, cy = 0.0, cz = -2.0, cw = -1.0),
-            ShapeStyle(fill = ShapeColor.rgb(0xff, 0, 0)),
-        )
+    fun `imaginary inside-out circle emits no draw calls`() {
+        // Inside-out wins: the twin of the imaginary circle above, every component negated.
+        val shape = CircleNode(Circle(cx = 0.0, cy = 0.0, cz = 2.0, cw = 1.0))
         assertEquals("", canvasToTrace(listOf(shape), 100f, 100f))
     }
 

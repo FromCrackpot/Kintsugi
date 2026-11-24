@@ -1,6 +1,7 @@
 package fromcrackpot.kintsugi.compose.drawing.primitives
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import fromcrackpot.kintsugi.compose.drawing.cgaToCanvas
@@ -12,11 +13,8 @@ internal fun DrawScope.drawCircle(
     fill: Color,
     stroke: Color,
     strokeWidth: Float,
+    dash: PathEffect?,
 ) {
-    if (circle.isImaginary) {
-        warn("skipping imaginary Circle (radius² < 0): $circle")
-        return
-    }
     if (circle.cw > 0) {
         warn("skipping inside-out Circle (cw > 0): $circle")
         return
@@ -30,6 +28,6 @@ internal fun DrawScope.drawCircle(
         color = stroke,
         radius = radiusPx,
         center = center,
-        style = Stroke(width = strokeWidth),
+        style = Stroke(width = strokeWidth, pathEffect = dash),
     )
 }

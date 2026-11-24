@@ -9,6 +9,7 @@ import fromcrackpot.kintsugi.scenegraph.nodes.primitives.FlatPointNode
 import fromcrackpot.kintsugi.scenegraph.nodes.composites.PolygonNode
 import fromcrackpot.kintsugi.scenegraph.nodes.ShapeNode
 import fromcrackpot.kintsugi.scenegraph.style.ShapeColor
+import fromcrackpot.kintsugi.scenegraph.style.ShapeDash
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 import fromcrackpot.kintsugi.svg.KATTR_FLAGS
 import fromcrackpot.kintsugi.svg.KATTR_TYPE
@@ -19,6 +20,7 @@ import fromcrackpot.kintsugi.svg.attrAsDouble
 import fromcrackpot.kintsugi.svg.kAttr
 import fromcrackpot.kintsugi.svg.kTags
 import fromcrackpot.kintsugi.svg.parseKFlags
+import fromcrackpot.kintsugi.svg.presentationAsDouble
 import fromcrackpot.kintsugi.svg.svgToCga
 import fromcrackpot.kintsugi.svg.warn
 import nl.adaptivity.xmlutil.XmlReader
@@ -44,12 +46,14 @@ internal fun XmlReader.parseRectElement(viewBox: SceneBounds, inherited: Inherit
     val width = attrAsDouble("width")
     val height = attrAsDouble("height")
     val ownFill = readColorAttr("fill", loc)
+    val dash = readDash(inherited, loc)
     val tags = inherited.tags + kTags()
 
     if (kType == KTYPE_FLAT_POINT) {
         return flatPointFrom(
             x = x, y = y, width = width, height = height,
-            fill = ownFill ?: inherited.fill, tags = tags, viewBox = viewBox, location = loc,
+            fill = ownFill ?: inherited.fill, dash = dash,
+            tags = tags, viewBox = viewBox, location = loc,
         )
     }
     if (kType != null) {
@@ -61,7 +65,8 @@ internal fun XmlReader.parseRectElement(viewBox: SceneBounds, inherited: Inherit
         flags = kAttr(KATTR_FLAGS),
         fill = ownFill ?: inherited.fill,
         stroke = readColorAttr("stroke", loc) ?: inherited.stroke,
-        strokeWidth = attrAsDouble("stroke-width") ?: inherited.strokeWidth,
+        strokeWidth = presentationAsDouble("stroke-width") ?: inherited.strokeWidth,
+        dash = dash,
         tags = tags, viewBox = viewBox, location = loc,
     )
 }
@@ -79,6 +84,7 @@ private fun flatPointFrom(
     width: Double?,
     height: Double?,
     fill: ShapeColor?,
+    dash: ShapeDash?,
     tags: Set<String>,
     viewBox: SceneBounds,
     location: String? = null,
@@ -98,6 +104,7 @@ private fun flatPointFrom(
     val style = ShapeStyle(
         fill = fill ?: SvgDefaults.FILL,
         size = w,
+        dash = dash,
     )
     return FlatPointNode(FlatPoint(cgaX, cgaY), style, tags)
 }
@@ -126,6 +133,7 @@ private fun rectangleFrom(
     fill: ShapeColor?,
     stroke: ShapeColor?,
     strokeWidth: Double?,
+    dash: ShapeDash?,
     tags: Set<String>,
     viewBox: SceneBounds,
     location: String? = null,
@@ -155,5 +163,5 @@ private fun rectangleFrom(
         throw MalformedRectException("width and height must be > 0, was width=$w height=$h", location)
     }
 
-    return PolygonNode(polygon, SvgDefaults.style(fill, stroke, strokeWidth), tags)
+    return PolygonNode(polygon, SvgDefaults.style(fill, stroke, strokeWidth, dash = dash), tags)
 }

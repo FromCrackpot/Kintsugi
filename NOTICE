@@ -16,6 +16,12 @@ SfxrSynth
   32-bfxr/src/commonMain/kotlin/fromcrackpot/kintsugi/bfxr/synths/Bfxr.kt is a derivative work:
   fromcrackpot translated bfxr2's js/audio/Bfxr_DSP.js from JavaScript to Kotlin in 2026.
 
+Dokka project
+  Copyright 2014-2024 JetBrains s.r.o. Apache License 2.0 (LICENSES/Apache-2.0.txt).
+  https://github.com/Kotlin/dokka
+  dokka/templates/includes/page_metadata.ftl is Dokka 2.3.0's template of the same name, modified
+  by fromcrackpot in 2026 to suffix the API reference's page titles.
+
 Adventure Kid Waveforms (AKWF)
   Public domain, dedicated under CC0 1.0 Universal; converted by Brad Roy, distributed in bfxr2.
   https://www.adventurekid.se/akrt/waveforms/adventure-kid-waveforms/

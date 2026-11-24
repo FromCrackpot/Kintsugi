@@ -5,6 +5,7 @@ import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polyline
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.scenegraph.nodes.composites.PolylineNode
 import fromcrackpot.kintsugi.scenegraph.style.ShapeColor
+import fromcrackpot.kintsugi.scenegraph.style.ShapeDash
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -30,6 +31,19 @@ class PolylineDrawTest {
         val expected = """
             path    tl=(100, 70) size=(40, 30)  fill=#00000000
             path    tl=(100, 70) size=(40, 30)  stroke=#0000ff w=2
+        """.trimIndent()
+        assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
+    }
+
+    @Test
+    fun `authored dash dashes the stroke and leaves the fill alone`() {
+        val shape = PolylineNode(
+            Polyline(listOf(FlatPoint(0.0, 0.0), FlatPoint(40.0, 0.0), FlatPoint(0.0, 30.0))),
+            ShapeStyle(stroke = ShapeColor.rgb(0, 0, 0xff), strokeWidth = 2.0, dash = ShapeDash(listOf(4.0, 1.0))),
+        )
+        val expected = """
+            path    tl=(100, 70) size=(40, 30)  fill=#00000000
+            path    tl=(100, 70) size=(40, 30)  stroke=#0000ff w=2 dash=on
         """.trimIndent()
         assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
     }

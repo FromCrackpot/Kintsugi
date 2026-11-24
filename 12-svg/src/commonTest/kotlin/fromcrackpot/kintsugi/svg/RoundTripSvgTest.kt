@@ -1,6 +1,7 @@
 package fromcrackpot.kintsugi.svg
 
 import fromcrackpot.kintsugi.cga.d2.operations.products.join
+import fromcrackpot.kintsugi.cga.d2.operations.products.meet
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polygon
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Segment
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.unaryMinus
@@ -12,6 +13,7 @@ import fromcrackpot.kintsugi.scenegraph.nodes.GroupNode
 import fromcrackpot.kintsugi.scenegraph.nodes.composites.*
 import fromcrackpot.kintsugi.scenegraph.nodes.primitives.*
 import fromcrackpot.kintsugi.scenegraph.style.ShapeColor
+import fromcrackpot.kintsugi.scenegraph.style.ShapeDash
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStrokeCap
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 import kotlin.test.Test
@@ -613,6 +615,60 @@ class RoundTripSvgTest {
         assertEquals(dipole, shape.shape)
         assertEquals(ShapeColor.rgb(0xFF, 0x00, 0x00), shape.style.fill)
         assertEquals(12.0, shape.style.size)
+    }
+
+    /* ZERO-RADIUS DIPOLES (center form) */
+
+    private fun assertCenterFormRoundTrip(node: DipoleNode): Dipole {
+        val original = GroupNode(bounds = SceneBounds(-50.0, -50.0, 100.0, 100.0), children = listOf(node))
+        val saved = serializeSvg(original)
+        assertTrue("k:attitude" in saved, saved)
+        val once = parseSvg(saved)
+        assertEquals(original, once)
+        assertIdempotent(original)
+        return (once.children.single() as ShapeNode).shape as Dipole
+    }
+
+    @Test fun `zero-radius dipole round-trips through the center form`() {
+        val dipole = Dipole(FlatPoint(10.0, -20.0), Direction(3.0, 4.0), 0.0)
+        assertEquals(dipole, assertCenterFormRoundTrip(DipoleNode(dipole)))
+    }
+
+    @Test fun `zero-radius dipole orientation survives the center form`() {
+        val forward = Dipole(FlatPoint(10.0, -20.0), Direction(3.0, 4.0), 0.0)
+        val forwardRT = assertCenterFormRoundTrip(DipoleNode(forward))
+        val reverseRT = assertCenterFormRoundTrip(DipoleNode(-forward))
+        assertNotEquals(forwardRT, reverseRT)
+        assertEquals(forwardRT.canonical, reverseRT.canonical)
+    }
+
+    @Test fun `tangent line meet circle round-trips`() {
+        val tangent = (FlatPoint(6.0, -3.0) join FlatPoint(-2.0, 3.0)) meet Circle(3.0, -7.0, 5.0)
+        assertCenterFormRoundTrip(DipoleNode(tangent))
+    }
+
+    @Test fun `touching circle meet circle round-trips`() {
+        val touching = Circle(0.0, 0.0, 10.0) meet Circle(15.0, 0.0, 5.0)
+        assertCenterFormRoundTrip(DipoleNode(touching))
+    }
+
+    @Test fun `center form round-trips tags and an authored dash`() {
+        assertCenterFormRoundTrip(
+            DipoleNode(
+                Dipole(FlatPoint(0.0, 0.0), Direction(1.0, 0.0), 0.0),
+                ShapeStyle.DIPOLE.copy(dash = ShapeDash(listOf(3.0, 1.0), offset = 0.5)),
+                tags = setOf("portal"),
+            )
+        )
+    }
+
+    @Test fun `center form with a non-zero radius re-saves in the endpoint form`() {
+        val parsed = parseSvg(DIPOLE_CENTER_FORM_REAL_SVG)
+        val dipole = (parsed.children.single() as ShapeNode).shape as Dipole
+        assertEquals(RoundPoint(-10.0, 0.0) join RoundPoint(10.0, 0.0), dipole)
+        val saved = serializeSvg(parsed)
+        assertTrue("k:attitude" !in saved, saved)
+        assertEquals(parsed, parseSvg(saved))
     }
 
     @Test fun `hex shorthand canonicalises to long form on round-trip`() {

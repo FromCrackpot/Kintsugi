@@ -7,8 +7,8 @@ import fromcrackpot.kintsugi.cga.d2.shapes.composites.Segment
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.*
 
 /**
- * The concrete paint a shape renders with: fill and stroke colors, stroke geometry, and the
- * open-stroke line cap.
+ * The concrete paint a shape renders with: fill and stroke colors, stroke geometry, the open-stroke
+ * line cap and the dash pattern.
  *
  * - The bare constructor defaults everything to nothing, so `ShapeStyle(fill = X)` draws at zero size.
  * - Start from a per-shape constant instead: `ShapeStyle.POINT.copy(fill = X)`.
@@ -24,7 +24,31 @@ public data class ShapeStyle(
     val size: Double = 0.0,
     /** How open strokes terminate, inert on closed shapes. [ShapeStrokeCap.BUTT] by default. */
     val strokeCap: ShapeStrokeCap = ShapeStrokeCap.BUTT,
+    /**
+     * The dash pattern of every stroke the shape draws, a dipole's connector included, or `null` when unset.
+     *
+     * - Imaginary shapes and dipoles replace an unset dash with a default. [dashFor] resolves it.
+     * - [ShapeDash.SOLID] keeps every stroke solid, imaginary shapes included.
+     */
+    val dash: ShapeDash? = null,
 ) {
+    /**
+     * Returns the dash pattern [shape]'s strokes draw with under this style, or `null` when they draw solid.
+     *
+     * - Precedence: [dash], then [ImaginaryChrome.DASH] when imaginary, then [DipoleChrome.DASH] on a dipole.
+     *
+     * @param shape The shape the style paints.
+     * @return The pattern to draw, never [ShapeDash.SOLID], or `null` for a solid stroke.
+     */
+    public fun dashFor(shape: Shape): ShapeDash? {
+        val resolved = dash ?: when {
+            ImaginaryChrome.appliesTo(shape) -> ImaginaryChrome.DASH
+            shape is Dipole -> DipoleChrome.DASH
+            else -> null
+        }
+        return resolved?.takeUnless { it.isSolid }
+    }
+
     public companion object {
         /** The fully invisible style: no fill, no stroke, zero width and size. */
         public val NONE: ShapeStyle = ShapeStyle()
@@ -77,15 +101,41 @@ public data class ShapeStyle(
  * markers. Every renderer draws it the same way.
  *
  * - Color: the dipole style's [ShapeStyle.fill]; width: its [ShapeStyle.size] times [WIDTH_RATIO].
- * - Dashes alternate [DASH_ON] painted and [DASH_OFF] skipped, in the renderer's units.
+ * - Dash: the style's [ShapeStyle.dash] when set; else [ImaginaryChrome.DASH] when imaginary; else [DASH].
  */
 public object DipoleChrome {
-    /** The painted run of the connector's dash pattern, in the renderer's units. */
-    public const val DASH_ON: Double = 2.0
-
-    /** The skipped gap of the connector's dash pattern, in the renderer's units. */
-    public const val DASH_OFF: Double = 1.0
+    /** The connector's dash pattern on a real dipole with no dash of its own. */
+    public val DASH: ShapeDash = ShapeDash(listOf(2.0, 1.0))
 
     /** The connector's stroke width as a fraction of the dipole style's `size`. */
     public const val WIDTH_RATIO: Double = 0.25
+}
+
+/**
+ * The shared convention for drawing imaginary shapes: circles, dipoles, segments and round points
+ * whose squared radius is negative. Every renderer draws them the same way.
+ *
+ * - Strokes take [DASH] unless the style sets its own [ShapeStyle.dash]. Colors stay the style's own.
+ * - Point markers become rings of the marker's size, stroked in the fill color, [RING_WIDTH_RATIO] of it wide.
+ */
+public object ImaginaryChrome {
+    /** The dash pattern of an imaginary shape's strokes when its style sets none. */
+    public val DASH: ShapeDash = ShapeDash(listOf(4.0, 2.0))
+
+    /** A ring marker's stroke width as a fraction of the style's `size`. */
+    public const val RING_WIDTH_RATIO: Double = 0.25
+
+    /**
+     * Returns whether [shape] draws in the imaginary style.
+     *
+     * @param shape The shape to test.
+     * @return `true` for a circle, dipole, segment or round point whose squared radius rounds below zero.
+     */
+    public fun appliesTo(shape: Shape): Boolean = when (shape) {
+        is Circle -> shape.isImaginary
+        is Dipole -> shape.isImaginary
+        is Segment -> shape.isImaginary
+        is RoundPoint -> shape.isImaginary
+        else -> false
+    }
 }

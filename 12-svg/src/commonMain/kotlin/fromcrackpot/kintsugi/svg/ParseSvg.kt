@@ -76,6 +76,7 @@ internal fun parseDocument(
             if (reader.localName != "svg") throw UnsupportedSvgElementException(reader.localName, loc)
             val viewBox = reader.readViewBox()
             if (templateKey != null) reader.validateTemplateSize(viewBox, templateKey, loc)
+            reader.warnUnknownChrome(loc)
             // Root <svg> presentation attrs seed the inheritance chain: own attr → ancestor-<g>
             // chain → root attr → SvgDefaults. Per-attribute fallback layer above the SVG 1.1 defaults.
             val rootInherited = outerInherited.child(reader.readInheritedStyle(loc))

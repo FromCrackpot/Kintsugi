@@ -6,6 +6,7 @@ import fromcrackpot.kintsugi.cga.d2.operations.products.meet
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Circle
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.RoundPoint
 import fromcrackpot.kintsugi.scenegraph.nodes.primitives.DipoleNode
+import fromcrackpot.kintsugi.scenegraph.style.ShapeDash
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -51,14 +52,54 @@ class DipoleDrawTest {
         assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
     }
 
+    @Test
+    fun `authored dash replaces the connector chrome`() {
+        val shape = DipoleNode(
+            RoundPoint(-40.0, 0.0) join RoundPoint(40.0, 0.0),
+            ShapeStyle.DIPOLE.copy(dash = ShapeDash.SOLID),
+        )
+        val expected = """
+            circle  c=(60, 100) r=4  fill=#000000
+            circle  c=(140, 100) r=4  fill=#000000
+            line    p1=(60, 100) p2=(140, 100)  stroke=#000000 w=2
+        """.trimIndent()
+        assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
+    }
+
+    /* IMAGINARY */
+
+    @Test
+    fun `imaginary dipole draws dashed rings on its real-valued endpoints`() {
+        // Two unit circles 10 apart don't intersect. Circle ∨ Circle returns an imaginary Dipole
+        // (radius² < 0) on their radical axis x = 5. Its real-valued endpoints get ring markers
+        // (size 8 → r 4, width 8 × 0.25 = 2) and the connector takes the imaginary dash.
+        val dipole = Circle(0.0, 0.0, 1.0) meet Circle(10.0, 0.0, 1.0)
+        val shape = DipoleNode(dipole, ShapeStyle.DIPOLE)
+        val expected = """
+            circle  c=(105, 95.101) r=4  stroke=#000000 w=2 dash=on
+            circle  c=(105, 104.899) r=4  stroke=#000000 w=2 dash=on
+            line    p1=(105, 95.101) p2=(105, 104.899)  stroke=#000000 w=2 dash=on
+        """.trimIndent()
+        assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
+    }
+
+    @Test
+    fun `authored SOLID keeps an imaginary dipole's rings and connector solid`() {
+        val dipole = Circle(0.0, 0.0, 1.0) meet Circle(10.0, 0.0, 1.0)
+        val shape = DipoleNode(dipole, ShapeStyle.DIPOLE.copy(dash = ShapeDash.SOLID))
+        val expected = """
+            circle  c=(105, 95.101) r=4  stroke=#000000 w=2
+            circle  c=(105, 104.899) r=4  stroke=#000000 w=2
+            line    p1=(105, 95.101) p2=(105, 104.899)  stroke=#000000 w=2
+        """.trimIndent()
+        assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
+    }
+
     /* DEGENERATE */
 
     @Test
-    fun `imaginary dipole emits no draw calls`() {
-        // Two unit circles 10 apart don't intersect. Circle ∨ Circle returns an imaginary Dipole
-        // (radius² < 0) carrying "they're 8 units apart in separation" info. No real points to
-        // draw; drawDipole skip+warns, mirroring imaginary Circle.
-        val dipole = Circle(0.0, 0.0, 1.0) meet Circle(10.0, 0.0, 1.0)
+    fun `dipole at infinity emits no draw calls`() {
+        val dipole = Circle(0.0, 0.0, 70.0) meet Circle(0.0, 0.0, 40.0)
         val shape = DipoleNode(dipole, ShapeStyle.DIPOLE)
         assertEquals("", canvasToTrace(listOf(shape), 200f, 200f))
     }

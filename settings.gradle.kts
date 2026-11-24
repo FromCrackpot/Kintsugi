@@ -45,3 +45,10 @@ project(":brickit:game").projectDir = file("91-brickit/game")
 project(":brickit:desktop").projectDir = file("91-brickit/desktop")
 project(":brickit:web").projectDir = file("91-brickit/web")
 project(":brickit:android").projectDir = file("91-brickit/android")
+
+if (file("92-docs-gallery").isDirectory) {
+    include(":docs-gallery:cards", ":docs-gallery:web")
+    project(":docs-gallery").projectDir = file("92-docs-gallery")
+    project(":docs-gallery:cards").projectDir = file("92-docs-gallery/cards")
+    project(":docs-gallery:web").projectDir = file("92-docs-gallery/web")
+}

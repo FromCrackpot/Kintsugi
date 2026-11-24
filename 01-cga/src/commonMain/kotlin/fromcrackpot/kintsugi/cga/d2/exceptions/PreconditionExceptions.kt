@@ -2,6 +2,7 @@ package fromcrackpot.kintsugi.cga.d2.exceptions
 
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polygon
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.split
+import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Dipole
 
 /**
  * The rejection of a polygon failing [Polygon.isConvex] where an operation needs a convex one.
@@ -28,6 +29,7 @@ public class InsideOutPolygonException(
  * no position, and a line at infinity has no side.
  *
  * - Thrown by the distances, point differences, projections onto a line or segment, and antiprojections onto a point.
+ * - Also thrown by the [Dipole] constructor that takes a center.
  */
 public class AtInfinityException(
     /** The human-readable diagnostic naming the offending operand. */

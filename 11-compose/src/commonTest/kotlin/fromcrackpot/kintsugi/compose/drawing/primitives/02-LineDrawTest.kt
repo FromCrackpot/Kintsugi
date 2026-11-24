@@ -6,6 +6,7 @@ import fromcrackpot.kintsugi.cga.d2.shapes.primitives.FlatPoint
 import fromcrackpot.kintsugi.cga.d2.shapes.primitives.Line
 import fromcrackpot.kintsugi.scenegraph.nodes.primitives.LineNode
 import fromcrackpot.kintsugi.scenegraph.style.ShapeColor
+import fromcrackpot.kintsugi.scenegraph.style.ShapeDash
 import fromcrackpot.kintsugi.scenegraph.style.ShapeStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,6 +30,16 @@ class LineDrawTest {
             ShapeStyle(stroke = ShapeColor.rgb(0x80, 0x80, 0x80), strokeWidth = 2.0),
         )
         val expected = "line    p1=(-41.421, 100) p2=(241.421, 100)  stroke=#808080 w=2"
+        assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
+    }
+
+    @Test
+    fun `authored dash strokes a line dashed`() {
+        val shape = LineNode(
+            FlatPoint(-50.0, 0.0) join FlatPoint(50.0, 0.0),
+            ShapeStyle(stroke = ShapeColor.rgb(0x80, 0x80, 0x80), strokeWidth = 2.0, dash = ShapeDash(listOf(5.0))),
+        )
+        val expected = "line    p1=(-41.421, 100) p2=(241.421, 100)  stroke=#808080 w=2 dash=on"
         assertEquals(expected, canvasToTrace(listOf(shape), 200f, 200f))
     }
 

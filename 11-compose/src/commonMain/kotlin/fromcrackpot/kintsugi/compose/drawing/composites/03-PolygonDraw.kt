@@ -2,13 +2,20 @@ package fromcrackpot.kintsugi.compose.drawing.composites
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import fromcrackpot.kintsugi.compose.drawing.cgaToCanvas
 import fromcrackpot.kintsugi.compose.warn
 import fromcrackpot.kintsugi.cga.d2.shapes.composites.Polygon
 
-internal fun DrawScope.drawPolygon(polygon: Polygon, fill: Color, stroke: Color, strokeWidth: Float) {
+internal fun DrawScope.drawPolygon(
+    polygon: Polygon,
+    fill: Color,
+    stroke: Color,
+    strokeWidth: Float,
+    dash: PathEffect?,
+) {
     if (polygon.isInsideOut) {
         warn("skipping inside-out Polygon (signedArea < 0): $polygon")
         return
@@ -25,5 +32,5 @@ internal fun DrawScope.drawPolygon(polygon: Polygon, fill: Color, stroke: Color,
     // Compose's drawPath takes a single DrawStyle (Fill OR Stroke), never both. So the two
     // layers are two draw calls, fill first, stroke on top.
     drawPath(path, color = fill)
-    drawPath(path, color = stroke, style = Stroke(width = strokeWidth))
+    drawPath(path, color = stroke, style = Stroke(width = strokeWidth, pathEffect = dash))
 }

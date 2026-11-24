@@ -19,6 +19,7 @@ import fromcrackpot.kintsugi.scenegraph.nodes.GroupNode
 import fromcrackpot.kintsugi.scenegraph.nodes.Node
 import fromcrackpot.kintsugi.scenegraph.nodes.ShapeNode
 import fromcrackpot.kintsugi.scenegraph.nodes.flattenShapes
+import fromcrackpot.kintsugi.scenegraph.style.ImaginaryChrome
 
 /**
  * Renders the scene graph under [root] onto a transparent Compose canvas. Every shape draws in
@@ -26,7 +27,8 @@ import fromcrackpot.kintsugi.scenegraph.nodes.flattenShapes
  *
  * - Each child of [root] is its own cached layer, redrawn only when another instance takes its place.
  * - Sized by the root's bounds unless the host sizes it. The scene is fitted, letterboxed and clipped.
- * - Skipped with a warning: points, lines and segments at infinity; imaginary, inside-out and zero-length shapes.
+ * - Imaginary shapes draw dashed, and their point markers as rings, per [ImaginaryChrome].
+ * - Skipped with a warning: points, lines, dipoles and segments at infinity; inside-out and zero-length shapes.
  *
  * @param root The scene to draw. Its [GroupNode.bounds] is the viewport, and a backdrop goes first.
  * @param modifier The host's modifier chain. Any size it imposes overrides the intrinsic size.

@@ -651,6 +651,77 @@ internal const val DIPOLE_NEAR_COINCIDENT_SVG = """<?xml version="1.0" encoding=
 </svg>
 """
 
+/** Center form: zero-radius dipole at CGA (10, 20), attitude CGA (0, 1), written SVG-frame. */
+internal const val DIPOLE_CENTER_FORM_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
+  <g k:type="dipole" k:attitude="0 -1">
+    <circle k:type="round-point" cx="60" cy="30" r="4" k:aw="250"/>
+  </g>
+</svg>
+"""
+
+/** Center form without `k:aw` (the null lift: radius² 0), comma-separated attitude. */
+internal const val DIPOLE_CENTER_FORM_NO_AW_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
+  <g k:type="dipole" k:attitude="0,-1">
+    <circle k:type="round-point" cx="60" cy="30" r="4"/>
+  </g>
+</svg>
+"""
+
+/** Hand-authored center form with radius² 100 (`k:aw` 50 at the origin): the real dipole (−10, 0) ∧ (10, 0). */
+internal const val DIPOLE_CENTER_FORM_REAL_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
+  <g k:type="dipole" k:attitude="1 0">
+    <circle k:type="round-point" cx="50" cy="50" r="4" k:aw="50"/>
+  </g>
+</svg>
+"""
+
+/** `k:attitude` with two children: the center form takes exactly one. */
+internal const val DIPOLE_ATTITUDE_TWO_CHILDREN_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
+  <g k:type="dipole" k:attitude="1 0">
+    <circle k:type="round-point" cx="40" cy="50" r="4"/>
+    <circle k:type="round-point" cx="60" cy="50" r="4"/>
+  </g>
+</svg>
+"""
+
+/** `k:attitude` with no child. */
+internal const val DIPOLE_ATTITUDE_NO_CHILD_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
+  <g k:type="dipole" k:attitude="1 0"/>
+</svg>
+"""
+
+/** `k:attitude` of zero length: the dipole ctor's `require` fails. */
+internal const val DIPOLE_ZERO_ATTITUDE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
+  <g k:type="dipole" k:attitude="0 0.00001">
+    <circle k:type="round-point" cx="50" cy="50" r="4"/>
+  </g>
+</svg>
+"""
+
+/** `k:attitude` with one number. */
+internal const val DIPOLE_ATTITUDE_ONE_NUMBER_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
+  <g k:type="dipole" k:attitude="1">
+    <circle k:type="round-point" cx="50" cy="50" r="4"/>
+  </g>
+</svg>
+"""
+
+/** `k:attitude` with a non-number. */
+internal const val DIPOLE_ATTITUDE_NOT_A_NUMBER_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
+  <g k:type="dipole" k:attitude="1 NaN">
+    <circle k:type="round-point" cx="50" cy="50" r="4"/>
+  </g>
+</svg>
+"""
+
 /** <g> with an unknown k:type: UnsupportedSvgElementException (only k:type="dipole" is recognized). */
 internal const val DIPOLE_UNKNOWN_GROUP_KTYPE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
@@ -1057,5 +1128,55 @@ internal const val USE_WITH_CHILD_SVG = """<?xml version="1.0" encoding="UTF-8"?
 internal const val CYCLE_LAYOUT_SVG = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
   <use href="cycle-a.svg"/>
+</svg>
+"""
+
+/* DASHES + k:chrome */
+
+/** A `<g>` dash cascading into three circles: inherited, own override, own `none`; the offset inherits alone. */
+internal const val DASH_INHERITANCE_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
+  <g stroke-dasharray="4,2" stroke-dashoffset="1">
+    <circle cx="50" cy="50" r="10"/>
+    <circle cx="50" cy="50" r="20" stroke-dasharray="3"/>
+    <circle cx="50" cy="50" r="30" stroke-dasharray="none"/>
+  </g>
+</svg>
+"""
+
+/** `k:chrome` drops the listed attrs, so the circle falls back to the `<g>`'s stroke and has no dash. */
+internal const val CHROME_DROPPED_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
+  <g stroke="#00ff00">
+    <circle cx="50" cy="50" r="10" stroke="#ff0000" stroke-width="3" stroke-dasharray="5 5" stroke-dashoffset="2" k:chrome="stroke stroke-dasharray stroke-dashoffset"/>
+  </g>
+</svg>
+"""
+
+/** `k:chrome` on a `<g>` drops the attr from the inherited layer too. */
+internal const val CHROME_ON_GROUP_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100" stroke-dasharray="1 1">
+  <g stroke-dasharray="9 9" k:chrome="stroke-dasharray">
+    <circle cx="50" cy="50" r="10"/>
+  </g>
+</svg>
+"""
+
+/** An unknown `k:chrome` token warns and is ignored: `r` is geometry and still reads. */
+internal const val CHROME_UNKNOWN_TOKEN_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="10" stroke-dasharray="2 1" k:chrome="r bogus"/>
+</svg>
+"""
+
+/** Unrecognized dash values warn and fall back to the cascade; an offset alone leaves the dash unset. */
+internal const val DASH_MALFORMED_SVG = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:k="https://fromcrackpot.com/ns/kintsugi/svg/v1" viewBox="0 0 100 100">
+  <g stroke-dasharray="6 3">
+    <line x1="0" y1="0" x2="10" y2="0" stroke-dasharray="5px 2px"/>
+    <line x1="0" y1="10" x2="10" y2="10" stroke-dasharray="4 -1"/>
+    <line x1="0" y1="20" x2="10" y2="20" stroke-dashoffset="nope"/>
+  </g>
+  <line x1="0" y1="30" x2="10" y2="30" stroke-dashoffset="3"/>
 </svg>
 """

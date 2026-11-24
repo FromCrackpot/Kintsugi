@@ -27,6 +27,11 @@ SPDX-FileCopyrightText = ["2010 Thomas Vian", "2021 Stephen Lavelle", "2026 from
 SPDX-License-Identifier = "LicenseRef-Kintsugi-Engine-Community-License-1.0 AND MIT AND Apache-2.0"
 
 [[annotations]]
+path = "dokka/templates/**"
+SPDX-FileCopyrightText = ["2014-2024 JetBrains s.r.o", "2026 fromcrackpot"]
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
 path = ["gradlew", "gradlew.bat", "gradle/wrapper/**"]
 SPDX-FileCopyrightText = "2015 the original author or authors"
 SPDX-License-Identifier = "Apache-2.0"

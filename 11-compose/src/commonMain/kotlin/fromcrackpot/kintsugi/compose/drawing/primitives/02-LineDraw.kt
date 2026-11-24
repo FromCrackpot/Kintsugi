@@ -1,6 +1,7 @@
 package fromcrackpot.kintsugi.compose.drawing.primitives
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import fromcrackpot.kintsugi.compose.drawing.cgaToCanvas
@@ -15,6 +16,7 @@ internal fun DrawScope.drawLine(
     stroke: Color,
     strokeWidth: Float,
     cap: StrokeCap,
+    dash: PathEffect?,
 ) {
     if (line.isAtInfinity) {
         warn("skipping Line at infinity: $line")
@@ -36,5 +38,6 @@ internal fun DrawScope.drawLine(
         end = cgaToCanvas(dipole.end.ax, dipole.end.ay),
         strokeWidth = strokeWidth,
         cap = cap,
+        pathEffect = dash,
     )
 }
